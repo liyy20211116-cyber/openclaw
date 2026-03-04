@@ -1,0 +1,45 @@
+每次启动用这套最短流程就行（PowerShell）：
+
+```powershell
+cd D:\FY003
+openclaw gateway stop
+openclaw gateway --port 18789 --verbose
+```
+
+然后浏览器打开：
+
+```text
+http://127.0.0.1:18789/chat?session=main
+```
+
+如果页面提示要 token，就查一次并粘贴：
+
+```powershell
+openclaw config get gateway.auth.token
+```
+
+---
+
+常用补充命令（建议记住）：
+
+```powershell
+# 查看状态
+openclaw status
+
+# 看实时日志
+openclaw logs --follow
+
+# 只停止网关
+openclaw gateway stop
+```
+
+---
+
+你也可以用你现成脚本一条启动（更省事）：
+
+```powershell
+cd D:\FY003
+.\openclaw_仅启动.ps1
+```
+
+当前模型：gpt-5.3-codex（版本：GPT-5.3 Codex）
