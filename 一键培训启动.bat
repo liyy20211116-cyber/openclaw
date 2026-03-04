@@ -3,11 +3,11 @@ setlocal enabledelayedexpansion
 chcp 65001 >nul
 
 set "ROOT=%~dp0"
-set "DOC_INDEX=%ROOT%OpenClaw_飞书应用打通_文档总索引.md"
-set "DOC_INSTALL_USE=%ROOT%OpenClaw_培训手册_安装使用飞书配置.md"
-set "DOC_PRACTICE=%ROOT%OpenClaw_飞书应用打通实操手册.md"
-set "DOC_TRAINER=%ROOT%OpenClaw_飞书应用打通_公司内训版.md"
-set "DOC_STUDENT=%ROOT%OpenClaw_飞书应用打通_学员10分钟极简版.md"
+set "DOC_INDEX=%ROOT%README.md"
+set "DOC_ENV=%ROOT%01_安装环境要求.md"
+set "DOC_INSTALL=%ROOT%02_OpenClaw安装与启动.md"
+set "DOC_CONFIG=%ROOT%03_OpenClaw配置说明.md"
+set "DOC_FEISHU=%ROOT%04_飞书接入配置与联调.md"
 set "CHECK_PS1=%ROOT%openclaw_飞书联调自检.ps1"
 
 echo ============================================================
@@ -16,10 +16,10 @@ echo ============================================================
 echo.
 echo [1/6] 打开培训文档（安装 / 使用 / 配置 / 飞书打通）
 if exist "%DOC_INDEX%" start "" "%DOC_INDEX%"
-if exist "%DOC_INSTALL_USE%" start "" "%DOC_INSTALL_USE%"
-if exist "%DOC_PRACTICE%" start "" "%DOC_PRACTICE%"
-if exist "%DOC_TRAINER%" start "" "%DOC_TRAINER%"
-if exist "%DOC_STUDENT%" start "" "%DOC_STUDENT%"
+if exist "%DOC_ENV%" start "" "%DOC_ENV%"
+if exist "%DOC_INSTALL%" start "" "%DOC_INSTALL%"
+if exist "%DOC_CONFIG%" start "" "%DOC_CONFIG%"
+if exist "%DOC_FEISHU%" start "" "%DOC_FEISHU%"
 
 echo.
 echo [2/6] 检查 Node.js 与 npm
