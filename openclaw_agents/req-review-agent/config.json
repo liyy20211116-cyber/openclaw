@@ -1,0 +1,195 @@
+{
+  "_comment": "需求审核 Agent 配置文件 — 所有 ONES UUID 已通过 API 探测并填写完毕，2026-03-13 最后更新",
+
+  "feishu": {
+    "bitable_app_token": "EI2CbmJb1aDlVosGmnocIdAznab",
+    "table_id": "tbl3Ci7REHJK8LQT",
+
+    "fields": {
+      "ones_link":     "ONES 链接",
+      "type":          "提报类型",
+      "title":         "标题",
+      "description":   "描述",
+      "submitter":     "需求提出人",
+      "expected_date": "期望上线时间",
+      "value_amount":  "需求价值（金额，单位：元|年）",
+      "attachment":    "附件",
+      "severity":      "严重程度",
+      "priority":      "需求优先级",
+      "product":       "所属产品",
+      "status":        "状态",
+      "created_at":    "创建时间",
+      "warehouse":     "提出仓库",
+      "automation_status": "自动化处理状态",
+      "reject_reason": "退回原因",
+      "ones_number": "ONES 编号",
+      "approval_time": "审批时间",
+      "approver": "审批人",
+      "build_fail_reason": "建单失败原因",
+      "card_message_id": "审批卡片消息ID",
+      "recent_processed_time": "最近处理时间"
+    },
+
+    "type_values": {
+      "requirement": "需求优化",
+      "bug":         "系统BUG"
+    },
+
+    "status_values": {
+      "pending":   "待审批",
+      "approved":  "已提交ones",
+      "rejected":  "退回需求"
+    },
+
+    "automation_status_values": {
+      "pending_send": "待发送审批卡片",
+      "card_sent": "审批卡片已发送",
+      "approved_waiting_create": "审批通过待建单",
+      "create_success": "建单成功",
+      "create_failed": "建单失败",
+      "rejected": "审核退回",
+      "skipped": "跳过处理"
+    },
+
+    "_product_note": "飞书表格所属产品选项（与 ONES 产品名称对应关系见下方 product_mapping）",
+    "feishu_product_options": ["全棉WMS","TMS","SAP","医疗WMS","WIN BI数据报表","OMS中台订单库存","OA","BI工具"],
+
+    "_product_mapping_note": "飞书产品名 → ONES product_option_uuids 的键名映射",
+    "product_name_mapping": {
+      "全棉WMS":          "全棉时代-WMS",
+      "医疗WMS":          "稳健医疗-WMS",
+      "TMS":              "全棉时代-PMS",
+      "SAP":              "稳健医疗-ERP",
+      "WIN BI数据报表":    "稳健医疗-PMS",
+      "OMS中台订单库存":   "全棉时代-ERP",
+      "OA":               "全棉时代-MES",
+      "BI工具":           "稳健医疗-MES"
+    }
+  },
+
+  "_app_note": "原神 app (cli_a779f812f519d00b) 专用于需求审核卡片，不连接妙搭，独占 card.action.trigger 回调",
+  "feishu_app_id":     "cli_a779f812f519d00b",
+  "feishu_app_secret": "iZfptN8YREsaRYQScoV3JgkNMOV0G6Bj",
+
+  "reviewer_open_id": "oc_cdd9020e9d68680bb4b33c0a10dae244",
+  "reviewer_receive_id": "oc_cdd9020e9d68680bb4b33c0a10dae244",
+  "reviewer_receive_id_type": "chat_id",
+  "reviewer_approver_open_id": "ou_26731dd03336090ae72f1e096b4ccc10",
+  "reviewer_open_id_baize": "ou_58bdbb9d9f369e06ba35add9c9c881a2",
+  "reviewer_open_id_cursor_mcp": "oc_cdd9020e9d68680bb4b33c0a10dae244",
+  "reviewer_union_id": "on_c277ecc244ec2ff423cdb18493df43e3",
+  "reviewer_name":    "李原野",
+
+  "ones": {
+    "base_url":     "https://ones.winnermedical.com",
+    "team_uuid":    "BSsxXFv2",
+    "project_uuid": "QE2GXyz1K1Z1aDui",
+
+    "_auth_comment": "ONES 使用 Bearer JWT 认证（非 OAuth2）。Token 从浏览器 F12 > Network > 任意请求 Authorization: Bearer <token> 获取，有效期约1小时。Cookie 中须包含 ones-org-uuid=UTcECDmx",
+    "client_id":     "b8f49ff2a7184ac363ccf31f9a6fc5de",
+    "client_secret": "c4c67603f4e446ea64f299cb5cdfbbb5",
+
+    "_api_endpoint": "POST https://ones.winnermedical.com/project/api/project/team/BSsxXFv2/items/graphql",
+    "_task_create_endpoint": "POST https://ones.winnermedical.com/project/api/project/team/BSsxXFv2/tasks/add",
+    "_task_create_note": "payload: {tasks:[{uuid, assign, summary, parent_uuid, issue_type_uuid, project_uuid, watchers, field_values}]}. uuid=user_uuid+8随机字符(客户端生成). 必填字段: field001(title,type2), field016(desc_html,type20), ScqUnZYX(desc_plain,type15), field038(severity,type1), field004(assignee,type8), field029(product_uuids,type44).",
+
+    "issue_types": {
+      "requirement": {
+        "name": "业务需求",
+        "issue_type_uuid": "2cCuqqQw",
+        "view_url": "https://ones.winnermedical.com/project/#/team/BSsxXFv2/project/QE2GXyz1K1Z1aDui/component/QOErkfJe/view/zzhY3kL9"
+      },
+      "bug": {
+        "name": "问题缺陷",
+        "issue_type_uuid": "TNVWjjtZ",
+        "view_url": "https://ones.winnermedical.com/project/#/team/BSsxXFv2/project/QE2GXyz1K1Z1aDui/component/nTmMrI5U/view/xtUKy81T"
+      }
+    },
+
+    "_field_note": "field_uuid 通过 GraphQL { fields { uuid name fieldType allowedValues { uuid value } } } 查询获得",
+    "field_uuids": {
+      "_system": {
+        "title":        "field001",
+        "description":  "field016",
+        "assignee":     "field004",
+        "status":       "field005",
+        "priority":     "field006",
+        "project":      "field007",
+        "issue_type":   "field009",
+        "product_link": "field029"
+      },
+      "submission_type": "ScqUnZYX",
+      "product":         "BmupUp2N",
+      "req_type":        "ANYBr4rF",
+      "expected_date":   "BkxSCLrR",
+      "value_amount":    "EHn5dvkh",
+      "submitter":       "LFcgENrp",
+      "req_priority":    "MtkJMUfU",
+      "value_type":      "VzvqjJRe",
+      "product_owner":   "NandikEq",
+      "it_contact":      "b3TaATCz",
+      "biz_contact":     "S3F4vEt6"
+    },
+
+    "_submission_type_options": "ScqUnZYX 字段的选项",
+    "submission_type_option_uuids": {
+      "需求优化": "41B37H8v",
+      "系统BUG":  "2evTTPTk"
+    },
+
+    "_req_type_options": "ANYBr4rF 字段的选项",
+    "req_type_option_uuids": {
+      "功能优化": "YcHHwTkr",
+      "流程优化": "2B9LgJpS",
+      "效率提升": "7vF6F7Bv"
+    },
+
+    "_product_note": "field029(type=44) 中使用的 ONES product UUID，通过 GraphQL products 查询获得",
+    "product_uuids": {
+      "全棉WMS":         "QE2GXyz1QGmiMX55",
+      "医疗WMS":         "4Nisyuwu3RpqYEpW",
+      "TMS":             "QE2GXyz1M9wrK1z3",
+      "SAP":             "QE2GXyz1LBEv31Ps",
+      "WIN BI数据报表":  "AGRwaJXiRNd7vpn2",
+      "OMS中台订单库存": "QE2GXyz13FrYFMEj",
+      "OA":              "QE2GXyz1BqVWhNhM",
+      "BI工具":          "QE2GXyz1WSeEmJo7"
+    },
+
+    "_priority_note": "标准优先级字段 field006 的选项值",
+    "priority_uuids": {
+      "高": "13vTf67S",
+      "中": "PPrE6H8j",
+      "低": "2T94Gz4u"
+    },
+
+    "_req_priority_note": "需求优先级字段 MtkJMUfU 的选项",
+    "req_priority_option_uuids": {
+      "高": "MZLtsJGV",
+      "中": "Ph1VY84z",
+      "低": "4sHbzsWC"
+    },
+
+    "_value_type_note": "价值类型字段 VzvqjJRe 的选项",
+    "value_type_option_uuids": {
+      "管理价值": "PTQvQsS8",
+      "降本":    "V8jV3EVn",
+      "提质":    "4qGp2aC7",
+      "增效":    "STCCHWtS"
+    },
+
+    "_severity_note": "问题缺陷严重程度字段 field038 的选项",
+    "severity_field_uuid": "field038",
+    "severity_option_uuids": {
+      "P0": "CbHEhDQ4",
+      "P1": "Gjh8TNF3",
+      "P2": "da53MmEu",
+      "P3": "VN4pcKke"
+    },
+
+    "_user_note": "reviewer_ones_user_uuid 从 JWT payload.org_user_uuid 提取",
+    "reviewer_ones_user_uuid": "5ktr445N",
+
+    "issue_link_template": "https://ones.winnermedical.com/project/#/team/BSsxXFv2/project/QE2GXyz1K1Z1aDui/issue/{{issue_uuid}}"
+  }
+}
