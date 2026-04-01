@@ -29,9 +29,16 @@ WIS_PASS    = "LLll99..=="
 # ------ 缓存读写 ------
 def _load_cache() -> dict:
     try:
-        return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+    # 兼容两种缓存格式：
+    # 1) 旧格式：{"ones_lt": "..."}
+    # 2) 手动刷新脚本格式：{"token": "...", "cookie": "..."}
+    if data.get("token") and not data.get("ones_lt"):
+        data["ones_lt"] = data["token"]
+    return data
 
 def _save_cache(data: dict):
     CACHE_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -169,8 +176,13 @@ def get_token_auto() -> str:
     cache = _load_cache()
     token = cache.get("ones_lt", "")
 
-    if _token_valid(token):
-        return token
+    if token:
+        print(f"[TokenRefresh] 命中缓存 token，长度={len(token)}")
+        if _token_valid(token):
+            print("[TokenRefresh] 缓存 token 仍有效，直接使用")
+            return token
+        else:
+            print("[TokenRefresh] 缓存 token 判定已过期，准备刷新")
 
     print("[TokenRefresh] 缓存已过期，通过 WIS SSO 刷新...")
 
