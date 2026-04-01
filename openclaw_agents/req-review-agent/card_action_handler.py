@@ -76,6 +76,11 @@ def update_bitable_record(token: str, record_id: str, fields_data: dict):
         safe_fields.pop(approver_field, None)
         log.info(f"[Bitable PUT] 已过滤审批人字段: {approver_field}")
 
+    try:
+        log.info(f"[Bitable PUT] safe_fields keys={list(safe_fields.keys())}")
+    except Exception:
+        pass
+
     r = requests.put(
         f"{FEISHU_API}/bitable/v1/apps/{APP_TOKEN}/tables/{TABLE_ID}/records/{record_id}",
         headers=headers, json={"fields": safe_fields}, timeout=15
@@ -254,13 +259,6 @@ def handle_approve(value: dict) -> P2CardActionTriggerResponse:
         output = result.stdout + result.stderr
         log.info(f"[通过] create_ones_task 输出:\n{output[:600]}")
 
-        ones_url = ""
-        for line in output.splitlines():
-            m = re.search(r'https?://ones\.winnermedical\.com\S+', line)
-            if m:
-                ones_url = m.group(0).strip('",)')
-                break
-
         bitable_token = get_bitable_token()
         fields_cfg    = CONFIG["feishu"]["fields"]
         status_values = CONFIG["feishu"]["status_values"]
@@ -276,6 +274,18 @@ def handle_approve(value: dict) -> P2CardActionTriggerResponse:
         # 审批人字段的 Person ID 体系与会话/开放平台 ID 存在差异，暂不在此处回写，先保证主流程闭环
         update_bitable_record(bitable_token, record_id, pre_update)
 
+        if result.returncode != 0:
+            raise RuntimeError(f"create_ones_task.py 失败(returncode={result.returncode}): {output[:500].strip()}")
+
+        ones_url = ""
+        for line in output.splitlines():
+            m = re.search(r'https?://ones\.winnermedical\.com\S+', line)
+            if m:
+                ones_url = m.group(0).strip('",)')
+                break
+        if not ones_url:
+            raise RuntimeError(f"未从 create_ones_task.py 输出中解析到 ONES 链接: {output[:500].strip()}")
+
         update_data = {
             fields_cfg["status"]: status_values.get("approved", "已提交ones"),
             fields_cfg["automation_status"]: auto_values.get("create_success", "建单成功"),
@@ -288,7 +298,7 @@ def handle_approve(value: dict) -> P2CardActionTriggerResponse:
             if m:
                 issue_no = f"#{m.group(1)}"
                 break
-        if ones_url and fields_cfg.get("ones_link"):
+        if fields_cfg.get("ones_link"):
             update_data[fields_cfg["ones_link"]] = f"{issue_no} {title} {ones_url}".strip()
         if issue_no and fields_cfg.get("ones_number"):
             update_data[fields_cfg["ones_number"]] = issue_no
@@ -296,7 +306,7 @@ def handle_approve(value: dict) -> P2CardActionTriggerResponse:
             update_data[fields_cfg["build_fail_reason"]] = ""
         update_bitable_record(bitable_token, record_id, update_data)
 
-        detail = f"工单链接：{ones_url}" if ones_url else "工单已创建（请在 ONES 中查看）"
+        detail = f"工单链接：{ones_url}"
         return make_response(build_done_card(title, "approved", detail), toast_text="工单创建成功")
 
     except Exception as e:
