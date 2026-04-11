@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router'
 import { useSnapshot } from '../hooks/useSnapshot'
 import { dashboardService } from '../services/dashboardService'
+import { AgentPerformanceChart } from '../components/AgentPerformanceChart'
+import { NotificationPanel } from '../components/NotificationPanel'
 
 export function DashboardPage() {
   useSnapshot()
@@ -100,6 +102,14 @@ export function DashboardPage() {
           <h3>审计中心</h3>
           <p className="muted">{o.openAuditEvents > 0 ? `${o.openAuditEvents}个待处理` : '当前无风险'}</p>
         </article>
+      </section>
+
+      <section style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 10 }}>
+        <div className="panel" style={{ padding: 14 }}>
+          <p className="eyebrow" style={{ marginBottom: 8 }}>Agent 绩效概览</p>
+          <AgentPerformanceChart />
+        </div>
+        <NotificationPanel />
       </section>
     </>
   )
