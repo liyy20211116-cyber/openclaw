@@ -1,0 +1,17 @@
+{
+  "agent": "neville-hr",
+  "role": "CHRO",
+  "domain": "human_resources",
+  "initialized_at": "2026-04-11T16:05:00",
+  "learn_categories": ["performance", "onboarding", "culture", "incentive", "organization"],
+  "description": "Agent performance, team growth, onboarding, culture, incentive systems",
+  "stats": {"total_learnings": 1, "last_consolidation": null},
+  "categories": {
+    "performance": {"count": 0, "latest": null},
+    "onboarding": {"count": 0, "latest": null},
+    "culture": {"count": 0, "latest": null},
+    "incentive": {"count": 0, "latest": null},
+    "organization": {"count": 0, "latest": null}
+  },
+  "top_learnings": []
+}

@@ -13,7 +13,8 @@ CEO（李原野）
       ├── 弗雷德·韦斯莱（销售商务部）
       ├── 珀西·韦斯莱（财务部）
       ├── 斯内普（审计风控部）
-      └── 多比（客户成功部）
+      ├── 多比（客户成功部）
+      └── 纳威·隆巴顿（人资部）
 ```
 
 ## 部门一号位速查
@@ -28,6 +29,7 @@ CEO（李原野）
 | 财务部 | 珀西·韦斯莱 | percy-finance | Token预算、成本核算、工资发放、ROI统计 | `openclaw_agents/percy-finance/` |
 | 审计风控部 | 斯内普 | snape-audit | 代码审查、质量检测、风险预警、合规审计 | `openclaw_agents/snape-audit/` |
 | 客户成功部 | 多比 | dobby-customer | 用户体验、客户反馈、满意度、问题跟进 | `openclaw_agents/dobby-customer/` |
+| 人资部 | 纳威·隆巴顿 | neville-hr | 绩效管理、人才发展、入职管理、团队文化、激励体系 | `openclaw_agents/neville-hr/` |
 
 ## 协作规则
 
