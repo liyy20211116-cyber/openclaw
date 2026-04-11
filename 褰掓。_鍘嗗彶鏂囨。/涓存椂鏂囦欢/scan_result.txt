@@ -1,0 +1,22 @@
+﻿[扫描] 获取飞书 token...
+[扫描] 查询待审批记录...
+[扫描] 找到 1 条待审批需求，开始发送审核卡片...
+  [OK] 已发送: [{'text': '测试', 'type': 'text'}]
+
+{
+  "status": "done",
+  "count": 1,
+  "results": [
+    {
+      "record_id": "recvdUU4Y3kOcs",
+      "title": [
+        {
+          "text": "测试",
+          "type": "text"
+        }
+      ],
+      "status": "sent",
+      "message_id": "om_x100b5451a8d7a8b0b29e768a226d1aa"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+﻿STDOUT: [OK] task_uuid=5ktr445NmZSUHNlU
+[OK] ones_url=https://ones.winnermedical.com/project/#/team/BSsxXFv2/project/QE2GXyz1K1Z1aDui/issue/5ktr445NmZSUHNlU
+{"task_uuid": "5ktr445NmZSUHNlU", "ones_url": "https://ones.winnermedical.com/project/#/team/BSsxXFv2/project/QE2GXyz1K1Z1aDui/issue/5ktr445NmZSUHNlU"}
+
+STDERR: 
+RC: 0

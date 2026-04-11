@@ -1,0 +1,3560 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenClaw 飞书培训课件</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%234f8cff'/%3E%3Ctext x='50%25' y='54%25' font-size='28' text-anchor='middle' fill='white' font-family='Arial'%3EOC%3C/text%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #07111f;
+        --panel: rgba(12, 23, 42, 0.82);
+        --panel-strong: #0f1d33;
+        --panel-soft: #162742;
+        --text: #eef4ff;
+        --muted: #9fb0cc;
+        --line: rgba(165, 184, 220, 0.16);
+        --brand: #4f8cff;
+        --brand-soft: rgba(79, 140, 255, 0.16);
+        --accent: #27d0b3;
+        --warn: #ffca5f;
+        --danger: #ff7f8d;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+        --radius-lg: 24px;
+        --radius-md: 18px;
+        --radius-sm: 12px;
+        --page-width: 1200px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(51, 102, 204, 0.35), transparent 32%),
+          radial-gradient(circle at top right, rgba(39, 208, 179, 0.15), transparent 28%),
+          linear-gradient(180deg, #07111f 0%, #0a1628 48%, #08111d 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      button {
+        font: inherit;
+        color: inherit;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(18px);
+        background: rgba(7, 17, 31, 0.72);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .topbar-inner,
+      .page,
+      .footer-inner {
+        width: min(calc(100% - 32px), var(--page-width));
+        margin: 0 auto;
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 72px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--brand), #7a68ff);
+        box-shadow: 0 12px 28px rgba(79, 140, 255, 0.38);
+        font-weight: 700;
+      }
+
+      .brand-copy strong,
+      .section-title {
+        letter-spacing: 0.02em;
+      }
+
+      .brand-copy small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .nav a,
+      .ghost-btn,
+      .copy-btn,
+      .demo-btn {
+        text-decoration: none;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+        padding: 10px 14px;
+        border-radius: 999px;
+        transition: 0.2s ease;
+        cursor: pointer;
+      }
+
+      .nav a:hover,
+      .ghost-btn:hover,
+      .copy-btn:hover,
+      .demo-btn:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-1px);
+      }
+
+      .ghost-btn.active {
+        background: var(--brand-soft);
+        border-color: rgba(79, 140, 255, 0.45);
+      }
+
+      .page {
+        padding: 32px 0 72px;
+      }
+
+      .hero,
+      .section,
+      .footer-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        overflow: hidden;
+        position: relative;
+        padding: 40px;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(120deg, rgba(79, 140, 255, 0.12), transparent 42%),
+          radial-gradient(circle at 85% 18%, rgba(39, 208, 179, 0.18), transparent 18%);
+        pointer-events: none;
+      }
+
+      .hero-grid,
+      .two-col,
+      .three-col,
+      .command-grid,
+      .demo-grid,
+      .pairing-grid,
+      .showcase-grid,
+      .install-path-grid,
+      .talk-track-grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1.2fr 0.8fr;
+        position: relative;
+        z-index: 1;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(39, 208, 179, 0.12);
+        color: #b9fff2;
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(34px, 5vw, 56px);
+        line-height: 1.08;
+      }
+
+      .hero p {
+        margin-top: 18px;
+        font-size: 18px;
+        line-height: 1.75;
+        color: #d9e4f7;
+        max-width: 700px;
+      }
+
+      .hero-tags,
+      .mini-tags,
+      .step-tags,
+      .status-list,
+      .demo-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .hero-tags {
+        margin-top: 24px;
+      }
+
+      .tag,
+      .stat-pill,
+      .mini-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #d7e6ff;
+      }
+
+      .hero-panel,
+      .card,
+      .sub-card,
+      .terminal,
+      .callout,
+      .demo-player,
+      .checklist,
+      .faq,
+      .note-box {
+        background: rgba(9, 19, 34, 0.78);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+      }
+
+      .hero-panel {
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hero-panel strong {
+        font-size: 18px;
+      }
+
+      .hero-panel ul,
+      .card ul,
+      .faq ul,
+      .checklist ul {
+        margin: 0;
+        padding-left: 18px;
+        color: #d7e2f5;
+        line-height: 1.85;
+      }
+
+      .section {
+        margin-top: 24px;
+        padding: 28px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 24px;
+      }
+
+      .section-head p {
+        max-width: 760px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .three-col {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .command-grid,
+      .demo-grid,
+      .pairing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .showcase-grid,
+      .install-path-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .talk-track-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .intro-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 20px;
+      }
+
+      .pillar-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card,
+      .sub-card,
+      .callout,
+      .checklist,
+      .faq,
+      .note-box {
+        padding: 20px;
+      }
+
+      .card h3,
+      .sub-card h3,
+      .demo-title,
+      .faq h3 {
+        font-size: 22px;
+        margin-bottom: 10px;
+      }
+
+      .preview-card {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .preview-shot {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .link-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(79, 140, 255, 0.12);
+        border: 1px solid rgba(79, 140, 255, 0.32);
+        color: #dce9ff;
+      }
+
+      .link-btn:hover {
+        background: rgba(79, 140, 255, 0.2);
+      }
+
+      .source-note {
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        line-height: 1.8;
+        color: #d7e2f5;
+      }
+
+      .story-card {
+        padding: 22px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .story-card strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 20px;
+      }
+
+      .story-card p {
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .source-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        margin-bottom: 12px;
+        background: rgba(39, 208, 179, 0.14);
+        color: #b9fff2;
+        font-size: 13px;
+      }
+
+      .intro-lead {
+        font-size: 18px;
+        line-height: 1.9;
+        color: #dce8fb;
+      }
+
+      .intro-stack {
+        display: grid;
+        gap: 16px;
+      }
+
+      .value-card {
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .value-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      .value-card p {
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .pillar-card {
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(20, 33, 58, 0.95), rgba(11, 20, 38, 0.95));
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        min-height: 280px;
+      }
+
+      .pillar-card.blue {
+        border-color: rgba(83, 163, 255, 0.85);
+      }
+
+      .pillar-card.orange {
+        border-color: rgba(255, 152, 73, 0.9);
+      }
+
+      .pillar-card.green {
+        border-color: rgba(39, 208, 179, 0.9);
+      }
+
+      .pillar-card.purple {
+        border-color: rgba(182, 104, 255, 0.9);
+      }
+
+      .pillar-card.red {
+        border-color: rgba(255, 98, 98, 0.9);
+      }
+
+      .pillar-card.yellow {
+        border-color: rgba(255, 191, 71, 0.9);
+      }
+
+      .pillar-title {
+        font-size: 28px;
+        margin-bottom: 18px;
+      }
+
+      .pillar-card h3 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .pillar-card ul {
+        margin: 0;
+        padding-left: 18px;
+        line-height: 1.85;
+        color: #dce5f7;
+      }
+
+      .section-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(182, 104, 255, 0.14);
+        color: #e8d0ff;
+        font-weight: 600;
+      }
+
+      .usecase-grid,
+      .risk-grid,
+      .guardrail-grid,
+      .brain-grid,
+      .download-grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .usecase-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .risk-grid,
+      .guardrail-grid,
+      .brain-grid,
+      .download-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .section-banner {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(79, 140, 255, 0.12), rgba(79, 140, 255, 0.04));
+        border: 1px solid rgba(79, 140, 255, 0.18);
+      }
+
+      .section-banner strong {
+        font-size: 24px;
+      }
+
+      .section-banner p {
+        color: #d8e6fb;
+        line-height: 1.8;
+      }
+
+      .usecase-card,
+      .risk-card,
+      .guardrail-card {
+        padding: 20px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(18, 30, 54, 0.96), rgba(9, 18, 33, 0.94));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
+      }
+
+      .usecase-card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .usecase-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 6px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(79, 140, 255, 1), rgba(39, 208, 179, 0.8));
+      }
+
+      .usecase-card.orange::before {
+        background: linear-gradient(180deg, rgba(255, 152, 73, 1), rgba(255, 198, 92, 0.8));
+      }
+
+      .usecase-card.green::before {
+        background: linear-gradient(180deg, rgba(39, 208, 179, 1), rgba(78, 224, 138, 0.8));
+      }
+
+      .usecase-card.purple::before {
+        background: linear-gradient(180deg, rgba(182, 104, 255, 1), rgba(122, 104, 255, 0.8));
+      }
+
+      .card-topline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .card-icon {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .card-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #b9c8e5;
+        font-size: 12px;
+      }
+
+      .usecase-card h3,
+      .risk-card h3,
+      .guardrail-card h3 {
+        margin: 0 0 12px;
+        font-size: 22px;
+      }
+
+      .usecase-card ul,
+      .risk-card ul,
+      .guardrail-card ul {
+        margin: 0;
+        padding-left: 18px;
+        line-height: 1.85;
+        color: #dce6f8;
+      }
+
+      .risk-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .risk-label {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #d7e3fb;
+      }
+
+      .risk-card.danger {
+        border-color: rgba(255, 98, 98, 0.28);
+      }
+
+      .risk-card.warning {
+        border-color: rgba(255, 191, 71, 0.28);
+      }
+
+      .risk-card.info {
+        border-color: rgba(79, 140, 255, 0.28);
+      }
+
+      .risk-card.limit {
+        border-color: rgba(182, 104, 255, 0.28);
+      }
+
+      .risk-conclusion {
+        margin-top: 4px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #bde9db;
+      }
+
+      .guardrail-grid .guardrail-card {
+        min-height: 230px;
+      }
+
+      .brain-card,
+      .download-card {
+        padding: 20px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(18, 30, 54, 0.96), rgba(9, 18, 33, 0.94));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
+      }
+
+      .brain-card h3,
+      .download-card h3 {
+        margin: 0 0 12px;
+        font-size: 22px;
+      }
+
+      .brain-card ul,
+      .download-card ul {
+        margin: 0;
+        padding-left: 18px;
+        line-height: 1.85;
+        color: #dce6f8;
+      }
+
+      .brain-highlight {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+        border-radius: 999px;
+        background: rgba(39, 208, 179, 0.14);
+        color: #bcfff0;
+        font-size: 12px;
+      }
+
+      .guardrail-step {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(79, 140, 255, 0.95), rgba(39, 208, 179, 0.75));
+        font-weight: 700;
+      }
+
+      .hero-steps,
+      .simple-grid,
+      .prep-grid,
+      .what-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .hero-steps {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-top: 24px;
+      }
+
+      .simple-grid,
+      .prep-grid,
+      .what-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .hero-step-chip,
+      .simple-card,
+      .prep-card,
+      .what-card {
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .hero-step-chip strong,
+      .simple-card strong,
+      .prep-card strong,
+      .what-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      .hero-step-chip p,
+      .simple-card p,
+      .prep-card p,
+      .what-card p {
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .simple-number,
+      .prep-number,
+      .what-number {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 12px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(79, 140, 255, 0.95), rgba(39, 208, 179, 0.75));
+        font-weight: 700;
+      }
+
+      .big-quote {
+        padding: 22px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(79, 140, 255, 0.12), rgba(79, 140, 255, 0.05));
+        border: 1px solid rgba(79, 140, 255, 0.24);
+        font-size: 24px;
+        line-height: 1.7;
+        font-weight: 700;
+        color: #ecf3ff;
+      }
+
+      .mini-flow {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .mini-flow-card {
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+      }
+
+      .mini-flow-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 19px;
+      }
+
+      .mini-flow-card p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .card p,
+      .sub-card p,
+      .callout p,
+      .faq p,
+      .note-box p {
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .flow {
+        display: grid;
+        gap: 16px;
+      }
+
+      .flow-step {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 16px;
+        align-items: start;
+        padding: 18px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .flow-step-number {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(79, 140, 255, 0.9), rgba(39, 208, 179, 0.75));
+        font-weight: 700;
+      }
+
+      .visual-board {
+        position: relative;
+        min-height: 420px;
+        padding: 22px;
+        overflow: hidden;
+      }
+
+      .visual-board::before {
+        content: "";
+        position: absolute;
+        inset: 18px;
+        border-radius: 22px;
+        border: 1px dashed rgba(255, 255, 255, 0.08);
+      }
+
+      .diagram {
+        position: relative;
+        height: 100%;
+        min-height: 360px;
+      }
+
+      .node {
+        position: absolute;
+        width: 210px;
+        padding: 18px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(20, 36, 65, 0.96), rgba(8, 19, 36, 0.92));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .node h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      .node small {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .node.pc {
+        left: 0;
+        top: 92px;
+      }
+
+      .node.claw {
+        right: 0;
+        top: 0;
+      }
+
+      .node.feishu {
+        right: 0;
+        bottom: 0;
+      }
+
+      .node.pairing {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 72px;
+        width: 240px;
+        border-color: rgba(255, 202, 95, 0.3);
+      }
+
+      .line-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .metric {
+        display: grid;
+        gap: 12px;
+      }
+
+      .metric-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .metric-row:last-child {
+        border-bottom: 0;
+      }
+
+      .metric-label {
+        color: var(--muted);
+      }
+
+      .terminal {
+        padding: 18px;
+        overflow: hidden;
+      }
+
+      .terminal-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .dot.red {
+        background: #ff6b6b;
+      }
+
+      .dot.yellow {
+        background: #ffd166;
+      }
+
+      .dot.green {
+        background: #06d6a0;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #d8e8ff;
+        font-family: Consolas, "Courier New", monospace;
+      }
+
+      code {
+        font-family: Consolas, "Courier New", monospace;
+      }
+
+      .command-card {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .command-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .copy-btn,
+      .demo-btn {
+        padding: 9px 14px;
+      }
+
+      .copy-btn.copied {
+        background: rgba(39, 208, 179, 0.18);
+        border-color: rgba(39, 208, 179, 0.42);
+      }
+
+      .callout {
+        display: grid;
+        gap: 10px;
+        background: linear-gradient(180deg, rgba(79, 140, 255, 0.14), rgba(79, 140, 255, 0.06));
+      }
+
+      .callout.warn {
+        background: linear-gradient(180deg, rgba(255, 202, 95, 0.14), rgba(255, 202, 95, 0.06));
+      }
+
+      .callout.danger {
+        background: linear-gradient(180deg, rgba(255, 127, 141, 0.14), rgba(255, 127, 141, 0.06));
+      }
+
+      .timeline {
+        display: grid;
+        gap: 16px;
+      }
+
+      .timeline-item {
+        padding: 18px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .timeline-item strong {
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+
+      .step-tags {
+        margin-top: 14px;
+      }
+
+      .mini-tag {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      .demo-player {
+        overflow: hidden;
+      }
+
+      .demo-player-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .demo-screen {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        min-height: 380px;
+      }
+
+      .screen-main,
+      .screen-side {
+        padding: 20px;
+      }
+
+      .screen-main {
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 34%),
+          rgba(4, 10, 20, 0.45);
+      }
+
+      .video-shell {
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, rgba(16, 27, 49, 0.98), rgba(9, 18, 32, 0.95));
+        padding: 18px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .video-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        color: var(--muted);
+      }
+
+      .video-title {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .video-caption {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #dbe7fb;
+      }
+
+      .progress-track {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--brand), var(--accent));
+        transition: width 0.3s ease;
+      }
+
+      .fake-window {
+        display: grid;
+        gap: 12px;
+        flex: 1;
+      }
+
+      .fake-card {
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 16px;
+      }
+
+      .fake-card strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .fake-card ul {
+        margin: 0;
+        padding-left: 18px;
+        color: #d8e4f8;
+        line-height: 1.8;
+      }
+
+      .screen-side {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .status-list {
+        padding-top: 6px;
+      }
+
+      .stat-pill {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .kpi {
+        border-radius: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .kpi strong {
+        display: block;
+        font-size: 28px;
+        margin-bottom: 6px;
+      }
+
+      .checklist li {
+        margin-bottom: 8px;
+      }
+
+      .checklist input {
+        accent-color: var(--accent);
+      }
+
+      .pairing-steps {
+        display: grid;
+        gap: 14px;
+      }
+
+      .pairing-step {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 14px;
+        align-items: start;
+        padding: 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .pairing-badge {
+        width: 56px;
+        height: 56px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        font-size: 20px;
+        font-weight: 700;
+        background: rgba(79, 140, 255, 0.18);
+        color: #bcd4ff;
+      }
+
+      details {
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 16px 0;
+      }
+
+      details:first-of-type {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      summary::marker {
+        color: var(--brand);
+      }
+
+      .footer-inner {
+        padding-bottom: 48px;
+      }
+
+      .footer-card {
+        padding: 24px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .speaker-note-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+        background: rgba(255, 202, 95, 0.14);
+        color: #ffe19a;
+        font-size: 12px;
+      }
+
+      .speaker-note,
+      .presenter-section {
+        position: relative;
+      }
+
+      .presentation-only {
+        display: none !important;
+      }
+
+      .slide-controls {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        z-index: 50;
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        backdrop-filter: blur(14px);
+        background: rgba(7, 17, 31, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+      }
+
+      .slide-counter {
+        min-width: 94px;
+        text-align: center;
+        color: #dce8fb;
+      }
+
+      .mode-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .notes-hidden .speaker-note,
+      .notes-hidden .presenter-section,
+      .notes-hidden .hero-panel,
+      .notes-hidden .section-head p,
+      .notes-hidden .source-note {
+        display: none !important;
+      }
+
+      .presentation-mode {
+        overflow: hidden;
+      }
+
+      .presentation-mode .topbar {
+        display: none !important;
+      }
+
+      .presentation-mode .nav,
+      .presentation-mode .hero-panel,
+      .presentation-mode .speaker-note,
+      .presentation-mode .presenter-section,
+      .presentation-mode .source-note,
+      .presentation-mode .section-head p,
+      .presentation-mode .checklist,
+      .presentation-mode .note-box,
+      .presentation-mode .footer-inner,
+      .presentation-mode #notesToggle {
+        display: none !important;
+      }
+
+      .presentation-mode .slide-controls {
+        display: flex;
+      }
+
+      .presentation-mode .page {
+        width: min(calc(100% - 28px), 1460px);
+        height: 100vh;
+        padding: 14px 0 88px;
+        overflow: hidden;
+      }
+
+      .presentation-mode .page > .hero,
+      .presentation-mode .page > .section {
+        display: none;
+        height: calc(100vh - 112px);
+        overflow: hidden;
+        margin-top: 0;
+      }
+
+      .presentation-mode .page > .slide-active {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        transform-origin: top center;
+      }
+
+      .presentation-mode .page > .presentation-only.slide-active {
+        display: flex !important;
+      }
+
+      .presentation-mode h1 {
+        font-size: clamp(38px, 4.8vw, 60px);
+      }
+
+      .presentation-mode .hero p,
+      .presentation-mode .video-caption,
+      .presentation-mode .card p,
+      .presentation-mode .sub-card p,
+      .presentation-mode .hero-step-chip p,
+      .presentation-mode .simple-card p,
+      .presentation-mode .prep-card p,
+      .presentation-mode .what-card p {
+        font-size: 16px;
+      }
+
+      .presentation-mode .section,
+      .presentation-mode .hero {
+        padding: 24px 26px;
+      }
+
+      .presentation-mode .hero,
+      .presentation-mode .section {
+        background: linear-gradient(180deg, rgba(9, 24, 46, 0.98), rgba(7, 18, 34, 0.98));
+        border-color: rgba(255, 255, 255, 0.07);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
+      }
+
+      .presentation-mode .section-head {
+        margin-bottom: 14px;
+      }
+
+      .presentation-mode .section-title,
+      .presentation-mode .pillar-title {
+        font-size: 22px;
+        margin-bottom: 8px;
+      }
+
+      .presentation-mode .section-banner {
+        margin-bottom: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+      }
+
+      .presentation-mode .section-banner strong {
+        font-size: 18px;
+      }
+
+      .presentation-mode .hero-steps,
+      .presentation-mode .simple-grid,
+      .presentation-mode .prep-grid,
+      .presentation-mode .what-grid,
+      .presentation-mode .usecase-grid,
+      .presentation-mode .risk-grid,
+      .presentation-mode .guardrail-grid,
+      .presentation-mode .pairing-grid,
+      .presentation-mode .command-grid,
+      .presentation-mode .showcase-grid,
+      .presentation-mode .install-path-grid,
+      .presentation-mode .two-col,
+      .presentation-mode .three-col {
+        gap: 12px;
+      }
+
+      .presentation-mode .hero-step-chip,
+      .presentation-mode .simple-card,
+      .presentation-mode .prep-card,
+      .presentation-mode .what-card,
+      .presentation-mode .usecase-card,
+      .presentation-mode .risk-card,
+      .presentation-mode .guardrail-card,
+      .presentation-mode .card,
+      .presentation-mode .sub-card,
+      .presentation-mode .callout {
+        padding: 14px 16px;
+        border-radius: 16px;
+      }
+
+      .presentation-mode .usecase-card h3,
+      .presentation-mode .risk-card h3,
+      .presentation-mode .guardrail-card h3,
+      .presentation-mode .card h3,
+      .presentation-mode .sub-card h3,
+      .presentation-mode .demo-title {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .presentation-mode .usecase-card ul,
+      .presentation-mode .risk-card ul,
+      .presentation-mode .guardrail-card ul,
+      .presentation-mode .card ul,
+      .presentation-mode .sub-card ul {
+        line-height: 1.55;
+        font-size: 14px;
+      }
+
+      .presentation-mode .guardrail-grid .guardrail-card,
+      .presentation-mode .pillar-card,
+      .presentation-mode .risk-card {
+        min-height: auto;
+      }
+
+      .presentation-mode .card-topline,
+      .presentation-mode .step-tags,
+      .presentation-mode .status-list,
+      .presentation-mode .mini-tags {
+        gap: 8px;
+      }
+
+      .presentation-mode .card-icon,
+      .presentation-mode .guardrail-step,
+      .presentation-mode .simple-number,
+      .presentation-mode .prep-number,
+      .presentation-mode .what-number {
+        width: 30px;
+        height: 30px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+        font-size: 13px;
+      }
+
+      .presentation-mode .card-tag,
+      .presentation-mode .risk-label,
+      .presentation-mode .section-kicker,
+      .presentation-mode .mini-tag,
+      .presentation-mode .tag,
+      .presentation-mode .stat-pill {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+
+      .presentation-mode pre {
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .presentation-mode .demo-screen {
+        min-height: 0;
+      }
+
+      .presentation-mode .demo-player-head,
+      .presentation-mode .screen-main,
+      .presentation-mode .screen-side,
+      .presentation-mode .video-shell {
+        padding: 14px;
+      }
+
+      .presentation-mode .link-btn,
+      .presentation-mode .ghost-btn,
+      .presentation-mode .copy-btn,
+      .presentation-mode .demo-btn {
+        padding: 8px 12px;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 1100px) {
+        .hero-grid,
+        .two-col,
+        .three-col,
+        .command-grid,
+        .demo-grid,
+        .pairing-grid,
+        .showcase-grid,
+        .install-path-grid,
+        .talk-track-grid,
+        .intro-grid,
+        .pillar-grid,
+        .hero-steps,
+        .simple-grid,
+        .prep-grid,
+        .what-grid,
+        .mini-flow,
+        .usecase-grid,
+        .risk-grid,
+        .guardrail-grid,
+        .brain-grid,
+        .download-grid,
+        .demo-screen,
+        .kpi-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .node,
+        .node.pairing {
+          position: static;
+          transform: none;
+          width: auto;
+        }
+
+        .diagram {
+          display: grid;
+          gap: 14px;
+          min-height: 0;
+        }
+
+        .line-svg {
+          display: none;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .topbar-inner,
+        .footer-card,
+        .section-head,
+        .command-head,
+        .demo-player-head {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .hero,
+        .section {
+          padding: 22px;
+        }
+
+        .pairing-step,
+        .flow-step {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">OC</div>
+          <div class="brand-copy">
+            <strong>OpenClaw 飞书培训课件</strong>
+            <small>面向培训现场，目标是让学员完成“装好 + 连通 + 能聊”</small>
+          </div>
+        </div>
+        <nav class="nav" aria-label="页面导航">
+          <a href="#intro">产品介绍</a>
+          <a href="#official">官方入口</a>
+          <a href="#overview">全局理解</a>
+          <a href="#install">安装启动</a>
+          <a href="#model">模型接入</a>
+          <a href="#feishu">飞书配对</a>
+          <a href="#demo">视频讲解</a>
+          <a href="#practice">现场操作</a>
+          <a href="#faq">排障答疑</a>
+        </nav>
+        <div class="mode-group">
+          <button class="ghost-btn active" id="notesToggle" type="button">辅导语开</button>
+          <button class="ghost-btn" id="presentationToggle" type="button">投屏模式</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow">培训目标只聚焦一件事：让飞书先和“小龙虾”成功说上话</div>
+            <h1>OpenClaw 安装与飞书配对<br />一页讲懂，一页带练</h1>
+            <p>
+              这不是一套“技术参数课”，而是一套“带你把小龙虾接进飞书”的上手课。
+              学完只需要记住一件事：让飞书能和 AI 助手顺利对话。
+            </p>
+            <div class="hero-tags">
+              <span class="tag">适合投屏讲解</span>
+              <span class="tag">适合边讲边操作</span>
+              <span class="tag">内置视频式演示</span>
+              <span class="tag">命令可一键复制</span>
+            </div>
+            <div class="hero-steps">
+              <div class="hero-step-chip">
+                <strong>先认识</strong>
+                <p>先知道 OpenClaw 是什么。</p>
+              </div>
+              <div class="hero-step-chip">
+                <strong>再安装</strong>
+                <p>把服务先跑起来。</p>
+              </div>
+              <div class="hero-step-chip">
+                <strong>再接飞书</strong>
+                <p>让机器人能收发消息。</p>
+              </div>
+              <div class="hero-step-chip">
+                <strong>最后配对</strong>
+                <p>批准一次就能开始聊。</p>
+              </div>
+            </div>
+          </div>
+          <aside class="hero-panel speaker-note">
+            <div class="speaker-note-badge">讲师备注</div>
+            <strong>讲师开场建议</strong>
+            <ul>
+              <li>先告诉学员：今天的标准不是“会调模型”，而是“飞书能和小龙虾对话”。</li>
+              <li>优先使用 WebSocket 模式，成功率高，也更适合培训环境。</li>
+              <li>遇到失败先看 3 个地方：应用是否发布、事件是否订阅、网关是否正在运行。</li>
+            </ul>
+            <div class="metric">
+              <div class="metric-row">
+                <span class="metric-label">推荐培训时长</span>
+                <strong>20-30 分钟</strong>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">核心成果</span>
+                <strong>飞书可私聊机器人</strong>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">本次不展开</span>
+                <strong>模型池 / 技能细配</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="intro">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">安装前先讲清楚：OpenClaw 是什么</h2>
+            <p>
+              先不讲复杂名词，先讲一句最好懂的人话：`OpenClaw 就是一个能住在电脑里、还能在飞书里跟你说话的 AI 助手。`
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">先理解再安装</span>
+            <span class="mini-tag">先价值再操作</span>
+          </div>
+        </div>
+
+        <div class="intro-grid">
+          <div class="card">
+            <div class="section-kicker">小白版一句话</div>
+            <div class="big-quote">
+              OpenClaw = 让 AI 住进你的电脑，<br />
+              再通过飞书跟你说话、帮你做事。
+            </div>
+            <div class="mini-flow">
+              <div class="mini-flow-card">
+                <strong>你的电脑</strong>
+                <p>AI 助手住在这里。</p>
+              </div>
+              <div class="mini-flow-card">
+                <strong>OpenClaw</strong>
+                <p>负责理解、执行、回复。</p>
+              </div>
+              <div class="mini-flow-card">
+                <strong>飞书</strong>
+                <p>负责让大家方便沟通。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="simple-grid" style="grid-template-columns: 1fr;">
+            <div class="simple-card">
+              <div class="simple-number">01</div>
+              <strong>它是什么</strong>
+              <p>不是聊天玩具，是一个能接飞书、能调用工具、能长期运行的 AI 助手平台。</p>
+            </div>
+            <div class="simple-card">
+              <div class="simple-number">02</div>
+              <strong>它能带来什么</strong>
+              <p>以后大家不用换工作习惯，直接在飞书里问、在飞书里收结果。</p>
+            </div>
+            <div class="simple-card">
+              <div class="simple-number">03</div>
+              <strong>今天先学什么</strong>
+              <p>今天先把“飞书能聊通”学会，其他高级能力以后再加。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">今天这堂课你会完成什么</h2>
+            <p>不用记太多概念，只要跟着这 4 步走，就能从 0 到 1 把小龙虾接进飞书。</p>
+          </div>
+        </div>
+
+        <div class="what-grid">
+          <div class="what-card">
+            <div class="what-number">1</div>
+            <strong>认识它</strong>
+            <p>先知道 OpenClaw 是干什么的。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">2</div>
+            <strong>装起来</strong>
+            <p>把 OpenClaw 在电脑上跑起来。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">3</div>
+            <strong>接飞书</strong>
+            <p>给小龙虾办一个飞书身份。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">4</div>
+            <strong>开始聊天</strong>
+            <p>批准配对后，就能在飞书里用了。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">安装前准备</h2>
+            <p>这部分也改成小白能懂的检查卡片。培训时只要让学员看这 4 项是否齐全就行。</p>
+          </div>
+        </div>
+
+        <div class="prep-grid">
+          <div class="prep-card">
+            <div class="prep-number">A</div>
+            <strong>电脑系统</strong>
+            <p>Windows 10 或 Windows 11。</p>
+          </div>
+          <div class="prep-card">
+            <div class="prep-number">B</div>
+            <strong>操作窗口</strong>
+            <p>用 PowerShell 来执行命令。</p>
+          </div>
+          <div class="prep-card">
+            <div class="prep-number">C</div>
+            <strong>Node.js</strong>
+            <p>版本要 `>= 22`，这是安装 OpenClaw 的关键环境。</p>
+          </div>
+          <div class="prep-card">
+            <div class="prep-number">D</div>
+            <strong>网络</strong>
+            <p>电脑要能访问 npm 和飞书开放平台。</p>
+          </div>
+        </div>
+
+        <div class="command-grid" style="margin-top: 20px;">
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>先检查环境</h3>
+              <button class="copy-btn" type="button" data-copy="node -v&#10;npm -v">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>node -v
+npm -v</pre>
+            </div>
+            <p>如果 `node -v` 的主版本小于 22，就先升级 Node.js，再继续下面的安装。</p>
+          </div>
+
+          <div class="card">
+            <h3>培训时最简单的解释方式</h3>
+            <div class="callout">
+              <strong>只要记一句话</strong>
+              <p>OpenClaw 要先依赖 Node.js 才能装，所以先看 Node 行不行，再谈后面的启动和飞书接入。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">OpenClaw 能优先落地到哪些场景</h2>
+            <p>学员先不用记技术词，只要知道它最后能帮我们在哪些工作里省时间、提效率。</p>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>你可以把它理解成 4 类“工作帮手”</strong>
+          <p>有的帮你回消息，有的帮你写代码，有的帮你盯数据，还有的帮你自动跑流程。</p>
+        </div>
+
+        <div class="usecase-grid">
+          <div class="usecase-card">
+            <div class="card-topline">
+              <div class="card-icon">1</div>
+              <div class="card-tag">沟通协作</div>
+            </div>
+            <h3>运营与办公助手</h3>
+            <ul>
+              <li>在飞书里回答常见问题</li>
+              <li>把零散消息整理成纪要</li>
+              <li>自动生成日报、周报</li>
+              <li>把待办事项自动列出来</li>
+            </ul>
+          </div>
+          <div class="usecase-card orange">
+            <div class="card-topline">
+              <div class="card-icon">2</div>
+              <div class="card-tag">研发效率</div>
+            </div>
+            <h3>开发辅助助手</h3>
+            <ul>
+              <li>帮忙排查 Bug</li>
+              <li>协助写代码和改代码</li>
+              <li>补测试用例和文档</li>
+              <li>把开发问题直接在飞书里沟通</li>
+            </ul>
+          </div>
+          <div class="usecase-card green">
+            <div class="card-topline">
+              <div class="card-icon">3</div>
+              <div class="card-tag">业务数据</div>
+            </div>
+            <h3>数据与告警助手</h3>
+            <ul>
+              <li>用自然语言查数据</li>
+              <li>看账单、看异常、看趋势</li>
+              <li>发现问题后自动提醒</li>
+              <li>把监控结果推送到飞书</li>
+            </ul>
+          </div>
+          <div class="usecase-card purple">
+            <div class="card-topline">
+              <div class="card-icon">4</div>
+              <div class="card-tag">自动执行</div>
+            </div>
+            <h3>流程自动化助手</h3>
+            <ul>
+              <li>定时发送汇总信息</li>
+              <li>跨系统同步数据</li>
+              <li>批量发消息或邮件</li>
+              <li>把重复动作交给它处理</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">安全风险与控制策略</h2>
+            <p>这部分的核心不是“吓人”，而是告诉大家：AI 很有用，但企业使用时要有边界。</p>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>一句话理解</strong>
+          <p>可以大胆用，但不要“放飞用”。越是能执行动作的 AI，越要有审批、监控和成本意识。</p>
+        </div>
+
+        <div class="risk-grid">
+          <div class="risk-card danger">
+            <span class="risk-label">风险点</span>
+            <h3>权限不能乱给</h3>
+            <ul>
+              <li>能读文件、能跑命令，就必须管权限</li>
+              <li>如果接公网，更要注意隔离</li>
+              <li>工具和扩展也要做控制</li>
+            </ul>
+            <div class="risk-conclusion">重点：权限越大，越要加审计。</div>
+          </div>
+          <div class="risk-card warning">
+            <span class="risk-label">运行问题</span>
+            <h3>服务也可能不稳定</h3>
+            <ul>
+              <li>外部接口偶尔会失败</li>
+              <li>长任务可能卡住</li>
+              <li>需要重试、超时和兜底</li>
+            </ul>
+            <div class="risk-conclusion">重点：生产环境一定要有监控。</div>
+          </div>
+          <div class="risk-card info">
+            <span class="risk-label">费用问题</span>
+            <h3>模型成本要提前算</h3>
+            <ul>
+              <li>模型越强，通常越贵</li>
+              <li>调用越频繁，成本越高</li>
+              <li>缓存和模型分级很重要</li>
+            </ul>
+            <div class="risk-conclusion">重点：先选对档位，再谈规模化。</div>
+          </div>
+          <div class="risk-card limit">
+            <span class="risk-label">使用边界</span>
+            <h3>AI 不是所有事都能全自动</h3>
+            <ul>
+              <li>复杂业务仍要人工确认</li>
+              <li>幻觉和误判暂时不能完全避免</li>
+              <li>高风险动作不要无脑放开</li>
+            </ul>
+            <div class="risk-conclusion">重点：关键步骤保留人工把关。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">OpenClaw 的安全架构与控制机制</h2>
+            <p>如果领导或学员问“它安全吗”，你可以从下面 4 个方面回答。</p>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>企业里最常见的 4 个安全抓手</strong>
+          <p>不是靠一句“它很安全”，而是靠权限、审批、审计、合规这 4 个层面一起保证。</p>
+        </div>
+
+        <div class="guardrail-grid">
+          <div class="guardrail-card">
+            <div class="guardrail-step">1</div>
+            <h3>权限分层</h3>
+            <ul>
+              <li>本地部署可控</li>
+              <li>不同人看到的能力不同</li>
+              <li>工具访问可以单独开关</li>
+              <li>减少越权风险</li>
+            </ul>
+          </div>
+          <div class="guardrail-card">
+            <div class="guardrail-step">2</div>
+            <h3>人工审批</h3>
+            <ul>
+              <li>敏感动作可以先确认</li>
+              <li>高费用任务可以先拦一下</li>
+              <li>重要消息发送前可预览</li>
+              <li>避免误操作直接落地</li>
+            </ul>
+          </div>
+          <div class="guardrail-card">
+            <div class="guardrail-step">3</div>
+            <h3>日志与追踪</h3>
+            <ul>
+              <li>对话过程可留痕</li>
+              <li>工具调用链路可追踪</li>
+              <li>问题发生后能回看</li>
+              <li>成本和用量也能统计</li>
+            </ul>
+          </div>
+          <div class="guardrail-card">
+            <div class="guardrail-step">4</div>
+            <h3>企业合规</h3>
+            <ul>
+              <li>支持私有化或隔离部署</li>
+              <li>数据主权更容易掌控</li>
+              <li>便于接入现有权限体系</li>
+              <li>更适合正式业务环境</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presentation-only" id="official">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">官方入口：记住这两个网址就够了</h2>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>培训现场只强调两个入口</strong>
+          <p>一个看官网和文档，一个看源码和安装来源。先记住入口，回去自己也能继续学。</p>
+        </div>
+
+        <div class="usecase-grid">
+          <div class="usecase-card">
+            <div class="card-topline">
+              <div class="card-icon">A</div>
+              <div class="card-tag">官网</div>
+            </div>
+            <h3>OpenClaw 官网与文档</h3>
+            <ul>
+              <li>看产品介绍</li>
+              <li>看安装文档</li>
+              <li>看入门教程</li>
+            </ul>
+            <div class="link-row" style="margin-top: 12px;">
+              <a class="link-btn" href="https://openclaw.ai" target="_blank" rel="noreferrer">官网</a>
+              <a class="link-btn" href="https://docs.openclaw.ai/start/getting-started" target="_blank" rel="noreferrer">安装文档</a>
+            </div>
+          </div>
+
+          <div class="usecase-card green">
+            <div class="card-topline">
+              <div class="card-icon">B</div>
+              <div class="card-tag">源码</div>
+            </div>
+            <h3>GitHub 源码库</h3>
+            <ul>
+              <li>看源码</li>
+              <li>看 README</li>
+              <li>看标准安装命令</li>
+            </ul>
+            <div class="link-row" style="margin-top: 12px;">
+              <a class="link-btn" href="https://github.com/openclaw/openclaw" target="_blank" rel="noreferrer">源码库</a>
+              <a class="link-btn" href="https://github.com/openclaw/openclaw#install-recommended" target="_blank" rel="noreferrer">安装章节</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presenter-section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">官方入口与源码库</h2>
+            <p>
+              这一段建议你放在培训前半段讲。它的作用不是让学员立刻去研究源码，而是先建立信任感：
+              这个项目有官网、有文档、有 GitHub 源码库，安装来源清楚，学习路径也清楚。
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">官网</span>
+            <span class="mini-tag">文档</span>
+            <span class="mini-tag">源码库</span>
+          </div>
+        </div>
+
+        <div class="showcase-grid">
+          <article class="card preview-card">
+            <h3>OpenClaw 官网实景</h3>
+            <img
+              class="preview-shot"
+              src="https://image.thum.io/get/width/1400/https://openclaw.ai"
+              alt="OpenClaw 官网截图"
+              loading="lazy"
+            />
+            <p>
+              官网适合讲“它是什么、能做什么、为什么值得学”。培训时你可以直接告诉学员：
+              OpenClaw 不是一个单纯聊天框，它是一个能接消息渠道、能执行任务、能长期运行的个人 AI 助手平台。
+            </p>
+            <div class="link-row">
+              <a class="link-btn" href="https://openclaw.ai" target="_blank" rel="noreferrer">打开官网</a>
+              <a class="link-btn" href="https://docs.openclaw.ai/start/getting-started" target="_blank" rel="noreferrer">打开安装文档</a>
+            </div>
+          </article>
+
+          <article class="card preview-card">
+            <h3>GitHub 源码库实景</h3>
+            <img
+              class="preview-shot"
+              src="https://image.thum.io/get/width/1400/https://github.com/openclaw/openclaw"
+              alt="OpenClaw GitHub 源码库截图"
+              loading="lazy"
+            />
+            <p>
+              源码库适合讲“它是开源的、安装命令来自哪里、后续如果企业要深度定制可以看哪里”。
+              对学员来说，看到源码库就会更容易相信这不是黑盒工具。
+            </p>
+            <div class="link-row">
+              <a class="link-btn" href="https://github.com/openclaw/openclaw" target="_blank" rel="noreferrer">打开源码库</a>
+              <a class="link-btn" href="https://github.com/openclaw/openclaw#install-recommended" target="_blank" rel="noreferrer">打开安装章节</a>
+            </div>
+          </article>
+        </div>
+
+        <div class="install-path-grid" style="margin-top: 20px;">
+          <div class="sub-card">
+            <h3>官方推荐安装</h3>
+            <div class="source-badge">来自 OpenClaw README</div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>npm install -g openclaw@latest
+openclaw onboard --install-daemon</pre>
+            </div>
+            <p>这条适合告诉学员：如果你离开培训环境，回到自己的电脑，按官方推荐可以这样安装。</p>
+          </div>
+
+          <div class="sub-card">
+            <h3>源码方式安装</h3>
+            <div class="source-badge">来自 GitHub README</div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>git clone https://github.com/openclaw/openclaw.git
+cd openclaw
+pnpm install
+pnpm ui:build
+pnpm build</pre>
+            </div>
+            <p>这条适合讲给进阶学员：如果要自己研究、二次开发、看源码，就从这里入手。</p>
+          </div>
+        </div>
+
+        <div class="source-note speaker-note" style="margin-top: 20px;">
+          <div class="speaker-note-badge">讲师备注</div>
+          <strong>你可以现场这样讲给学员听：</strong><br />
+          “我们今天现场为了更稳，用的是已经准备好的本地脚本；但如果你回去自己安装，有两条路：一条是按官网文档走官方命令安装，另一条是从 GitHub 把源码拉下来自己构建。今天我们先走最容易成功的路。”
+        </div>
+      </section>
+
+      <section class="section presenter-section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">怎么讲学员才听得懂</h2>
+            <p>
+              下面这 3 句是培训时最值得反复强调的“翻译话术”。它们能把技术名词变成人话，特别适合面对第一次接触 OpenClaw 的学员。
+            </p>
+          </div>
+        </div>
+
+        <div class="talk-track-grid">
+          <div class="story-card">
+            <div class="source-badge">话术 1</div>
+            <strong>把 OpenClaw 讲成“住在你电脑里的 AI 助手”</strong>
+            <p>
+              不要一上来讲什么网关、Agent、RPC。先告诉学员：你可以把它理解成一个住在你电脑里的 AI 助手，它能通过飞书和你说话，还能帮你执行事情。
+            </p>
+          </div>
+          <div class="story-card">
+            <div class="source-badge">话术 2</div>
+            <strong>把飞书应用讲成“给小龙虾办工牌”</strong>
+            <p>
+              飞书应用、机器人能力、事件订阅，这些词容易绕。你可以直接说：我们是在给“小龙虾”办一个飞书里的正式身份，让它能进飞书、能收消息、能回消息。
+            </p>
+          </div>
+          <div class="story-card">
+            <div class="source-badge">话术 3</div>
+            <strong>把配对码讲成“首次授权验证码”</strong>
+            <p>
+              学员看到配对码时容易以为失败了。你要明确说：这不是报错，这是首次授权。批准一次以后，这个飞书用户就正式和小龙虾配好了。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presenter-section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">我是怎么安装给大家看的</h2>
+            <p>
+              这一段专门服务培训。既能展示你当前的实际安装方法，也能帮助学员理解“培训现场为什么和官网命令不完全一样”。
+            </p>
+          </div>
+        </div>
+
+        <div class="three-col">
+          <div class="timeline-item">
+            <strong>方式 A：官方安装命令</strong>
+            <p>适合回家自己装，来源是官方 README。学员能知道标准入口在哪里。</p>
+            <div class="step-tags">
+              <span class="mini-tag">官网标准路径</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <strong>方式 B：源码库构建安装</strong>
+            <p>适合研发或想做定制的人，展示给学员时主要用来增强信任感和可追溯性。</p>
+            <div class="step-tags">
+              <span class="mini-tag">适合进阶</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <strong>方式 C：你当前培训脚本安装</strong>
+            <p>这是今天现场最推荐的路径，因为你已经把依赖、命令和启动流程包装好了，最容易一次成功。</p>
+            <div class="step-tags">
+              <span class="mini-tag">培训现场最稳</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="command-grid" style="margin-top: 20px;">
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>我今天现场这样装</h3>
+              <button class="copy-btn" type="button" data-copy="Set-ExecutionPolicy -Scope Process Bypass&#10;.\openclaw_安装并启动.ps1">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>Set-ExecutionPolicy -Scope Process Bypass
+.\openclaw_安装并启动.ps1</pre>
+            </div>
+            <p>这就是你可以现场展示给学员看的“实际安装过程”。它背后本质上还是在帮你完成官方安装和网关启动。</p>
+          </div>
+
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>装好之后我这样启动</h3>
+              <button class="copy-btn" type="button" data-copy="cd D:\\FY003&#10;openclaw gateway stop&#10;openclaw gateway --port 18789 --verbose">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>cd D:\FY003
+openclaw gateway stop
+openclaw gateway --port 18789 --verbose</pre>
+            </div>
+            <p>这条命令特别适合你在培训中展示“重启服务、重新接飞书、重新验证”的完整过程。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="overview">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">一屏看懂全局</h2>
+            <p>
+              学员只要理解下面这条链路，后面的操作就不容易乱：本机先把 OpenClaw 跑起来，再把飞书应用接上来，最后通过一次“配对授权”把真实用户和机器人绑定。
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">先装后连</span>
+            <span class="mini-tag">先通再优</span>
+            <span class="mini-tag">默认私聊走配对</span>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>最短成功路径</h3>
+            <div class="flow">
+              <div class="flow-step">
+                <div class="flow-step-number">1</div>
+                <div>
+                  <strong>装好 OpenClaw</strong>
+                  <p>确认 Node.js 版本符合要求，然后通过脚本或命令把 OpenClaw 装好并能启动网关。</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-number">2</div>
+                <div>
+                  <strong>在飞书开放平台创建应用</strong>
+                  <p>拿到 App ID 与 App Secret，开启机器人能力，添加消息事件订阅。</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-number">3</div>
+                <div>
+                  <strong>让 OpenClaw 连接飞书</strong>
+                  <p>推荐用 `openclaw channels add` 走向导，选 Feishu，输入凭证，连接模式选 WebSocket。</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-number">4</div>
+                <div>
+                  <strong>完成配对，开始对话</strong>
+                  <p>首次私聊机器人时会收到配对码，管理员批准后，飞书用户就能和“小龙虾”正常沟通。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card visual-board">
+            <div class="diagram">
+              <svg class="line-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M 210 180 C 320 180, 390 110, 640 110" fill="none" stroke="rgba(79,140,255,0.65)" stroke-width="4" stroke-dasharray="9 10" />
+                <path d="M 640 140 C 590 240, 580 360, 510 430" fill="none" stroke="rgba(255,202,95,0.55)" stroke-width="4" stroke-dasharray="8 8" />
+                <path d="M 640 360 C 580 360, 560 430, 510 430" fill="none" stroke="rgba(39,208,179,0.6)" stroke-width="4" stroke-dasharray="9 10" />
+              </svg>
+
+              <div class="node pc">
+                <h3>你的电脑</h3>
+                <small>安装 OpenClaw、保存配置、启动网关。<br />这是所有培训操作的起点。</small>
+              </div>
+
+              <div class="node claw">
+                <h3>OpenClaw / 小龙虾</h3>
+                <small>接收飞书消息、调用 Agent 能力、把回复再发回飞书。</small>
+              </div>
+
+              <div class="node feishu">
+                <h3>飞书应用与机器人</h3>
+                <small>负责消息入口。用户看到的是机器人，背后连的是 OpenClaw。</small>
+              </div>
+
+              <div class="node pairing">
+                <h3>配对授权</h3>
+                <small>首次私聊默认走 `dmPolicy: "pairing"`，需要管理员批准一次。</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">推荐授课顺序</h2>
+            <p>照着这个顺序讲，学员最容易跟上，也能把“理解”和“动手”合成一次完整体验。</p>
+          </div>
+        </div>
+
+        <div class="three-col">
+          <div class="timeline-item">
+            <strong>第 1 段：先树目标</strong>
+            <p>告诉学员今天只做一件事：让飞书机器人能回复。模型配置、技能配置以后再讲。</p>
+            <div class="step-tags">
+              <span class="mini-tag">2 分钟</span>
+              <span class="mini-tag">建立预期</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <strong>第 2 段：现场装起来</strong>
+            <p>直接演示安装与启动网关，让学员看到本地控制台、状态页和基础命令。</p>
+            <div class="step-tags">
+              <span class="mini-tag">6 分钟</span>
+              <span class="mini-tag">边讲边敲</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <strong>第 3 段：飞书配对打通</strong>
+            <p>重点讲应用创建、权限、事件订阅、首次私聊配对。成功后学员最有成就感。</p>
+            <div class="step-tags">
+              <span class="mini-tag">12 分钟</span>
+              <span class="mini-tag">重点章节</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presentation-only" id="install">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第一部分：安装 OpenClaw</h2>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>先准备好文件，再开始安装</strong>
+          <p>对小白来说，先确认培训包、启动文件和运行方式，比先背命令更重要。</p>
+        </div>
+
+        <div class="download-grid">
+          <div class="download-card">
+            <h3>先准备</h3>
+            <ul>
+              <li>下载老师发的培训包</li>
+              <li>解压到 `D:\FY003`</li>
+              <li>确认看到 `一键启动.bat`</li>
+              <li>确认看到 `openclaw_启动管理.ps1`</li>
+            </ul>
+          </div>
+          <div class="download-card">
+            <h3>最简单打开方式</h3>
+            <ul>
+              <li>优先双击 `一键启动.bat`</li>
+              <li>不要自己新建 `.ps1` 文件</li>
+              <li>也不用自己复制脚本内容</li>
+              <li>直接用培训包里的现成文件</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presentation-only">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第一部分：启动并确认成功</h2>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>再操作，再看结果</strong>
+          <p>安装完成后，只要能打开本地页面并看到状态正常，就说明这一步已经成功。</p>
+        </div>
+
+        <div class="command-grid">
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>推荐方式：一键启动</h3>
+              <button class="copy-btn" type="button" data-copy="Set-ExecutionPolicy -Scope Process Bypass&#10;.\openclaw_安装并启动.ps1">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>Set-ExecutionPolicy -Scope Process Bypass
+.\openclaw_安装并启动.ps1</pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>成功标志</h3>
+            <ul>
+              <li>终端持续输出日志</li>
+              <li>浏览器能访问 `127.0.0.1:18789`</li>
+              <li>`openclaw gateway status` 正常</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presenter-section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第一部分：安装与启动 OpenClaw</h2>
+            <p>
+              培训现场推荐优先使用你已经准备好的脚本。这样成功率最高，也更容易让学员先看到“服务跑起来”。
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">推荐脚本启动</span>
+            <span class="mini-tag">端口 18789</span>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>很多小白不是不会敲命令，而是不知道文件从哪里来</strong>
+          <p>所以安装前先补两步：先拿到培训包，再知道脚本该怎么打开。</p>
+        </div>
+
+        <div class="section-kicker">先准备</div>
+
+        <div class="download-grid">
+          <div class="download-card">
+            <h3>第 0 步：先拿到培训文件</h3>
+            <ul>
+              <li>先下载老师发的培训包</li>
+              <li>把它解压到 `D:\FY003`</li>
+              <li>确认目录里有 `一键启动.bat`</li>
+              <li>也能看到 `openclaw_启动管理.ps1`</li>
+            </ul>
+          </div>
+          <div class="download-card">
+            <h3>第 1 步：最简单的打开方式</h3>
+            <ul>
+              <li>小白优先：直接双击 `一键启动.bat`</li>
+              <li>双击 `一键启动.bat`，本质上就是调用 `openclaw_安装并启动.ps1` 完成安装与启动</li>
+              <li>不要自己新建 `.ps1` 文件</li>
+              <li>也不用自己复制脚本内容</li>
+              <li>培训里直接用现成文件即可</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section-kicker" style="margin-top: 20px;">再操作</div>
+
+        <div class="command-grid">
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>推荐方式：培训现场一键启动</h3>
+              <button class="copy-btn" type="button" data-copy="Set-ExecutionPolicy -Scope Process Bypass&#10;.\openclaw_安装并启动.ps1">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>Set-ExecutionPolicy -Scope Process Bypass
+.\openclaw_安装并启动.ps1</pre>
+            </div>
+            <p>脚本会做 3 件事：检查 Node.js、安装 `openclaw@latest`、启动 `openclaw gateway --port 18789 --verbose`。</p>
+          </div>
+
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>备用方式：手动安装</h3>
+              <button class="copy-btn" type="button" data-copy="npm install -g openclaw@latest&#10;openclaw gateway --port 18789 --verbose">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>npm install -g openclaw@latest
+openclaw gateway --port 18789 --verbose</pre>
+            </div>
+            <p>适合脚本无法使用时兜底。培训时不建议先从这条讲起，容易把学员注意力带偏到环境问题上。</p>
+          </div>
+        </div>
+
+        <div class="section-kicker" style="margin-top: 20px;">成功标志</div>
+
+        <div class="two-col" style="margin-top: 20px;">
+          <div class="sub-card">
+            <h3>成功标志</h3>
+            <ul>
+              <li>终端持续输出启动日志，且没有阻断报错。</li>
+              <li>浏览器能访问 `http://127.0.0.1:18789/`。</li>
+              <li>运行 `openclaw gateway status` 能看到状态正常。</li>
+            </ul>
+          </div>
+          <div class="sub-card speaker-note">
+            <div class="speaker-note-badge">讲师备注</div>
+            <h3>讲师提示话术</h3>
+            <p>
+              这一步不要讲太多内部原理，只要让学员知道：本机现在已经有一个“会收消息、会回消息”的 AI 网关在运行，后面飞书只是把消息接过来。
+            </p>
+          </div>
+        </div>
+
+        <div class="two-col" style="margin-top: 20px;">
+          <div class="sub-card">
+            <h3>如果学员问：`PS1` 是什么？</h3>
+            <ul>
+              <li>它就是 PowerShell 脚本文件</li>
+              <li>老师已经提前帮你写好了</li>
+              <li>学员不用自己创建</li>
+              <li>直接运行培训包里的现成脚本就行</li>
+            </ul>
+          </div>
+          <div class="sub-card">
+            <h3>如果学员问：为什么先双击 `bat`？</h3>
+            <ul>
+              <li>`bat` 对新手更简单</li>
+              <li>它会自动进入正确目录</li>
+              <li>还能帮你间接调用 `.ps1`</li>
+              <li>比手动点脚本更不容易出错</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top: 20px;">
+          <strong>现场最短启动流程</strong>
+          <pre>cd D:\FY003
+openclaw gateway stop
+openclaw gateway --port 18789 --verbose</pre>
+        </div>
+      </section>
+
+      <section class="section presentation-only" id="model">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">让小龙虾先“聪明起来”</h2>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>先接一个模型，再谈它聪不聪明</strong>
+          <p>OpenClaw 是框架，模型才是大脑。没有模型，它就不会真正回答问题。</p>
+        </div>
+
+        <div class="brain-grid">
+          <div class="brain-card">
+            <div class="brain-highlight">培训首推</div>
+            <h3>免费入口：Qwen OAuth</h3>
+            <ul>
+              <li>适合第一次培训先跑通</li>
+              <li>不需要先买 API Key</li>
+              <li>登录流程相对直观</li>
+            </ul>
+          </div>
+          <div class="brain-card">
+            <div class="brain-highlight">备用方案</div>
+            <h3>本地兜底：Ollama</h3>
+            <ul>
+              <li>本地运行，费用更可控</li>
+              <li>网络差时也能用</li>
+              <li>适合作为备用脑子</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presenter-section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第二部分：怎么让小龙虾聪明起来</h2>
+            <p>
+              这一部分建议你讲成“给小龙虾接一个大脑”。没有模型，OpenClaw 只是通道；接上模型之后，它才会真正回答、理解和执行。
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">先免费跑通</span>
+            <span class="mini-tag">先简单后复杂</span>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>培训建议：先接免费模型</strong>
+          <p>不要一开始就讲很多提供商。先让学员成功接上一个免费模型，他们才会觉得“小龙虾真的活了”。</p>
+        </div>
+
+        <div class="section-kicker">先准备</div>
+
+        <div class="brain-grid">
+          <div class="brain-card">
+            <div class="brain-highlight">推荐给培训小白</div>
+            <h3>方案 A：先用免费的 Qwen</h3>
+            <ul>
+              <li>OpenClaw 已支持 `qwen-portal-auth` 登录方式</li>
+              <li>优点：不需要先买 API Key</li>
+              <li>适合培训：最容易让学员先跑通</li>
+            </ul>
+            <div class="terminal" style="margin-top: 14px;">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>openclaw plugins enable qwen-portal-auth
+openclaw models auth login --provider qwen-portal --set-default</pre>
+            </div>
+          </div>
+
+          <div class="brain-card">
+            <div class="brain-highlight">备用讲法</div>
+            <h3>方案 B：本地 Ollama 兜底</h3>
+            <ul>
+              <li>适合网络不稳的场景</li>
+              <li>优点：本地可控、成本低</li>
+              <li>缺点：效果看电脑性能</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section-kicker" style="margin-top: 20px;">再操作</div>
+
+        <div class="two-col" style="margin-top: 20px;">
+          <div class="sub-card">
+            <h3>国内免费模型怎么建议</h3>
+            <ul>
+              <li>首推：`Qwen OAuth`，因为 OpenClaw 已有现成登录流程</li>
+              <li>次选：本地 `Ollama`，适合做兜底或演示备用</li>
+              <li>进阶：`GLM / Z.AI`、`MiniMax`、`Kimi` 可以后续再讲</li>
+              <li>培训原则：先免费、先简单、先跑通</li>
+            </ul>
+          </div>
+          <div class="sub-card">
+            <h3>对学员怎么讲更好懂</h3>
+            <ul>
+              <li>OpenClaw 是身体，模型是大脑</li>
+              <li>不接模型，小龙虾就不会真正思考</li>
+              <li>先接一个免费的 Qwen 就够上手</li>
+              <li>后面想更强，再升级别的模型</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section-kicker" style="margin-top: 20px;">成功标志</div>
+        <div class="callout" style="margin-top: 20px;">
+          <strong>培训现场一句话</strong>
+          <p>先把 Qwen 这种免费模型接上，让小龙虾先能开口说话；等大家会用了，再慢慢升级到更强模型。</p>
+        </div>
+      </section>
+
+      <section class="section presentation-only" id="feishu">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">飞书接入：先把机器人接进来</h2>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>先做 3 件事</strong>
+          <p>建应用、拿凭证、打开机器人能力。先接入成功，再去细讲更多设置。</p>
+        </div>
+
+        <div class="what-grid">
+          <div class="what-card">
+            <div class="what-number">1</div>
+            <strong>建飞书应用</strong>
+            <p>进入飞书开放平台创建企业自建应用。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">2</div>
+            <strong>拿到凭证</strong>
+            <p>复制 App ID 和 App Secret。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">3</div>
+            <strong>开启机器人</strong>
+            <p>让它能收消息、能回消息。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">4</div>
+            <strong>添加渠道</strong>
+            <p>运行 `openclaw channels add` 接入 Feishu。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presentation-only">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">首次配对：只要 3 步</h2>
+          </div>
+        </div>
+
+        <div class="section-banner">
+          <strong>第一次聊天前要先授权</strong>
+          <p>这不是报错，而是首次绑定。批准一次后，后面就能正常聊了。</p>
+        </div>
+
+        <div class="mini-flow">
+          <div class="mini-flow-card">
+            <strong>第 1 步</strong>
+            <p>先在飞书里私聊机器人。</p>
+          </div>
+          <div class="mini-flow-card">
+            <strong>第 2 步</strong>
+            <p>看到系统返回的配对码。</p>
+          </div>
+          <div class="mini-flow-card">
+            <strong>第 3 步</strong>
+            <p>管理员批准这个配对码。</p>
+          </div>
+        </div>
+
+        <div class="command-grid" style="margin-top: 18px;">
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>添加飞书渠道</h3>
+              <button class="copy-btn" type="button" data-copy="openclaw channels add">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>openclaw channels add</pre>
+            </div>
+          </div>
+
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>批准配对</h3>
+              <button class="copy-btn" type="button" data-copy="openclaw pairing list feishu&#10;openclaw pairing approve feishu &lt;配对码&gt;">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>openclaw pairing list feishu
+openclaw pairing approve feishu &lt;配对码&gt;</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presenter-section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第三部分：飞书怎么和“小龙虾”配对</h2>
+            <p>
+              这是整场培训的重点。你可以把“小龙虾”解释成：部署在 OpenClaw 上、通过飞书机器人身份和人对话的 AI 助手。培训目标不是把所有权限都讲全，而是让它先连上、先能聊。
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">推荐 WebSocket</span>
+            <span class="mini-tag">默认私聊走配对</span>
+            <span class="mini-tag">群聊默认需要 @</span>
+          </div>
+        </div>
+
+        <div class="section-kicker">先准备</div>
+
+        <div class="pairing-grid">
+          <div class="card">
+            <h3>配对流程图</h3>
+            <div class="pairing-steps">
+              <div class="pairing-step">
+                <div class="pairing-badge">1</div>
+                <div>
+                  <strong>创建企业自建应用</strong>
+                  <p>进入 <code>open.feishu.cn</code>，创建应用，拿到 App ID 和 App Secret。</p>
+                </div>
+              </div>
+              <div class="pairing-step">
+                <div class="pairing-badge">2</div>
+                <div>
+                  <strong>开启机器人能力</strong>
+                  <p>让应用在飞书里具有机器人身份，否则用户无法和它私聊或把它拉进群。</p>
+                </div>
+              </div>
+              <div class="pairing-step">
+                <div class="pairing-badge">3</div>
+                <div>
+                  <strong>添加消息权限与事件</strong>
+                  <p>至少保证消息收发相关权限已经开好，并添加 `im.message.receive_v1` 事件。</p>
+                </div>
+              </div>
+              <div class="pairing-step">
+                <div class="pairing-badge">4</div>
+                <div>
+                  <strong>在 OpenClaw 中添加 Feishu 渠道</strong>
+                  <p>运行 `openclaw channels add`，选 Feishu，输入 App ID / App Secret，连接模式选 WebSocket。</p>
+                </div>
+              </div>
+              <div class="pairing-step">
+                <div class="pairing-badge">5</div>
+                <div>
+                  <strong>首次私聊触发配对码</strong>
+                  <p>用户给机器人发第一条消息后，OpenClaw 会返回配对码，管理员批准后即可正常对话。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card speaker-note">
+            <div class="speaker-note-badge">讲师备注</div>
+            <h3>培训现场只强调这些“必讲点”</h3>
+            <div class="status-list">
+              <span class="stat-pill">凭证：App ID + App Secret</span>
+              <span class="stat-pill">模式：WebSocket（默认）</span>
+              <span class="stat-pill">事件：`im.message.receive_v1`</span>
+              <span class="stat-pill">私聊：`dmPolicy: "pairing"`</span>
+              <span class="stat-pill">群聊：默认需要 @ 机器人</span>
+              <span class="stat-pill">批准命令：`pairing approve`</span>
+            </div>
+            <div class="callout warn" style="margin-top: 18px;">
+              <strong>为什么培训时优先讲 WebSocket？</strong>
+              <p>
+                因为它不需要公网回调地址，配置项更少，培训现场更容易一次成功。Webhook 模式可以作为补充说明，不建议第一次接入时作为主路径。
+              </p>
+            </div>
+            <div class="callout" style="margin-top: 18px;">
+              <strong>权限怎么讲最省力</strong>
+              <p>
+                不必把一长串权限逐条讲完。只需要告诉学员：至少要让机器人具备“收消息、发消息、读会话基础信息”的能力；如果现场使用的是你已准备好的权限模板，直接导入即可。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-kicker" style="margin-top: 20px;">再操作</div>
+
+        <div class="two-col" style="margin-top: 20px;">
+          <div class="sub-card">
+            <h3>最简配置记忆法</h3>
+            <p>记住 4 个词就够了：<strong>凭证、机器人、事件、配对</strong>。</p>
+            <ul>
+              <li>凭证：App ID / App Secret</li>
+              <li>机器人：要开启，飞书里才能看见它</li>
+              <li>事件：至少要能收到用户消息</li>
+              <li>配对：首次私聊批准一次，后面就稳定了</li>
+            </ul>
+          </div>
+          <div class="sub-card">
+            <h3>最简配置片段</h3>
+            <p>如果不走向导，也可以用这个最小配置做讲解。培训时只展示这一段就够。</p>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>{
+  channels: {
+    feishu: {
+      enabled: true,
+      connectionMode: "websocket",
+      dmPolicy: "pairing",
+      accounts: {
+        main: {
+          appId: "cli_xxx",
+          appSecret: "xxx",
+          botName: "小龙虾",
+        },
+      },
+    },
+  },
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-kicker" style="margin-top: 20px;">成功标志</div>
+        <div class="command-grid" style="margin-top: 20px;">
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>添加飞书渠道</h3>
+              <button class="copy-btn" type="button" data-copy="openclaw channels add">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>openclaw channels add</pre>
+            </div>
+            <p>建议培训时直接走交互式向导，减少讲配置文件的时间。</p>
+          </div>
+
+          <div class="card command-card">
+            <div class="command-head">
+              <h3>首次私聊后的配对批准</h3>
+              <button class="copy-btn" type="button" data-copy="openclaw pairing list feishu&#10;openclaw pairing approve feishu &lt;配对码&gt;">复制命令</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-top">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <pre>openclaw pairing list feishu
+openclaw pairing approve feishu &lt;配对码&gt;</pre>
+            </div>
+            <p>这一步就是“飞书用户”和“小龙虾机器人”建立正式关系的关键动作。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="demo">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第四部分：视频式讲解演示</h2>
+            <p>
+              下面两块不是静态截图，而是可以自动播放的“步骤视频”。适合培训时边播边讲，也适合学员回看时按节奏自己消化。
+            </p>
+          </div>
+          <div class="mini-tags">
+            <span class="mini-tag">自动播放</span>
+            <span class="mini-tag">逐步高亮</span>
+          </div>
+        </div>
+
+        <div class="demo-grid">
+          <article class="demo-player" data-demo="install">
+            <div class="demo-player-head">
+              <div>
+                <div class="demo-title">演示 A：5 分钟装好 OpenClaw</div>
+                <p>建议讲法：先把服务跑起来，再解释每个命令是做什么。</p>
+              </div>
+              <div class="demo-actions">
+                <button class="demo-btn" type="button" data-action="prev">上一步</button>
+                <button class="demo-btn" type="button" data-action="play">播放</button>
+                <button class="demo-btn" type="button" data-action="next">下一步</button>
+              </div>
+            </div>
+            <div class="demo-screen">
+              <div class="screen-main">
+                <div class="video-shell">
+                  <div class="video-bar">
+                    <div class="video-title" data-role="title">步骤标题</div>
+                    <div data-role="counter">1 / 1</div>
+                  </div>
+                  <div class="progress-track"><div class="progress-bar" data-role="progress"></div></div>
+                  <div class="video-caption" data-role="caption"></div>
+                  <div class="fake-window">
+                    <div class="fake-card">
+                      <strong>操作画面</strong>
+                      <ul data-role="lines"></ul>
+                    </div>
+                    <div class="fake-card">
+                      <strong>讲师提示</strong>
+                      <p data-role="note"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="screen-side">
+                <div class="note-box">
+                  <h3>本段重点</h3>
+                  <p>先给学员结果感。只要他能看到网关状态页，后面的飞书接入信心就会高很多。</p>
+                </div>
+                <div class="checklist">
+                  <h3>检查点</h3>
+                  <ul>
+                    <li>Node.js 版本是否符合要求</li>
+                    <li>OpenClaw 是否安装成功</li>
+                    <li>18789 端口页面能否打开</li>
+                    <li>网关状态是否正常</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="demo-player" data-demo="pairing">
+            <div class="demo-player-head">
+              <div>
+                <div class="demo-title">演示 B：5 分钟打通飞书配对</div>
+                <p>建议讲法：把流程讲成“建应用 -> 填凭证 -> 发首条消息 -> 批准配对 -> 开聊”。</p>
+              </div>
+              <div class="demo-actions">
+                <button class="demo-btn" type="button" data-action="prev">上一步</button>
+                <button class="demo-btn" type="button" data-action="play">播放</button>
+                <button class="demo-btn" type="button" data-action="next">下一步</button>
+              </div>
+            </div>
+            <div class="demo-screen">
+              <div class="screen-main">
+                <div class="video-shell">
+                  <div class="video-bar">
+                    <div class="video-title" data-role="title">步骤标题</div>
+                    <div data-role="counter">1 / 1</div>
+                  </div>
+                  <div class="progress-track"><div class="progress-bar" data-role="progress"></div></div>
+                  <div class="video-caption" data-role="caption"></div>
+                  <div class="fake-window">
+                    <div class="fake-card">
+                      <strong>操作画面</strong>
+                      <ul data-role="lines"></ul>
+                    </div>
+                    <div class="fake-card">
+                      <strong>讲师提示</strong>
+                      <p data-role="note"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="screen-side">
+                <div class="note-box">
+                  <h3>本段重点</h3>
+                  <p>把“配对”讲成授权，不要讲成故障。默认私聊需要批准一次，这是安全机制，不是报错。</p>
+                </div>
+                <div class="checklist">
+                  <h3>检查点</h3>
+                  <ul>
+                    <li>飞书应用是否已发布</li>
+                    <li>机器人能力是否开启</li>
+                    <li>是否选择 WebSocket</li>
+                    <li>是否看到配对码并批准</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="practice">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第五部分：现场操作区</h2>
+            <p>这里适合培训时实操，也适合课后让学员按清单自己复盘。</p>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="checklist">
+            <h3>讲师操作清单</h3>
+            <ul>
+              <li><label><input type="checkbox" /> 打开 PowerShell，进入 `D:\FY003`</label></li>
+              <li><label><input type="checkbox" /> 运行一键安装与启动脚本</label></li>
+              <li><label><input type="checkbox" /> 打开 `http://127.0.0.1:18789/` 展示状态</label></li>
+              <li><label><input type="checkbox" /> 打开飞书开放平台创建企业自建应用</label></li>
+              <li><label><input type="checkbox" /> 复制 App ID / App Secret</label></li>
+              <li><label><input type="checkbox" /> 运行 `openclaw channels add` 添加 Feishu</label></li>
+              <li><label><input type="checkbox" /> 在飞书里给机器人发第一条消息</label></li>
+              <li><label><input type="checkbox" /> 执行 `openclaw pairing approve feishu &lt;CODE&gt;`</label></li>
+              <li><label><input type="checkbox" /> 演示私聊成功回复</label></li>
+              <li><label><input type="checkbox" /> 演示群聊中 `@机器人` 的回复效果</label></li>
+            </ul>
+          </div>
+
+          <div class="faq">
+            <h3>一句话记忆版</h3>
+            <p>今天培训只讲这条主线：</p>
+            <div class="callout">
+              <strong>本地跑起来 → 飞书建应用 → 输入凭证 → 首次私聊拿配对码 → 管理员批准 → 开始聊天</strong>
+            </div>
+            <p style="margin-top: 16px;">
+              如果学员记不住全部菜单名称也没关系，只要记住“凭证、机器人、事件、配对”四个关键词，回去就能自己重新打通。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section presentation-only">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">培训总结</h2>
+          </div>
+        </div>
+
+        <div class="big-quote">
+          今天只需要记住一条主线：<br />
+          安装 OpenClaw → 接入模型 → 连接飞书 → 批准配对 → 开始对话
+        </div>
+
+        <div class="what-grid" style="margin-top: 18px;">
+          <div class="what-card">
+            <div class="what-number">1</div>
+            <strong>会安装</strong>
+            <p>知道培训包从哪来，知道怎么启动。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">2</div>
+            <strong>会接模型</strong>
+            <p>知道先给小龙虾接一个免费脑子。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">3</div>
+            <strong>会接飞书</strong>
+            <p>知道怎样把机器人接进飞书。</p>
+          </div>
+          <div class="what-card">
+            <div class="what-number">4</div>
+            <strong>会配对</strong>
+            <p>知道怎样批准首次授权并开始聊天。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">第六部分：常见问题与排障</h2>
+            <p>培训时建议按“先确认发布，再确认事件，再确认网关”的顺序排查，不要一开始就改复杂配置。</p>
+          </div>
+        </div>
+
+        <div class="faq">
+          <details open>
+            <summary>飞书里给机器人发消息没有反应怎么办？</summary>
+            <p>
+              优先检查 4 件事：应用是否发布、机器人能力是否开启、事件订阅里是否有 `im.message.receive_v1`、OpenClaw 网关是否处于运行状态。
+            </p>
+          </details>
+          <details>
+            <summary>为什么第一次私聊还要批准配对码？</summary>
+            <p>
+              因为默认是 `dmPolicy: "pairing"`。这是一种安全机制，用来确认谁可以和机器人建立私聊通道。培训时可以把它解释成“首次认证”。
+            </p>
+          </details>
+          <details>
+            <summary>群里不回复是不是坏了？</summary>
+            <p>
+              不一定。默认群聊通常需要 <code>@机器人</code> 才会响应；另外还要确认群策略没有被设成 `disabled` 或不在允许名单外。
+            </p>
+          </details>
+          <details>
+            <summary>培训现场到底讲不讲 Webhook？</summary>
+            <p>
+              建议只点到为止。告诉学员 OpenClaw 也支持 Webhook，但首次接入优先 WebSocket，因为它更适合没有公网环境的培训现场。
+            </p>
+          </details>
+          <details>
+            <summary>如果 App Secret 泄露了怎么办？</summary>
+            <p>
+              去飞书开放平台重置 App Secret，然后更新 OpenClaw 配置，再重启网关。培训时顺手提醒一下即可，不需要展开讲安全治理。
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer-inner">
+      <div class="footer-card">
+        <div>
+          <strong>这份页面已经可以直接用来讲课。</strong>
+          <p style="margin-top: 8px; color: var(--muted); line-height: 1.8;">
+            适合本地直接打开投屏，也适合后续继续补充真实截图、真实录屏、企业 Logo 或你自己的培训口径。
+          </p>
+        </div>
+        <a class="ghost-btn" href="#overview">回到顶部结构图</a>
+      </div>
+    </div>
+
+    <div class="slide-controls" id="slideControls">
+      <button class="ghost-btn" id="prevSlide" type="button">← 上一页</button>
+      <div class="slide-counter" id="slideCounter">1 / 1</div>
+      <button class="ghost-btn" id="nextSlide" type="button">下一页 →</button>
+      <button class="ghost-btn" id="exitPresentation" type="button">退出投屏</button>
+    </div>
+
+    <script>
+      const demos = {
+        install: [
+          {
+            title: "步骤 1：进入培训目录",
+            caption: "先把目录切到培训环境，让学员看到所有脚本和材料都已经准备好。",
+            lines: ["打开 PowerShell", "执行：cd D:\\FY003", "确认目录下能看到启动脚本和 OpenClaw 相关文件"],
+            note: "这一步的作用是降低学员心理压力，先看到一个干净、可操作的现场环境。",
+          },
+          {
+            title: "步骤 2：执行一键安装脚本",
+            caption: "培训现场推荐直接用脚本，能把环境检查、安装和启动串成一条最短链路。",
+            lines: ["Set-ExecutionPolicy -Scope Process Bypass", ".\\openclaw_安装并启动.ps1", "等待安装与启动完成"],
+            note: "如果时间紧，就只讲结果，不展开 PowerShell 执行策略原理。",
+          },
+          {
+            title: "步骤 3：观察网关启动日志",
+            caption: "告诉学员：终端有持续日志，说明 OpenClaw 已经在本机工作，后面飞书只是把消息送进来。",
+            lines: ["看到 openclaw gateway 启动日志", "确认没有阻断报错", "记住服务端口：18789"],
+            note: "讲到这里，学员就已经知道“AI 网关”不是抽象概念，而是本地真实运行的服务。",
+          },
+          {
+            title: "步骤 4：打开控制页面",
+            caption: "浏览器访问本地地址，给学员一个可视化的成功反馈。",
+            lines: ["打开浏览器", "访问：http://127.0.0.1:18789/", "展示页面已可访问"],
+            note: "这一步特别适合投屏，因为视觉反馈最直接。",
+          },
+          {
+            title: "步骤 5：用状态命令收尾",
+            caption: "最后用一条命令收束，让学员知道以后如何自己确认服务是否还活着。",
+            lines: ["执行：openclaw gateway status", "看到状态正常", "告诉学员：装好阶段到这里结束"],
+            note: "把这条命令作为课后记忆点，学员回去自查时最好用。",
+          },
+        ],
+        pairing: [
+          {
+            title: "步骤 1：创建飞书企业自建应用",
+            caption: "进入飞书开放平台，创建企业自建应用，这是飞书机器人身份的来源。",
+            lines: ["访问：open.feishu.cn", "点击“创建企业自建应用”", "填写应用名，例如：小龙虾助手"],
+            note: "这里可以告诉学员：飞书里看到的机器人名，就是这里配出来的应用身份。",
+          },
+          {
+            title: "步骤 2：拿到 App ID 和 App Secret",
+            caption: "这两个值是 OpenClaw 连飞书最关键的凭证，培训时只要讲清楚这两个值从哪来就够了。",
+            lines: ["进入“凭证与基础信息”页面", "复制 App ID", "复制 App Secret，并妥善保管"],
+            note: "现场建议演示复制动作，但不要把真实 Secret 长时间停留在大屏上。",
+          },
+          {
+            title: "步骤 3：开机器人能力与消息事件",
+            caption: "没有机器人能力，用户找不到它；没有消息事件，它收不到话。",
+            lines: ["在“应用能力”里开启机器人", "在“事件订阅”中选择长连接 WebSocket", "添加事件：im.message.receive_v1"],
+            note: "培训时重点强调 WebSocket，省掉公网地址和回调验证的复杂度。",
+          },
+          {
+            title: "步骤 4：在 OpenClaw 中添加 Feishu 渠道",
+            caption: "回到本机，运行添加渠道命令，把 App ID 与 App Secret 填进去。",
+            lines: ["执行：openclaw channels add", "选择 Feishu", "输入 App ID / App Secret，连接模式选 WebSocket"],
+            note: "这一步建议现场一步步念，学员照着选就能成功。",
+          },
+          {
+            title: "步骤 5：首次私聊触发配对码",
+            caption: "用户第一次给机器人发消息，默认会收到一串配对码，这是正常的首次授权流程。",
+            lines: ["在飞书里找到机器人", "给机器人发送第一条私聊消息", "看到返回的配对码"],
+            note: "把“配对码”解释成“首次绑定验证码”，学员会更容易接受。",
+          },
+          {
+            title: "步骤 6：管理员批准配对",
+            caption: "最后一步就是批准这串配对码，批准后该飞书用户就能正式和小龙虾聊天。",
+            lines: ["执行：openclaw pairing list feishu", "执行：openclaw pairing approve feishu <配对码>", "回到飞书再次发消息验证成功"],
+            note: "这一步做完，就是整场培训最重要的里程碑。",
+          },
+        ],
+      };
+
+      const demoState = new Map();
+
+      function renderDemo(card) {
+        const key = card.dataset.demo;
+        const steps = demos[key];
+        const state = demoState.get(card);
+        const step = steps[state.index];
+        card.querySelector('[data-role="title"]').textContent = step.title;
+        card.querySelector('[data-role="counter"]').textContent = `${state.index + 1} / ${steps.length}`;
+        card.querySelector('[data-role="caption"]').textContent = step.caption;
+        card.querySelector('[data-role="note"]').textContent = step.note;
+        card.querySelector('[data-role="progress"]').style.width = `${((state.index + 1) / steps.length) * 100}%`;
+        const list = card.querySelector('[data-role="lines"]');
+        list.innerHTML = "";
+        step.lines.forEach((line) => {
+          const li = document.createElement("li");
+          li.textContent = line;
+          list.appendChild(li);
+        });
+        const playBtn = card.querySelector('[data-action="play"]');
+        playBtn.textContent = state.playing ? "暂停" : "播放";
+      }
+
+      function stopDemo(card) {
+        const state = demoState.get(card);
+        if (state.timer) {
+          clearInterval(state.timer);
+          state.timer = null;
+        }
+        state.playing = false;
+        renderDemo(card);
+      }
+
+      function nextStep(card, direction = 1) {
+        const key = card.dataset.demo;
+        const steps = demos[key];
+        const state = demoState.get(card);
+        state.index = (state.index + direction + steps.length) % steps.length;
+        renderDemo(card);
+      }
+
+      function playDemo(card) {
+        const state = demoState.get(card);
+        if (state.playing) {
+          stopDemo(card);
+          return;
+        }
+        state.playing = true;
+        renderDemo(card);
+        state.timer = setInterval(() => {
+          const key = card.dataset.demo;
+          const steps = demos[key];
+          if (state.index >= steps.length - 1) {
+            state.index = 0;
+          } else {
+            state.index += 1;
+          }
+          renderDemo(card);
+        }, 3600);
+      }
+
+      document.querySelectorAll(".demo-player").forEach((card) => {
+        demoState.set(card, { index: 0, timer: null, playing: false });
+        renderDemo(card);
+        card.querySelectorAll(".demo-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            const action = button.dataset.action;
+            if (action === "play") {
+              playDemo(card);
+              return;
+            }
+            stopDemo(card);
+            nextStep(card, action === "prev" ? -1 : 1);
+          });
+        });
+      });
+
+      document.querySelectorAll("[data-copy]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(button.dataset.copy.replaceAll("&lt;", "<").replaceAll("&gt;", ">"));
+            const original = button.textContent;
+            button.textContent = "已复制";
+            button.classList.add("copied");
+            setTimeout(() => {
+              button.textContent = original;
+              button.classList.remove("copied");
+            }, 1600);
+          } catch (error) {
+            button.textContent = "复制失败";
+            setTimeout(() => {
+              button.textContent = "复制命令";
+            }, 1600);
+            console.error(error);
+          }
+        });
+      });
+
+      const body = document.body;
+      const notesToggle = document.getElementById("notesToggle");
+      const presentationToggle = document.getElementById("presentationToggle");
+      const prevSlideButton = document.getElementById("prevSlide");
+      const nextSlideButton = document.getElementById("nextSlide");
+      const exitPresentationButton = document.getElementById("exitPresentation");
+      const slideCounter = document.getElementById("slideCounter");
+      const slideCandidates = Array.from(document.querySelectorAll(".page > .hero, .page > .section"));
+      let currentSlideIndex = 0;
+
+      function getSlides() {
+        return slideCandidates.filter((slide) => {
+          if (slide.classList.contains("presenter-section")) return false;
+          if (!body.classList.contains("presentation-mode") && slide.classList.contains("presentation-only")) {
+            return false;
+          }
+          return true;
+        });
+      }
+
+      function renderSlideMode() {
+        const slides = getSlides();
+        const inPresentation = body.classList.contains("presentation-mode");
+        if (slides.length === 0) {
+          slideCounter.textContent = "0 / 0";
+          return;
+        }
+
+        if (currentSlideIndex < 0) currentSlideIndex = 0;
+        if (currentSlideIndex > slides.length - 1) currentSlideIndex = slides.length - 1;
+
+        slideCandidates.forEach((slide) => slide.classList.remove("slide-active"));
+        if (inPresentation) {
+          slides[currentSlideIndex].classList.add("slide-active");
+          slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+          fitActiveSlide(slides[currentSlideIndex]);
+        } else {
+          slideCandidates.forEach((slide) => {
+            slide.style.zoom = "";
+          });
+          slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+        }
+      }
+
+      function fitActiveSlide(slide) {
+        if (!slide || !body.classList.contains("presentation-mode")) return;
+        slide.style.zoom = "";
+        const availableHeight = slide.clientHeight;
+        const contentHeight = slide.scrollHeight;
+        if (!availableHeight || !contentHeight) return;
+        const ratio = Math.min(1, (availableHeight - 6) / contentHeight);
+        slide.style.zoom = ratio < 0.995 ? String(Math.max(0.4, ratio)) : "1";
+      }
+
+      function goToSlide(index) {
+        const slides = getSlides();
+        if (slides.length === 0) return;
+        currentSlideIndex = Math.max(0, Math.min(index, slides.length - 1));
+        renderSlideMode();
+      }
+
+      function moveSlide(step) {
+        goToSlide(currentSlideIndex + step);
+      }
+
+      function syncNotesToggle() {
+        const hidden = body.classList.contains("notes-hidden");
+        notesToggle.textContent = hidden ? "辅导语关" : "辅导语开";
+        notesToggle.classList.toggle("active", !hidden);
+      }
+
+      notesToggle.addEventListener("click", () => {
+        body.classList.toggle("notes-hidden");
+        syncNotesToggle();
+      });
+
+      presentationToggle.addEventListener("click", () => {
+        body.classList.toggle("presentation-mode");
+        const active = body.classList.contains("presentation-mode");
+        presentationToggle.textContent = active ? "退出投屏" : "投屏模式";
+        presentationToggle.classList.toggle("active", active);
+        if (active) {
+          body.classList.add("notes-hidden");
+          window.scrollTo({ top: 0, behavior: "auto" });
+        } else {
+          body.classList.remove("notes-hidden");
+        }
+        syncNotesToggle();
+        renderSlideMode();
+      });
+
+      prevSlideButton.addEventListener("click", () => moveSlide(-1));
+      nextSlideButton.addEventListener("click", () => moveSlide(1));
+      exitPresentationButton.addEventListener("click", () => {
+        body.classList.remove("presentation-mode");
+        body.classList.remove("notes-hidden");
+        presentationToggle.textContent = "投屏模式";
+        presentationToggle.classList.remove("active");
+        syncNotesToggle();
+        renderSlideMode();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (!body.classList.contains("presentation-mode")) return;
+        if (event.key === "ArrowRight" || event.key === "PageDown") {
+          event.preventDefault();
+          moveSlide(1);
+        }
+        if (event.key === "ArrowLeft" || event.key === "PageUp") {
+          event.preventDefault();
+          moveSlide(-1);
+        }
+        if (event.key === "Home") {
+          event.preventDefault();
+          goToSlide(0);
+        }
+        if (event.key === "End") {
+          event.preventDefault();
+          goToSlide(getSlides().length - 1);
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          body.classList.remove("presentation-mode");
+          presentationToggle.textContent = "投屏模式";
+          presentationToggle.classList.remove("active");
+          syncNotesToggle();
+          renderSlideMode();
+        }
+      });
+
+      document.querySelectorAll('.nav a[href^="#"]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          const href = link.getAttribute("href");
+          if (!href) return;
+          const target = document.querySelector(href);
+          if (!target) return;
+
+          if (body.classList.contains("presentation-mode")) {
+            event.preventDefault();
+            const slides = getSlides();
+            const index = slides.indexOf(target);
+            if (index >= 0) {
+              goToSlide(index);
+            }
+            return;
+          }
+        });
+      });
+
+      window.addEventListener("resize", () => {
+        const activeSlide = document.querySelector(".page > .slide-active");
+        if (activeSlide) {
+          fitActiveSlide(activeSlide);
+        }
+      });
+
+      syncNotesToggle();
+      renderSlideMode();
+    </script>
+  </body>
+  </html>

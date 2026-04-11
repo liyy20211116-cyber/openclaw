@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum AgentStatus {
+  idle
+  busy
+  waiting_approval
+  review
+  frozen
+}
+
+enum TaskType {
+  ops
+  tech
+  growth
+  finance
+  audit
+  product
+  sales
+  customer
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum TaskStatus {
+  draft
+  pending_approval
+  approved
+  in_progress
+  review
+  completed
+  rejected
+  frozen
+  archived
+}
+
+enum TaskActionType {
+  create
+  assign
+  approve
+  start
+  submit_review
+  complete
+  reject
+  freeze
+}
+
+enum LedgerType {
+  salary
+  bonus
+  budget
+  purchase
+  reward
+  revenue_share
+  refund
+}
+
+enum ApprovalTargetType {
+  task
+  budget
+  purchase
+  publish
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+  critical
+}
+
+enum AuditIssueType {
+  hallucination
+  overspend
+  unauthorized
+  low_quality
+  duplicate
+}
+
+enum AuditStatus {
+  open
+  reviewing
+  resolved
+  ignored
+}
+
+enum StoreItemType {
+  search_pack
+  model_pack
+  image_pack
+  api_pack
+  priority_pass
+}
+
+enum StockMode {
+  infinite
+  limited
+}
+
+enum StoreOrderStatus {
+  paid
+  cancelled
+  refunded
+}
+
+model Agent {
+  id                String      @id
+  name              String
+  code              String      @unique
+  role              String
+  department        String
+  persona           String
+  goalsJson         String
+  permissionsJson   String
+  salaryBase        Int
+  walletBalance     Int         @default(0)
+  bonusBalance      Int         @default(0)
+  complianceScore   Int         @default(100)
+  status            AgentStatus @default(idle)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  createdTasks      Task[]      @relation("CreatedTasks")
+  ownedTasks        Task[]      @relation("OwnedTasks")
+  approvedTasks     Task[]      @relation("ApprovedTasks")
+  taskLogs          TaskLog[]
+  approvalsRequested Approval[] @relation("ApprovalRequester")
+  approvalsToReview Approval[]  @relation("ApprovalApprover")
+  auditEvents       AuditEvent[]
+  storeOrders       StoreOrder[]
+
+  @@map("agents")
+}
+
+model Task {
+  id              String       @id
+  title           String
+  description     String
+  taskType        TaskType
+  creatorAgentId  String
+  ownerAgentId    String
+  priority        TaskPriority
+  status          TaskStatus   @default(draft)
+  budgetToken     Int          @default(0)
+  spentToken      Int          @default(0)
+  requiresApproval Boolean     @default(false)
+  approverId      String?
+  deliverablesJson String      @default("[]")
+  kpiJson         String       @default("{}")
+  dueAt           DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  creator         Agent        @relation("CreatedTasks", fields: [creatorAgentId], references: [id])
+  owner           Agent        @relation("OwnedTasks", fields: [ownerAgentId], references: [id])
+  approver        Agent?       @relation("ApprovedTasks", fields: [approverId], references: [id])
+  logs            TaskLog[]
+  ledgerEntries   TokenLedger[]
+  auditEvents     AuditEvent[]
+  revenues        Revenue[]
+
+  @@index([status])
+  @@index([ownerAgentId])
+  @@index([creatorAgentId])
+  @@map("tasks")
+}
+
+model TaskLog {
+  id         String         @id
+  taskId     String
+  operatorId String
+  actionType TaskActionType
+  detailJson String         @default("{}")
+  createdAt  DateTime       @default(now())
+  task       Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  operator   Agent          @relation(fields: [operatorId], references: [id])
+
+  @@index([taskId])
+  @@map("task_logs")
+}
+
+model Treasury {
+  id              String   @id
+  totalBalance    Int
+  reservedBalance Int
+  availableBalance Int
+  updatedAt       DateTime @updatedAt
+
+  @@map("treasury")
+}
+
+model TokenLedger {
+  id                 String     @id
+  fromAccount        String
+  toAccount          String
+  amount             Int
+  ledgerType         LedgerType
+  reason             String
+  relatedTaskId      String?
+  relatedStoreItemId String?
+  createdAt          DateTime   @default(now())
+  relatedTask        Task?      @relation(fields: [relatedTaskId], references: [id])
+  relatedStoreItem   StoreItem? @relation(fields: [relatedStoreItemId], references: [id])
+
+  @@index([ledgerType])
+  @@index([relatedTaskId])
+  @@map("token_ledger")
+}
+
+model Approval {
+  id          String             @id
+  targetType  ApprovalTargetType
+  targetId    String
+  requesterId String
+  approverId  String
+  status      ApprovalStatus     @default(pending)
+  reason      String
+  decisionNote String?
+  createdAt   DateTime           @default(now())
+  decidedAt   DateTime?
+  requester   Agent              @relation("ApprovalRequester", fields: [requesterId], references: [id])
+  approver    Agent              @relation("ApprovalApprover", fields: [approverId], references: [id])
+
+  @@index([status])
+  @@index([requesterId])
+  @@map("approvals")
+}
+
+model AuditEvent {
+  id        String         @id
+  taskId     String?
+  agentId    String
+  riskLevel  RiskLevel
+  issueType  AuditIssueType
+  detail     String
+  status     AuditStatus    @default(open)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  task       Task?          @relation(fields: [taskId], references: [id])
+  agent      Agent          @relation(fields: [agentId], references: [id])
+
+  @@index([riskLevel])
+  @@index([status])
+  @@map("audit_events")
+}
+
+model StoreItem {
+  id               String        @id
+  name             String
+  itemType         StoreItemType
+  priceToken       Int
+  description      String
+  stockMode        StockMode
+  stockCount       Int?
+  enabled          Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  orders           StoreOrder[]
+  ledgerEntries    TokenLedger[]
+
+  @@map("store_items")
+}
+
+model StoreOrder {
+  id           String           @id
+  buyerAgentId String
+  itemId       String
+  quantity     Int              @default(1)
+  totalPrice   Int
+  status       StoreOrderStatus @default(paid)
+  createdAt    DateTime         @default(now())
+  buyer        Agent            @relation(fields: [buyerAgentId], references: [id])
+  item         StoreItem        @relation(fields: [itemId], references: [id])
+
+  @@index([buyerAgentId])
+  @@map("store_orders")
+}
+
+model Revenue {
+  id            String   @id
+  title         String
+  businessLine  String
+  source        String
+  amountFiat    Decimal
+  mappedToken   Int
+  relatedTaskId String?
+  note          String?
+  createdAt     DateTime @default(now())
+  relatedTask   Task?    @relation(fields: [relatedTaskId], references: [id])
+
+  @@index([businessLine])
+  @@map("revenues")
+}

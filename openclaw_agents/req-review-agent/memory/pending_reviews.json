@@ -1,0 +1,117 @@
+{
+  "recvdUU4Y3kOcs": {
+    "message_id": "om_x100b544d85cbe8b4c378adfb2999824",
+    "title": "测试",
+    "sent_at": "2026-03-16T14:01:21.145601"
+  },
+  "recAj7nu6B": {
+    "message_id": "om_x100b53e8db9e58b4c2af299e7b54d9d",
+    "title": "“货品包装”页面增加零捡位料号的筛选条件，并支持导出",
+    "sent_at": "2026-04-02T09:41:43.293103"
+  },
+  "reccbWyCGX": {
+    "message_id": "om_x100b53e8dbba28b4c2c40e5fd6f40a8",
+    "title": "快递日单量报表导出报错",
+    "sent_at": "2026-04-02T09:41:45.583913"
+  },
+  "recx3onWeo": {
+    "message_id": "om_x100b522746e384a0b28b970b4966208",
+    "title": "出库-推荐箱型维护登记（需求优化）",
+    "sent_at": "2026-04-04T23:38:43.669710"
+  },
+  "recoNGq3kO": {
+    "message_id": "om_x100b52274681e93cb2d88675c345881",
+    "title": "B2C-播种",
+    "sent_at": "2026-04-04T23:38:45.573520"
+  },
+  "recvfphZIC5szt": {
+    "message_id": "om_x100b522746a10938b24714a618e5096",
+    "title": "联调测试-需求优化-0331",
+    "sent_at": "2026-04-04T23:38:47.583606"
+  },
+  "recO9LcsLN": {
+    "message_id": "om_x100b52274640aca0b318cb080cbdc1a",
+    "title": "大批量登记   箱型栏  增加排序按钮",
+    "sent_at": "2026-04-04T23:38:49.599960"
+  },
+  "recSUJpYsw": {
+    "message_id": "om_x100b5227466648a4b3f8859bae05797",
+    "title": "主数据-货品包装-增加零捡库位料号的主数据导出功能",
+    "sent_at": "2026-04-04T23:38:51.870802"
+  },
+  "recAtqaYUa": {
+    "message_id": "om_x100b5227461ac4a4b49985de3a9b6f8",
+    "title": "把零头拣货单跟整箱整托拣货单分开打印",
+    "sent_at": "2026-04-04T23:38:54.229006"
+  },
+  "recD3XKGut": {
+    "message_id": "om_x100b5227463a98a0b10f3b35f583c88",
+    "title": "TOB系统优化",
+    "sent_at": "2026-04-04T23:38:56.230573"
+  },
+  "recIzpbuCF": {
+    "message_id": "om_x100b522747da4ca0b3fd72ad56a379c",
+    "title": "TOC看板优化",
+    "sent_at": "2026-04-04T23:38:58.256481"
+  },
+  "rec2JaSiYW": {
+    "message_id": "om_x100b522747f498a0b319bc527117ca9",
+    "title": "退货RF上架增加69码字段",
+    "sent_at": "2026-04-04T23:39:00.339441"
+  },
+  "recqGBp5ep": {
+    "message_id": "om_x100b5227479674a0b31bbd8744a4516",
+    "title": "退货RF上架增加库位筛选功能",
+    "sent_at": "2026-04-04T23:39:02.518926"
+  },
+  "recyPakU56": {
+    "message_id": "om_x100b522747b720a0b31e56d4ba214fc",
+    "title": "非季节品退货  Tob退货单收货首选项修改",
+    "sent_at": "2026-04-04T23:39:04.453258"
+  },
+  "recg8B7jGj": {
+    "message_id": "om_x100b5227475458a0b2f27119b44ff4c",
+    "title": "退货装箱加工报表有问题 ",
+    "sent_at": "2026-04-04T23:39:06.389248"
+  },
+  "recOwykv4W": {
+    "message_id": "om_x100b5227477450a4b2c417dd1b99592",
+    "title": "出库箱优化",
+    "sent_at": "2026-04-04T23:39:08.396671"
+  },
+  "recnWCmd6d": {
+    "message_id": "om_x100b5227471508a0b31728654de176b",
+    "title": "推荐箱型维护登记优化",
+    "sent_at": "2026-04-04T23:39:10.300129"
+  },
+  "reckqitBEc": {
+    "message_id": "om_x100b5227473af4a0b3faf70ab4225c3",
+    "title": "周转箱状态跟新",
+    "sent_at": "2026-04-04T23:39:12.409748"
+  },
+  "recuRSw2bC": {
+    "message_id": "om_x100b522744d5e13cb2c9d825ff719fa",
+    "title": "当退货入库商品效期小于 6 个月时，系统将弹出提示弹窗，该弹窗需手动点击确认按钮方可关闭；不支持按回车键确认，也不允许通过扫描下一个商品自动跳过弹窗。 ",
+    "sent_at": "2026-04-04T23:39:14.302727"
+  },
+  "recfglSK58": {
+    "message_id": "om_x100b522744fabca0b2456ba34794ad9",
+    "title": "WMS库存调整单——新增上位系统过账回传状态",
+    "sent_at": "2026-04-04T23:39:16.221289"
+  },
+  "recfIoGH69": {
+    "message_id": "om_x100b5225c3fbe4a0b3fd664b35b341b",
+    "title": "大批量登记，",
+    "sent_at": "2026-04-04T21:57:40.357664"
+  },
+  "recns3BJFo": {
+    "message_id": "om_x100b522744999ca0b266eef4371df73",
+    "title": "原单拆箱调整至RF拣货",
+    "sent_at": "2026-04-04T23:39:18.038271"
+  },
+  "recmhqx70l": {
+    "message_id": "om_x100b5225c3b470b4b4b695dcf1ec206",
+    "title": "TMS中工单客诉信息报表里中通的发货信息和客诉信息不显示，需要调整报表里面中通承运商编码",
+    "sent_at": "2026-04-04T21:57:44.447115"
+  }
+}

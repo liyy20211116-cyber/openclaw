@@ -1,0 +1,19 @@
+﻿{
+  "code": 0,
+  "data": {
+    "user_list": [
+      {
+        "email": "liyy@winnermedical.com",
+        "status": {
+          "is_activated": true,
+          "is_exited": false,
+          "is_frozen": false,
+          "is_resigned": false,
+          "is_unjoin": false
+        },
+        "user_id": "ou_58bdbb9d9f369e06ba35add9c9c881a2"
+      }
+    ]
+  },
+  "msg": "success"
+}

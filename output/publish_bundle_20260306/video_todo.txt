@@ -1,0 +1,3 @@
+﻿ffmpeg not found, skip video rendering.
+Install ffmpeg and rerun this script.
+Script bundle is ready in: D:\FY003\output\publish_bundle_20260306

@@ -1,0 +1,77 @@
+{
+  "ones_lt": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjY2OGZkNDUyLTU0ODgtNDA3ZC01NzFkLTQ2YzgxNTRmYmZhZCIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib25lcy52MSJdLCJjbGllbnRfaW5mbyI6eyJjbGllbnRfaXAiOiIxMC4yNy4yNS4zNyJ9LCJleHAiOjE3NzUxMjM1NjMsImlhdCI6MTc3NTExOTY2MywiaXNzIjoiaHR0cDovL29uZXMud2lubmVybWVkaWNhbC5jb20vIiwianRpIjoiNWVlNGNkOTEtZWRhNC00NGZhLTQxZGMtMzQzY2M1ZjA5MDVmIiwibG9naW5fdGltZSI6MTc3NTExOTk2MDkwMiwibmJmIjoxNzc1MTE5NjYzLCJvcmdfdXNlcl91dWlkIjoiNWt0cjQ0NU4iLCJvcmdfdXVpZCI6IlVUY0VDRG14IiwicmVnaW9uX3V1aWQiOiJkZWZhdWx0Iiwic2NvcGVzIjpbIm9wZW5pZCIsIm9mZmxpbmVfYWNjZXNzIiwib25lczpvcmc6ZGVmYXVsdDpVVGNFQ0RteDo1a3RyNDQ1TiJdLCJzaWQiOiI5ZGJmNzdhZi1iNmI3LTRkNDktNDVkYi02NGE4ZGYwNDUyNGEiLCJzdWIiOiJRN1RxTXJBUTpkZWZhdWx0OlVUY0VDRG14OjVrdHI0NDVOIn0.USIzA1hUPEREDpTSIGarWoEGSKSISQGozPnkRmjxrwjOKC3JQk5oXZzDitm9CmsEqH6Y3jmmqNT69v_kQu6UIH8NvFWBXPmVzi6NO7UWBHhi3vtbTYu6GbxHBBeLfdT97QgWcOUmFpA6agQPJYlByanffKvwozPXXFOeoHOiAh6JNDC547_Zf_Mf8s9CPSAsCNs0tFSElBP3KVSt7P18Z66ehvn4UTQ4ViNqGLxbCa9gi5gUS634t8uGV3WprbtG6aaPr5hN5CYVvvAVlixyMN56fHDXpySQqA2vUD0K8i0KzgufgSZk6zaBvqqcFfZtxyu7hRkU0Y1iFZGf2gVXYA",
+  "source": "request:GET:https://ones.winnermedical.com/project/api/project/infra/bootstrap?default_org_uuid=null",
+  "ones_org_uuid": "UTcECDmx",
+  "cookies": [
+    {
+      "name": "ones-ids-sid",
+      "value": "a6a2e594-eee0-4ac0-666f-0a8a540c2fe5",
+      "domain": ".ones.winnermedical.com",
+      "path": "/",
+      "expires": 1806655962.372282,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ones-lang",
+      "value": "zh",
+      "domain": ".ones.winnermedical.com",
+      "path": "/",
+      "expires": 1809679962.372422,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ones-tz",
+      "value": "Asia%2FShanghai",
+      "domain": ".ones.winnermedical.com",
+      "path": "/",
+      "expires": 1809679963.539531,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ones-region-uuid",
+      "value": "default",
+      "domain": ".ones.winnermedical.com",
+      "path": "/",
+      "expires": 1790671964.379809,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ones-org-uuid",
+      "value": "UTcECDmx",
+      "domain": ".ones.winnermedical.com",
+      "path": "/",
+      "expires": 1790671964.379941,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ones-lt",
+      "value": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjY2OGZkNDUyLTU0ODgtNDA3ZC01NzFkLTQ2YzgxNTRmYmZhZCIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib25lcy52MSJdLCJjbGllbnRfaW5mbyI6eyJjbGllbnRfaXAiOiIxMC4yNy4yNS4zNyJ9LCJleHAiOjE3NzUxMjM1NjMsImlhdCI6MTc3NTExOTY2MywiaXNzIjoiaHR0cDovL29uZXMud2lubmVybWVkaWNhbC5jb20vIiwianRpIjoiNWVlNGNkOTEtZWRhNC00NGZhLTQxZGMtMzQzY2M1ZjA5MDVmIiwibG9naW5fdGltZSI6MTc3NTExOTk2MDkwMiwibmJmIjoxNzc1MTE5NjYzLCJvcmdfdXNlcl91dWlkIjoiNWt0cjQ0NU4iLCJvcmdfdXVpZCI6IlVUY0VDRG14IiwicmVnaW9uX3V1aWQiOiJkZWZhdWx0Iiwic2NvcGVzIjpbIm9wZW5pZCIsIm9mZmxpbmVfYWNjZXNzIiwib25lczpvcmc6ZGVmYXVsdDpVVGNFQ0RteDo1a3RyNDQ1TiJdLCJzaWQiOiI5ZGJmNzdhZi1iNmI3LTRkNDktNDVkYi02NGE4ZGYwNDUyNGEiLCJzdWIiOiJRN1RxTXJBUTpkZWZhdWx0OlVUY0VDRG14OjVrdHI0NDVOIn0.USIzA1hUPEREDpTSIGarWoEGSKSISQGozPnkRmjxrwjOKC3JQk5oXZzDitm9CmsEqH6Y3jmmqNT69v_kQu6UIH8NvFWBXPmVzi6NO7UWBHhi3vtbTYu6GbxHBBeLfdT97QgWcOUmFpA6agQPJYlByanffKvwozPXXFOeoHOiAh6JNDC547_Zf_Mf8s9CPSAsCNs0tFSElBP3KVSt7P18Z66ehvn4UTQ4ViNqGLxbCa9gi5gUS634t8uGV3WprbtG6aaPr5hN5CYVvvAVlixyMN56fHDXpySQqA2vUD0K8i0KzgufgSZk6zaBvqqcFfZtxyu7hRkU0Y1iFZGf2gVXYA",
+      "domain": "ones.winnermedical.com",
+      "path": "/",
+      "expires": 1775123864,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "storage": {
+    "localStorage": {
+      "ONES_LOGOUT_LOGS": "[{\"reason\":\"global_error_handler catch logout, 跳转到登出\",\"data\":{\"url\":\"https://ones.winnermedical.com/project/#/workspace\"},\"time\":1775119934491},{\"reason\":\"project logout页面登出成功\",\"data\":{\"redirectTo\":null,\"ones_from\":\"https://ones.winnermedical.com/project/#/workspace\"},\"time\":1775119935244},{\"reason\":\"auth-web clearPrevOrgCache\",\"time\":1775119937792}]",
+      "_ones_json_ones_org_jwt": "{\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IjY2OGZkNDUyLTU0ODgtNDA3ZC01NzFkLTQ2YzgxNTRmYmZhZCIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib25lcy52MSJdLCJjbGllbnRfaW5mbyI6eyJjbGllbnRfaXAiOiIxMC4yNy4yNS4zNyJ9LCJleHAiOjE3NzUxMjM1NjMsImlhdCI6MTc3NTExOTY2MywiaXNzIjoiaHR0cDovL29uZXMud2lubmVybWVkaWNhbC5jb20vIiwianRpIjoiNWVlNGNkOTEtZWRhNC00NGZhLTQxZGMtMzQzY2M1ZjA5MDVmIiwibG9naW5fdGltZSI6MTc3NTExOTk2MDkwMiwibmJmIjoxNzc1MTE5NjYzLCJvcmdfdXNlcl91dWlkIjoiNWt0cjQ0NU4iLCJvcmdfdXVpZCI6IlVUY0VDRG14IiwicmVnaW9uX3V1aWQiOiJkZWZhdWx0Iiwic2NvcGVzIjpbIm9wZW5pZCIsIm9mZmxpbmVfYWNjZXNzIiwib25lczpvcmc6ZGVmYXVsdDpVVGNFQ0RteDo1a3RyNDQ1TiJdLCJzaWQiOiI5ZGJmNzdhZi1iNmI3LTRkNDktNDVkYi02NGE4ZGYwNDUyNGEiLCJzdWIiOiJRN1RxTXJBUTpkZWZhdWx0OlVUY0VDRG14OjVrdHI0NDVOIn0.USIzA1hUPEREDpTSIGarWoEGSKSISQGozPnkRmjxrwjOKC3JQk5oXZzDitm9CmsEqH6Y3jmmqNT69v_kQu6UIH8NvFWBXPmVzi6NO7UWBHhi3vtbTYu6GbxHBBeLfdT97QgWcOUmFpA6agQPJYlByanffKvwozPXXFOeoHOiAh6JNDC547_Zf_Mf8s9CPSAsCNs0tFSElBP3KVSt7P18Z66ehvn4UTQ4ViNqGLxbCa9gi5gUS634t8uGV3WprbtG6aaPr5hN5CYVvvAVlixyMN56fHDXpySQqA2vUD0K8i0KzgufgSZk6zaBvqqcFfZtxyu7hRkU0Y1iFZGf2gVXYA\",\"token_type\":\"Bearer\",\"refresh_token\":\"5671185d-9863-4860-5e29-a3350597609a\",\"expires_in\":3899,\"id_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IjY2OGZkNDUyLTU0ODgtNDA3ZC01NzFkLTQ2YzgxNTRmYmZhZCIsInR5cCI6IkpXVCJ9.eyJhbXIiOlsic3NvX3dlY2hhdF9hcHAiLCJtZmFfd2VjaGF0X2FwcCJdLCJhdF9oYXNoIjoiSUl3Qk13U1I1cndoeDJNc3ljU3QyQSIsImF1ZCI6WyJvbmVzLnYxIl0sImF1dGhfdGltZSI6MTc3NTExOTY2MywiYXpwIjoib25lcy52MSIsImNfaGFzaCI6InR3YXZ5N2lwSHRqRVA0ckZ3OFpHUGciLCJjbGllbnRfaWQiOiJvbmVzLnYxIiwiZXhwIjoxNzc1MTIzODYzLCJpYXQiOjE3NzUxMTk2NjMsImlzcyI6Imh0dHA6Ly9vbmVzLndpbm5lcm1lZGljYWwuY29tLyIsIm9yZ191c2VyX3V1aWQiOiI1a3RyNDQ1TiIsIm9yZ191dWlkIjoiVVRjRUNEbXgiLCJyZWdpb25fdXVpZCI6ImRlZmF1bHQiLCJzdWIiOiJRN1RxTXJBUTpkZWZhdWx0OlVUY0VDRG14OjVrdHI0NDVOIn0.e-IFkH_91nPj8mzjGYpByz-F3XHRAi5tZpiENklAdDzdos3-2yri908HbJr6pOFnTHCK0W5NirJk6MflSAoOdVJvJuEtEmESEIJxwifTaB3ZkYeDBJnHNYP12xAViiSujiCfJd8--kP1J-rtJdUVlvRm-fHGfX-6LeP1rmgxakqtyaw2crjFbn-vBYfQdZvg1PUJoYFoX0suxTpgbNpb7OF4hIQREGP2RWpH_ADExxxGs8FpIMIQNPTodT6izkpwg_kWKXj1orqvkmQN3FJZn6_z48rOTu7FzysWd4H_5TGMqWrdPUaqVHB5wJy889S8Sv6Ql72-ZnXweXHcVlcZ_g\",\"state\":\"org_uuid=UTcECDmx&ones_from=https%3A%2F%2Fones.winnermedical.com%2Fproject%2F%23%2Fworkspace\"}",
+      "ones_org_uuid": "UTcECDmx",
+      "ones_auth_pkce_code_verifier": "XwVKwoLCsWmWBmGDUyG6hIG2EcsuEuomUGRgCruxTIf",
+      "_ones_json_ids_cache_org_uuid": "\"UTcECDmx\""
+    },
+    "sessionStorage": {}
+  }
+}

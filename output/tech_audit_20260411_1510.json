@@ -1,0 +1,89 @@
+{
+  "timestamp": "2026-04-11T15:09:57.062169",
+  "checks": {
+    "bandit": {
+      "status": "warn",
+      "issue_count": 3,
+      "top_issues": [
+        {
+          "file": "D:\\FY003\\scripts\\fetch_news.py",
+          "line": 14,
+          "severity": "MEDIUM",
+          "text": "Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected."
+        },
+        {
+          "file": "D:\\FY003\\scripts\\fetch_news.py",
+          "line": 15,
+          "severity": "MEDIUM",
+          "text": "Using xml.etree.ElementTree.fromstring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.fromstring with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called"
+        },
+        {
+          "file": "D:\\FY003\\scripts\\product_competitive_scan.py",
+          "line": 33,
+          "severity": "MEDIUM",
+          "text": "Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected."
+        }
+      ]
+    },
+    "ruff": {
+      "status": "error",
+      "message": "'NoneType' object has no attribute 'strip'"
+    },
+    "secrets": {
+      "status": "warn",
+      "finding_count": 13,
+      "findings": [
+        {
+          "file": "D:\\FY003\\scripts\\tech_code_audit.py",
+          "type": "Bearer Token",
+          "line_hint": 65
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\jarvis-coo\\memory\\learnings.md",
+          "type": "Bearer Token",
+          "line_hint": 20
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\auto_token.py",
+          "type": "Bearer Token",
+          "line_hint": 2
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\auto_token.py",
+          "type": "Bearer Token",
+          "line_hint": 94
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\auto_token.py",
+          "type": "Bearer Token",
+          "line_hint": 110
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\capture_ones_token.py",
+          "type": "Bearer Token",
+          "line_hint": 7
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\config.json",
+          "type": "Bearer Token",
+          "line_hint": 88
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\ones_token_refresh.py",
+          "type": "Bearer Token",
+          "line_hint": 6
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\ones_token_refresh.py",
+          "type": "Bearer Token",
+          "line_hint": 213
+        },
+        {
+          "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\scan_and_send.py",
+          "type": "硬编码密钥",
+          "line_hint": 14
+        }
+      ]
+    }
+  }
+}

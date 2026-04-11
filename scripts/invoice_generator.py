@@ -85,7 +85,7 @@ def generate_invoice(client_name, items, doc_type="报价单", notes="", invoice
     json.dump(ledger, open(ledger_file, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
     print(f"已生成 {doc_type}: {out_file}")
-    print(f"金额: ¥{total:,.2f}")
+    print(f"Amount: CNY{total:,.2f}")
     return out_file
 
 if __name__ == "__main__":

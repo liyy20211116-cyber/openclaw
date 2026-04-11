@@ -1,0 +1,33 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const projectRoot = path.resolve(__dirname, '..')
+const electronEntry = path.join(projectRoot, 'desktop', 'electron', 'main.ts')
+const tauriConfig = path.join(projectRoot, 'desktop', 'tauri', 'tauri.conf.json')
+const electronCli = path.join(projectRoot, 'node_modules', 'electron', 'cli.js')
+const waitOnCli = path.join(projectRoot, 'node_modules', 'wait-on', 'bin', 'wait-on')
+const distIndex = path.join(projectRoot, 'dist', 'index.html')
+const electronReady = fs.existsSync(electronCli)
+const waitOnReady = fs.existsSync(waitOnCli)
+const distReady = fs.existsSync(distIndex)
+
+console.log('Jarvis One Company OS 桌面端收口入口已预留。')
+console.log(`当前项目根目录：${projectRoot}`)
+console.log('当前已补齐的桌面骨架：')
+console.log(`1. Electron 主进程入口：${electronEntry}`)
+console.log(`2. Tauri 配置预留：${tauriConfig}`)
+console.log('当前可用启动方式：')
+console.log('1. npm run dev              -> 同时启动前端与写回 API')
+console.log('2. npm run desktop:guide    -> 查看桌面接入骨架说明')
+console.log('3. npm run desktop:start    -> 启动开发态 Electron 联调入口')
+console.log('4. npm run desktop:build    -> 构建前端产物，供桌面端生产态加载')
+console.log('5. npm run desktop:prod     -> 以生产态资源启动 Electron')
+console.log('6. Start_Jarvis_One_Company_OS.bat -> Windows 一键启动桌面联调入口')
+console.log(`Electron 运行依赖状态：${electronReady ? '已就绪' : '未就绪'}`)
+console.log(`wait-on 依赖状态：${waitOnReady ? '已就绪' : '未就绪'}`)
+console.log(`桌面生产资源状态：${distReady ? '已就绪' : '未构建'}`)
+console.log('Electron 现已支持开发/生产加载切换、窗口状态持久化，以及加载失败时的兜底页。')
+console.log('下一步可继续接入真正的 Electron 打包链路，或转向 Tauri 原生壳。')

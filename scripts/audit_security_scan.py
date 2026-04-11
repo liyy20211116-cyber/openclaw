@@ -91,7 +91,7 @@ if os.path.exists(env_file):
         add_finding("HIGH", "config", ".env 文件未加入 .gitignore", env_file)
         print("   警告: .env 未在 .gitignore 中")
     else:
-        print("   .env 已在 .gitignore 中 ✓")
+        print("   .env is in .gitignore [OK]")
 else:
     print("   无 .env 文件")
 

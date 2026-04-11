@@ -1,0 +1,234 @@
+// Merge this into C:\Users\Lenovo\.openclaw\openclaw.json.
+// Do not overwrite the whole file directly.
+// First move plaintext secrets to ${ENV_VAR}, then merge section by section.
+
+{
+  agents: {
+    defaults: {
+      model: {
+        // Keep the current strongest coding model as primary.
+        primary: "openai-codex/gpt-5.3-codex",
+        fallbacks: [
+          // Free text/coding entry.
+          "qwen-portal/coder-model",
+
+          // Main CN reasoning pool.
+          "zai/glm-5",
+          "moonshot/kimi-k2.5",
+          "deepseek/deepseek-chat",
+          "minimax/MiniMax-M2.5-highspeed",
+
+          // Local last-resort fallback.
+          "ollama/qwen2.5:7b",
+        ],
+      },
+
+      models: {
+        "openai-codex/gpt-5.3-codex": { alias: "Codex" },
+        "qwen-portal/coder-model": { alias: "Qwen Free" },
+        "zai/glm-5": { alias: "GLM 5" },
+        "moonshot/kimi-k2.5": { alias: "Kimi K2.5" },
+        "deepseek/deepseek-chat": { alias: "DeepSeek Chat" },
+        "deepseek/deepseek-reasoner": { alias: "DeepSeek Reasoner" },
+        "minimax/MiniMax-M2.5": { alias: "MiniMax" },
+        "minimax/MiniMax-M2.5-highspeed": { alias: "MiniMax HS" },
+        "ollama/qwen2.5:7b": { alias: "Local Qwen" },
+      },
+
+      // Push subagents toward free or CN models to control cost.
+      subagents: {
+        model: "qwen-portal/coder-model",
+        maxConcurrent: 4,
+        runTimeoutSeconds: 300,
+      },
+    },
+  },
+
+  models: {
+    mode: "merge",
+    providers: {
+      // DeepSeek belongs in the reasoning layer, not the image/video/speech layer.
+      deepseek: {
+        baseUrl: "https://api.deepseek.com/v1",
+        apiKey: "${DEEPSEEK_API_KEY}",
+        api: "openai-completions",
+        authHeader: true,
+        models: [
+          {
+            id: "deepseek-chat",
+            name: "DeepSeek Chat",
+            reasoning: false,
+            input: ["text"],
+            contextWindow: 64000,
+            maxTokens: 8192,
+          },
+          {
+            id: "deepseek-reasoner",
+            name: "DeepSeek Reasoner",
+            reasoning: true,
+            input: ["text"],
+            contextWindow: 64000,
+            maxTokens: 8192,
+          },
+        ],
+      },
+
+      // Kimi / Moonshot.
+      moonshot: {
+        baseUrl: "https://api.moonshot.cn/v1",
+        apiKey: "${MOONSHOT_API_KEY}",
+        api: "openai-completions",
+        models: [
+          {
+            id: "kimi-k2.5",
+            name: "Kimi K2.5",
+            reasoning: false,
+            input: ["text"],
+            contextWindow: 256000,
+            maxTokens: 8192,
+          },
+          {
+            id: "kimi-k2-thinking",
+            name: "Kimi K2 Thinking",
+            reasoning: true,
+            input: ["text"],
+            contextWindow: 256000,
+            maxTokens: 8192,
+          },
+        ],
+      },
+
+      // MiniMax can use OAuth or API key.
+      minimax: {
+        // Replace this only if your console gives you a CN-specific API endpoint.
+        baseUrl: "https://api.minimax.io/anthropic",
+        apiKey: "${MINIMAX_API_KEY}",
+        api: "anthropic-messages",
+        models: [
+          {
+            id: "MiniMax-M2.5",
+            name: "MiniMax M2.5",
+            reasoning: true,
+            input: ["text"],
+            contextWindow: 200000,
+            maxTokens: 8192,
+          },
+          {
+            id: "MiniMax-M2.5-highspeed",
+            name: "MiniMax M2.5 Highspeed",
+            reasoning: true,
+            input: ["text"],
+            contextWindow: 200000,
+            maxTokens: 8192,
+          },
+        ],
+      },
+
+      // Add DashScope compatible-mode later if you need paid Qwen API.
+      // Free-first Qwen is better handled by qwen-portal-auth.
+      //
+      // dashscope: {
+      //   baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      //   apiKey: "${DASHSCOPE_API_KEY}",
+      //   api: "openai-completions",
+      //   models: [
+      //     {
+      //       id: "qwen-max",
+      //       name: "Qwen Max",
+      //       reasoning: false,
+      //       input: ["text"],
+      //       contextWindow: 128000,
+      //       maxTokens: 8192,
+      //     },
+      //   ],
+      // },
+    },
+  },
+
+  plugins: {
+    allow: [
+      "feishu",
+      "llm-task",
+      "qwen-portal-auth",
+      "minimax-portal-auth",
+      // "cn-multimodal-tools",
+    ],
+
+    entries: {
+      feishu: {
+        enabled: true,
+      },
+
+      "llm-task": {
+        enabled: true,
+        config: {
+          defaultProvider: "openai-codex",
+          defaultModel: "gpt-5.3-codex",
+          maxTokens: 2000,
+          timeoutMs: 60000,
+        },
+      },
+
+      "qwen-portal-auth": {
+        enabled: true,
+      },
+
+      "minimax-portal-auth": {
+        // After enabling, run:
+        // openclaw models auth login --provider minimax-portal --set-default
+        enabled: false,
+      },
+    },
+  },
+
+  tools: {
+    profile: "coding",
+
+    allow: [
+      "node C:\\Users\\Lenovo\\.openclaw\\workspace\\browser-automation\\run-nl-task.js *",
+
+      // Phase 2 wrapper scripts:
+      // "python D:\\FY003\\scripts\\cn_image_gen.py *",
+      // "python D:\\FY003\\scripts\\cn_video_gen.py *",
+      // "python D:\\FY003\\scripts\\cn_tts.py *",
+      // "python D:\\FY003\\scripts\\cn_asr.py *",
+    ],
+
+    // Built-in media understanding is still strongest with OpenAI/Google/CLI.
+    // Use wrapper scripts above when you wire CN image/video/speech providers.
+    media: {
+      audio: {
+        enabled: true,
+        models: [
+          {
+            type: "cli",
+            command: "whisper",
+            args: ["--model", "base", "{{MediaPath}}"],
+          },
+        ],
+      },
+
+      image: {
+        enabled: false,
+      },
+
+      video: {
+        enabled: false,
+      },
+    },
+  },
+
+  messages: {
+    tts: {
+      // Start with the free built-in TTS path.
+      auto: "off",
+      provider: "edge",
+      edge: {
+        enabled: true,
+        voice: "zh-CN-XiaoxiaoNeural",
+        lang: "zh-CN",
+        outputFormat: "audio-24khz-48kbitrate-mono-mp3",
+      },
+    },
+  },
+}

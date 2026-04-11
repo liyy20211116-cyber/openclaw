@@ -1,0 +1,140 @@
+{
+  "generated_at": "2026-04-11T15:57:27.389528",
+  "overall_health": 88.2,
+  "health_grade": "A",
+  "agent_health": {
+    "dobby-customer": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 2
+      },
+      "score": 65,
+      "issues": []
+    },
+    "fred-sales": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 2
+      },
+      "score": 65,
+      "issues": []
+    },
+    "hermione-tech": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 4
+      },
+      "score": 75,
+      "issues": []
+    },
+    "jarvis-coo": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 3,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 3
+      },
+      "score": 85,
+      "issues": []
+    },
+    "luna-growth": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 3
+      },
+      "score": 70,
+      "issues": []
+    },
+    "mcgonagall-product": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 3
+      },
+      "score": 70,
+      "issues": []
+    },
+    "percy-finance": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 3
+      },
+      "score": 70,
+      "issues": []
+    },
+    "req-review-agent": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": false,
+        "memory/learnings.md": true,
+        "*.py": 12
+      },
+      "score": 65,
+      "issues": []
+    },
+    "snape-audit": {
+      "files": {
+        "IDENTITY.md": true,
+        "SKILL-*.md": 1,
+        "skills.json": true,
+        "memory/learnings.md": true,
+        "*.py": 3
+      },
+      "score": 70,
+      "issues": []
+    }
+  },
+  "avg_agent_score": 70.6,
+  "script_coverage": {
+    "total_scripts": 36,
+    "departments_covered": 8,
+    "total_departments": 8,
+    "coverage_pct": 100.0,
+    "by_department": {
+      "tech": 3,
+      "finance": 2,
+      "growth": 4,
+      "sales": 3,
+      "audit": 2,
+      "product": 2,
+      "customer": 2,
+      "coo": 7
+    }
+  },
+  "config_completeness": {
+    "files": [
+      "communication-protocol.md",
+      "company-culture.md",
+      "company-mission.md",
+      "company-okr.md",
+      "company-rules.md",
+      "onboarding-guide.md",
+      "salary-system.md"
+    ],
+    "count": 7,
+    "target": 7,
+    "score": 100
+  },
+  "skills_count": 17,
+  "output_today": 13,
+  "output_total": 13
+}

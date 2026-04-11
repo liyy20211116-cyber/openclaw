@@ -1,0 +1,31 @@
+﻿OpenClaw 讲师开场 3 分钟操作清单
+
+1. 先确认已经解压讲师包，目录里可以看到：
+- `启动管理器.bat`
+- `OpenClaw控制台.bat`
+- `打开培训课件.bat`
+
+2. 双击 `启动管理器.bat`，先检查 Gateway 状态。
+
+3. 如果需要快速开讲，可直接运行：
+- `一键启动.bat`
+
+4. 启动成功后，在浏览器确认：
+- `http://127.0.0.1:18789/` 能正常打开
+- Dashboard 页面没有阻断报错
+
+5. 正式开讲前，双击 `打开培训课件.bat`。
+
+6. 如果要现场演示飞书联调，先运行：
+- `飞书联调自检.bat`
+
+7. 现场备用口令：
+- `openclaw gateway status`
+- `openclaw gateway stop`
+- `openclaw gateway --port 18789 --verbose`
+- `openclaw logs --follow`
+
+8. 如果学员提问“为什么启动失败”，优先检查：
+- Node.js 是否 >= 22
+- 是否能访问 npm
+- 是否运行了 `飞书联调自检.bat`

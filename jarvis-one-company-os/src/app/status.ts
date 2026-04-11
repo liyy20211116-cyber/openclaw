@@ -1,0 +1,15 @@
+export const statusLabelMap: Record<string, string> = {
+  idle: '空闲',
+  busy: '执行中',
+  review: '审核中',
+  frozen: '已冻结',
+  waiting_approval: '待审批',
+  draft: '草稿',
+  pending_approval: '待审批',
+  pending: '待审批',
+  approved: '已批准',
+  in_progress: '执行中',
+  completed: '已完成',
+  rejected: '已驳回',
+  archived: '已归档',
+}

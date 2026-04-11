@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-04-11T14:57:35.893701",
+  "stats": {
+    "total_raw": 27,
+    "duplicates_removed": 0,
+    "unique_entries": 27
+  },
+  "categories": {
+    "other": {
+      "count": 1,
+      "latest": "2026-04-10 01:30",
+      "key_learnings": [
+        "记忆系统初始化成功，开始积累长期记忆。"
+      ]
+    },
+    "ones_automation": {
+      "count": 13,
+      "latest": "2026-04-11 01:01",
+      "key_learnings": [
+        "ONES需求审核自动化项目失败的核心原因是建单逻辑中缺少Token过期自动重试机制，且存在异常处理静默失败的问题。",
+        "ONES需求审核自动化项目失败的核心原因是Token过期重试机制缺失及异常捕获静默处理，目前已暂停赫敏的工作以进行能力自检。",
+        "ONES 自动化项目失败的根源在于技术部（赫敏）的执行环境（Playwright 驱动及网络连接）存在物理性缺失，而非逻辑错误。"
+      ]
+    },
+    "agent_capability": {
+      "count": 12,
+      "latest": "2026-04-11 05:54",
+      "key_learnings": [
+        "Agent的执行能力受限于平台配置的底层工具（如沙箱、网络请求、文件系统），而非Agent自身的逻辑能力；赫敏执行失败是因为缺乏必要的环境配置工具。",
+        "Agent的执行能力取决于平台是否挂载了Code Interpreter、Web Fetch和File System等底层工具，而非单纯的权限授权。",
+        "Agent的执行能力完全受限于平台配置的工具（沙箱、联网、文件系统），若无底层工具挂载，Agent仅具备语言处理能力，无法执行自动化任务。"
+      ]
+    },
+    "team_management": {
+      "count": 1,
+      "latest": "2026-04-11 00:18",
+      "key_learnings": [
+        "系统曾遭遇LLM API 502全面断连，所有Agent失联。贾维斯具备调度hermione-tech、luna-growth、snape-audit等Agent的能力，可通过JSON指令分发任务。当前团队核心能力（联网、自动化、文件读写）尚未完成实测，需等API恢复后重新验证。"
+      ]
+    }
+  },
+  "openclaw_recent_memories": [
+    {
+      "date": "2026-04-07",
+      "content": "# 2026-04-07\n\n- 今日集中推进 ONES 页面自动化闭环，已确认主链路不再卡在 token 或页面路径，而是卡在浏览器控制与工具兼容层。\n- 已确认并执行的关键修复：为 `C:/Users/Lenovo/.openclaw/openclaw.json` 增加 `browser` 配置，默认启用隔离的 `openclaw` profile，并新增显式指向 `C:/Users/Lenovo/AppData/Local/Microsoft/Edge/User Data` 的 `edge-user` existing-session profile；Gateway 重启后，`openclaw` 浏览器恢复可控，`edge-user` 仍未稳定接入。\n- 用户授权在当前事项上高频试错、无需每一步再征求同意；默认原则更新为：只要风险可控且不涉及对外发送/资金/删除，优先直接试错推进，不要反复询问“是否同意继续”。\n- OpenClaw 已从旧版本更新到 `2026.4.5`；升级前 `openclaw browser extension ...` 命令不可用，升级后浏览器能力明显改善"
+    },
+    {
+      "date": "2026-04-08",
+      "content": "# 2026-04-08\n\n- 今日继续推进 ONES 自动化闭环，没有从头重跑，而是直接沿昨天已确认的稳定入口与 Playwright + CDP 18800 路线续做。\n- 已完成关键收口：下半区两个核心下拉 `价值类型` 与 `仓库` 已在真实 ONES 页面中命中可选项，说明当前主卡点已不再是“选不到下拉”，而是进入最终提交验证阶段。\n- 已将这轮验证过的稳定策略正式回写到 `D:/FY003/openclaw_agents/req-review-agent/create_ones_task_ui.py` 的 `choose_select_option(...)`：\n  - 下拉候选只认当前可见 option，不再使用全页宽匹配；\n  - 在点击下半区字段前，先将字段区域滚入弹窗可视区；\n  - `仓库` 的 fallback 映射已补全，包含 `武汉仓 -> 武汉智慧仓`、`天门仓`、`嘉兴仓`、`全棉时代` 等。\n- 终端输出仍存在中文乱码现象，但本轮判断标准以脚本返回的 `chosen` 命中结果为准，不再把控制台乱码误判为页面交互失败。\n- ONES 自动化主线最新状态"
+    },
+    {
+      "date": "2026-04-09",
+      "content": "# 2026-04-09\n\n- 08:33，原野明确收敛 ONES 自动化方案为“两阶段”：第一阶段只要求把新建后的 ONES ID 稳定回传并回写，不再把标题与链接抓取作为当前成功标准。\n- 当前最新口径：先把“飞书审批通过 -> ONES 建单 -> 多维表回写 ONES ID”这个最小闭环跑通；等业务侧实际用起来、拿到反馈后，再决定是否进入第二阶段，继续补强标题、ID、链接的完整同步抓取。\n- 已同步更新 `TASKS.md`：将 ONES 自动化 goal 改为“第一阶段仅同步 ID”，next action 改为围绕最小闭环做真实联调验证。\n"
+    }
+  ]
+}

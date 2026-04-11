@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8">
+<style>
+body{font-family:'Microsoft YaHei',sans-serif;max-width:800px;margin:40px auto;padding:20px;color:#333}
+.header{display:flex;justify-content:space-between;border-bottom:3px solid #2563eb;padding-bottom:20px;margin-bottom:30px}
+.title{font-size:28px;font-weight:bold;color:#2563eb}
+.info{text-align:right;font-size:13px;color:#666}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#2563eb;color:white;padding:12px;text-align:left}
+td{padding:10px;border-bottom:1px solid #eee}
+.total-row{font-weight:bold;font-size:16px;background:#f0f4ff}
+.footer{margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:12px;color:#999}
+.amount{text-align:right}
+.notes{background:#fffbeb;padding:15px;border-left:4px solid #f59e0b;margin:20px 0}
+</style></head><body>
+<div class="header">
+<div><div class="title">报价单</div><div>编号: INV-202604111540</div></div>
+<div class="info"><div>一人公司</div><div>日期: 2026-04-11</div><div>有效期至: 2026-05-11</div></div>
+</div>
+<div><strong>客户:</strong> 示例客户有限公司</div>
+<table>
+<tr><th>#</th><th>项目</th><th>描述</th><th>数量</th><th class="amount">单价</th><th class="amount">金额</th></tr>
+
+<tr><td>1</td><td>AI 自动化咨询</td><td>需求分析与方案设计</td><td>1</td><td class="amount">¥5000.00</td><td class="amount">¥5000.00</td></tr>
+
+<tr><td>2</td><td>Agent 开发</td><td>定制 AI Agent 开发部署</td><td>3</td><td class="amount">¥3000.00</td><td class="amount">¥9000.00</td></tr>
+
+<tr><td>3</td><td>运维支持</td><td>月度运维与优化</td><td>1</td><td class="amount">¥2000.00</td><td class="amount">¥2000.00</td></tr>
+
+<tr class="total-row"><td colspan="5" class="amount">合计</td><td class="amount">¥16000.00</td></tr>
+</table>
+<div class="notes"><strong>备注:</strong> 此报价单有效期 30 天，含税价格</div>
+<div class="footer">
+<p>此报价单由一人公司智能体系统自动生成</p>
+<p>付款方式: 银行转账 | 支付宝 | 微信支付</p>
+</div></body></html>

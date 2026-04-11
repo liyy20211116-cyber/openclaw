@@ -1,0 +1,11 @@
+flowchart TD
+    step_1["1. 明确需求"]
+    step_2["2. 拆解任务"]
+    step_3["3. 执行与跟进"]
+    step_4["4. 验收与复盘"]
+    step_1 --> step_2
+    step_2 --> step_3
+    step_3 --> step_4
+    classDef title fill:#f5f7ff,stroke:#4c6ef5,stroke-width:1px,color:#111827;
+    title_node["workflow_publish_check"]:::title
+    title_node --> step_1

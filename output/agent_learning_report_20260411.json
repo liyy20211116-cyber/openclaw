@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-04-11T15:30:04.693131",
+  "agents_processed": 8,
+  "total_learnings": 34,
+  "total_duplicates_removed": 0,
+  "total_sensitive_redacted": 0,
+  "agents": [
+    {
+      "agent": "dobby-customer",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "fred-sales",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "hermione-tech",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "jarvis-coo",
+      "status": "ok",
+      "count": 27,
+      "removed": 0,
+      "categories": 2,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "luna-growth",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "mcgonagall-product",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "percy-finance",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    },
+    {
+      "agent": "snape-audit",
+      "status": "ok",
+      "count": 1,
+      "removed": 0,
+      "categories": 1,
+      "sensitive_redacted": 0
+    }
+  ]
+}

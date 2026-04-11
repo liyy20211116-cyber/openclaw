@@ -1,0 +1,28 @@
+﻿[扫描] 获取飞书 token...
+[扫描] 查询待审批记录...
+[扫描] 找到 1 条待审批需求，开始发送审核卡片...
+python : Traceback (most recent call last):
+所在位置 C:\Users\Lenovo\AppData\Local\Temp\ps-script-5460d42f-e104-430a-8733-56d4c5d1e044.ps1:113 字符: 1
++ python "d:/FY003/openclaw_agents/req-review-agent/scan_and_send.py" 2 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "d:\FY003\openclaw_agents\req-review-agent\scan_and_send.py", line 192, in main
+    save_pending(rec["record_id"], msg_id, title)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\FY003\openclaw_agents\req-review-agent\scan_and_send.py", line 164, in save_pending
+    existing[record_id] = {
+    ~~~~~~~~^^^^^^^^^^^
+TypeError: list indices must be integers or slices, not str
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\FY003\openclaw_agents\req-review-agent\scan_and_send.py", line 204, in <module>
+    main()
+    ~~~~^^
+  File "d:\FY003\openclaw_agents\req-review-agent\scan_and_send.py", line 197, in main
+    print(f"  \u274c 失败: {title} — {e}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\u274c' in position 2: illegal multibyte sequence

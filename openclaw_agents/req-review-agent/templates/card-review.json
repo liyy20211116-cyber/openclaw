@@ -1,0 +1,142 @@
+{
+  "schema": "2.0",
+  "config": {
+    "update_multi": false
+  },
+  "body": {
+    "elements": [
+      {
+        "tag": "div",
+        "fields": [
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**提报类型**\n{{REQ_TYPE}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**提报人**\n{{SUBMITTER_NAME}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**所属产品**\n{{PRODUCT}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**优先级 / 严重程度**\n{{PRIORITY}} / {{SEVERITY}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**期望上线日期**\n{{EXPECTED_DATE}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**需求价值（元/年）**\n{{VALUE_AMOUNT}}"
+            }
+          }
+        ]
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**描述**\n{{DESCRIPTION}}"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "💬 **拒绝原因**（不通过时请填写，通过可留空）"
+        }
+      },
+      {
+        "tag": "input",
+        "name": "reject_reason",
+        "placeholder": {
+          "tag": "plain_text",
+          "content": "请填写拒绝原因（通过可留空）"
+        },
+        "max_length": 200
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "✅ 通过，创建 ONES 工作项"
+            },
+            "type": "primary",
+            "value": {
+              "action_type":    "req_approve",
+              "record_id":      "{{RECORD_ID}}",
+              "submitter_id":   "{{SUBMITTER_ID}}",
+              "req_type":       "{{REQ_TYPE}}",
+              "req_title":      "{{REQ_TITLE}}",
+              "description":    "{{DESCRIPTION}}",
+              "product":        "{{PRODUCT}}",
+              "priority":       "{{PRIORITY}}",
+              "severity":       "{{SEVERITY}}",
+              "value_amount":   "{{VALUE_AMOUNT}}",
+              "expected_date":  "{{EXPECTED_DATE}}"
+            }
+          },
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "❌ 不通过"
+            },
+            "type": "danger",
+            "value": {
+              "action_type":  "req_reject",
+              "record_id":    "{{RECORD_ID}}",
+              "submitter_id": "{{SUBMITTER_ID}}",
+              "req_title":    "{{REQ_TITLE}}"
+            }
+          }
+        ]
+      },
+      {
+        "tag": "note",
+        "elements": [
+          {
+            "tag": "plain_text",
+            "content": "提报时间：{{SUBMIT_TIME}}  |  表格记录 ID：{{RECORD_ID}}"
+          }
+        ]
+      }
+    ]
+  },
+  "header": {
+    "title": {
+      "tag": "plain_text",
+      "content": "📋 需求审核·{{REQ_TYPE}}·{{REQ_TITLE}}"
+    },
+    "template": "blue"
+  }
+}

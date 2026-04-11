@@ -1,0 +1,13 @@
+{
+  "report_date": "2026-04-11T15:10:02.399793",
+  "period": "last_7_days",
+  "api_usage": {},
+  "total_estimated_cost_usd": 0.0,
+  "project_assets": {
+    "py": 56,
+    "md": 102,
+    "json": 65,
+    "other": 210,
+    "total_size_mb": 77.9
+  }
+}

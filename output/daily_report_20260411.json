@@ -1,0 +1,34 @@
+{
+  "date": "2026-04-11T15:11:11.831933",
+  "company": "一人公司",
+  "coo": "贾维斯",
+  "sections": {
+    "tech": {
+      "status": "done",
+      "output": "[1/3] Bandit 安全扫描 ...\n   发现 3 个安全问题\n[2/3] Ruff 代码风格检查 ...\n   Ruff 出错: 'NoneType' object has no attribute 'strip'\n[3/3] 敏感信息扫描 ...\n   发现 13 处敏感信息\n\n审计报告已输出: D:\\FY003\\output\\tech_audit_20260411_1510.json\n总计发现 16 个问题\n"
+    },
+    "finance": {
+      "status": "done",
+      "output": "=== 珀西·财务报告生成器 ===\n\n扫描了 2 个日志文件\n\n--- 7 日 API 用量 ---\n\n总估算成本: $0.0\n\n--- 项目资产 ---\n  Python: 56 文件 | Markdown: 102 文件 | JSON: 65 文件\n  总大小: 77.9 MB\n\n报告已输出: D:\\FY003\\output\\finance_report_20260411.json\n"
+    },
+    "growth": {
+      "status": "done",
+      "output": "obe\n  - Petrol retailers in row with government over 'rip off' accus\n  - Why has Trump eased sanctions on Russian oil - and will it h\n\n[deep_dive] 深度解读\n  - We're not profiteering on fuel. But my staff still face abus\n\n[social_post] 社交媒体帖子\n  - We're not profiteering on fuel. But my staff still face abus\n  - Chancellor to offer support over rising heating oil costs\n  - Judge says 'no evidence' to justify Federal Reserve probe\n\n内容素材已输出: D:\\FY003\\output\\content_drafts_20260411.json\n共生成 3 份草稿，待进一步编辑\n"
+    },
+    "audit": {
+      "status": "done",
+      "output": "=== 斯内普·安全风控扫描 ===\n\n[1/4] 密钥泄露扫描 ...\n   发现 2 处密钥泄露风险\n[2/4] 依赖漏洞检查 ...\n   检查失败: Command '['C:\\\\Users\\\\Lenovo\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\\\python.exe', '-m', 'pip', 'list', '--outdated', '--format=json']' timed out after 60 seconds\n[3/4] 大文件与异常文件检查 ...\n   1 个超过 10MB 的文件\n[4/4] 配置安全检查 ...\n"
+    },
+    "infrastructure": {
+      "status": "healthy",
+      "python": "Python 3.13.12",
+      "node": "v22.22.2",
+      "openclaw_processes": 34
+    }
+  },
+  "summary": {
+    "departments_reported": 4,
+    "departments_error": 0,
+    "infrastructure": "healthy"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-04-11T15:58:27.554000",
+  "scenarios": [
+    {
+      "scenario": "AI Workflow Automation - Small Biz",
+      "investment": 10000,
+      "monthly_savings": 5000,
+      "period_months": 12,
+      "implementation_months": 1,
+      "total_savings": 55000,
+      "net_profit": 45000,
+      "roi_pct": 450.0,
+      "payback_months": 2.0,
+      "recommendation": "PROCEED"
+    },
+    {
+      "scenario": "Custom Agent Development",
+      "investment": 30000,
+      "monthly_savings": 8000,
+      "period_months": 12,
+      "implementation_months": 1,
+      "total_savings": 88000,
+      "net_profit": 58000,
+      "roi_pct": 193.3,
+      "payback_months": 3.8,
+      "recommendation": "PROCEED"
+    },
+    {
+      "scenario": "AI Training Workshop",
+      "investment": 5000,
+      "monthly_savings": 2000,
+      "period_months": 6,
+      "implementation_months": 1,
+      "total_savings": 10000,
+      "net_profit": 5000,
+      "roi_pct": 100.0,
+      "payback_months": 2.5,
+      "recommendation": "CONSIDER"
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "audit_date": "2026-04-11T15:37:17.736836",
+  "auditor": "jarvis-coo",
+  "summary": {
+    "total_agents": 11,
+    "healthy": 8,
+    "stale": 0,
+    "empty": 2,
+    "no_memory": 1,
+    "security_risk": 0,
+    "total_learnings": 34,
+    "total_sensitive_findings": 0
+  },
+  "agents": [
+    {
+      "agent": "dobby-customer",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 371,
+          "modified": "2026-04-11T15:30:04.655801"
+        },
+        "learnings.md": {
+          "size": 74,
+          "modified": "2026-04-11T11:55:32.000087"
+        },
+        "learnings_compressed.md": {
+          "size": 183,
+          "modified": "2026-04-11T15:30:04.654274"
+        },
+        "reflection_log.json": {
+          "size": 55,
+          "modified": "2026-04-11T15:29:38.940795"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.655801",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "fred-sales",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 367,
+          "modified": "2026-04-11T15:30:04.668523"
+        },
+        "learnings.md": {
+          "size": 77,
+          "modified": "2026-04-11T11:55:31.995781"
+        },
+        "learnings_compressed.md": {
+          "size": 179,
+          "modified": "2026-04-11T15:30:04.666490"
+        },
+        "reflection_log.json": {
+          "size": 51,
+          "modified": "2026-04-11T15:29:38.916889"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.668523",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "haimian-workspace",
+      "has_memory_dir": true,
+      "files": {},
+      "learnings_count": 0,
+      "last_updated": null,
+      "sensitive_findings": [],
+      "health": "empty"
+    },
+    {
+      "agent": "hermione-tech",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 681,
+          "modified": "2026-04-11T15:30:04.674112"
+        },
+        "learnings.md": {
+          "size": 1128,
+          "modified": "2026-04-10T09:57:12.997482"
+        },
+        "learnings_compressed.md": {
+          "size": 396,
+          "modified": "2026-04-11T15:30:04.672586"
+        },
+        "reflection_log.json": {
+          "size": 54,
+          "modified": "2026-04-11T15:29:38.901815"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.674112",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "jarvis-coo",
+      "has_memory_dir": true,
+      "files": {
+        "ceo_preferences.md": {
+          "size": 3998,
+          "modified": "2026-04-11T13:54:10.203042"
+        },
+        "decisions.md": {
+          "size": 4507,
+          "modified": "2026-04-11T13:54:10.196042"
+        },
+        "domain_knowledge.json": {
+          "size": 1495,
+          "modified": "2026-04-11T15:30:04.678698"
+        },
+        "last_self_check.json": {
+          "size": 111,
+          "modified": "2026-04-11T11:01:25.960431"
+        },
+        "learnings.md": {
+          "size": 7555,
+          "modified": "2026-04-11T13:54:10.191030"
+        },
+        "learnings_compressed.md": {
+          "size": 2207,
+          "modified": "2026-04-11T15:30:04.676658"
+        },
+        "skill_registry.json": {
+          "size": 200,
+          "modified": "2026-04-10T16:17:31.096446"
+        },
+        "skill_roadmap.json": {
+          "size": 361,
+          "modified": "2026-04-10T16:17:28.802248"
+        }
+      },
+      "learnings_count": 27,
+      "last_updated": "2026-04-11T15:30:04.678698",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "luna-growth",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 368,
+          "modified": "2026-04-11T15:30:04.682365"
+        },
+        "learnings.md": {
+          "size": 74,
+          "modified": "2026-04-11T11:55:31.991997"
+        },
+        "learnings_compressed.md": {
+          "size": 180,
+          "modified": "2026-04-11T15:30:04.680327"
+        },
+        "reflection_log.json": {
+          "size": 52,
+          "modified": "2026-04-11T15:29:38.910913"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.682365",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "mcgonagall-product",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 817,
+          "modified": "2026-04-11T15:30:04.685417"
+        },
+        "learnings.md": {
+          "size": 1047,
+          "modified": "2026-04-10T09:57:25.911659"
+        },
+        "learnings_compressed.md": {
+          "size": 492,
+          "modified": "2026-04-11T15:30:04.684397"
+        },
+        "reflection_log.json": {
+          "size": 59,
+          "modified": "2026-04-11T15:29:38.907269"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.685417",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "mofashi-workspace",
+      "has_memory_dir": false,
+      "files": {},
+      "learnings_count": 0,
+      "last_updated": null,
+      "sensitive_findings": [],
+      "health": "no_memory"
+    },
+    {
+      "agent": "percy-finance",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 370,
+          "modified": "2026-04-11T15:30:04.689488"
+        },
+        "learnings.md": {
+          "size": 74,
+          "modified": "2026-04-11T11:55:31.997308"
+        },
+        "learnings_compressed.md": {
+          "size": 182,
+          "modified": "2026-04-11T15:30:04.687965"
+        },
+        "reflection_log.json": {
+          "size": 54,
+          "modified": "2026-04-11T15:29:38.930197"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.689488",
+      "sensitive_findings": [],
+      "health": "healthy"
+    },
+    {
+      "agent": "req-review-agent",
+      "has_memory_dir": true,
+      "files": {
+        "pending_reject.json": {
+          "size": 164,
+          "modified": "2026-03-15T19:25:26.732598"
+        },
+        "pending_reviews.json": {
+          "size": 4452,
+          "modified": "2026-04-04T23:39:18.038914"
+        },
+        "processed_log.json": {
+          "size": 4,
+          "modified": "2026-03-13T21:12:27.815200"
+        }
+      },
+      "learnings_count": 0,
+      "last_updated": "2026-04-04T23:39:18.038914",
+      "sensitive_findings": [],
+      "health": "empty"
+    },
+    {
+      "agent": "snape-audit",
+      "has_memory_dir": true,
+      "files": {
+        "domain_knowledge.json": {
+          "size": 368,
+          "modified": "2026-04-11T15:30:04.692545"
+        },
+        "learnings.md": {
+          "size": 77,
+          "modified": "2026-04-11T11:55:31.999073"
+        },
+        "learnings_compressed.md": {
+          "size": 180,
+          "modified": "2026-04-11T15:30:04.690510"
+        },
+        "reflection_log.json": {
+          "size": 52,
+          "modified": "2026-04-11T15:29:38.934231"
+        }
+      },
+      "learnings_count": 1,
+      "last_updated": "2026-04-11T15:30:04.692545",
+      "sensitive_findings": [],
+      "health": "healthy"
+    }
+  ],
+  "recommendations": [
+    "Empty memory (haimian-workspace, req-review-agent): agents need to start learning"
+  ]
+}

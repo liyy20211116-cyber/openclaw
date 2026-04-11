@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "title": "workflow_publish_check",
+  "input_file": "D:\\FY003\\workspace\\workflow_diagram\\input\\workflow_demo.txt",
+  "steps_count": 4,
+  "render_mode": "auto",
+  "renderer": null,
+  "preferred_upload_assets": [
+    "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.mmd",
+    "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.txt"
+  ],
+  "doc_markdown_file": "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.md",
+  "attachments": {
+    "mermaid_file": "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.mmd",
+    "summary_file": "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.txt",
+    "rendered_files": []
+  },
+  "upload_steps": [
+    "当前未生成图片，先将 Mermaid 源文件或步骤摘要作为附件上传到飞书文档。",
+    "将文档草稿内容写入飞书文档正文。",
+    "如果后续装好 Mermaid CLI，可重新执行本脚本补齐图片后再上传。"
+  ]
+}

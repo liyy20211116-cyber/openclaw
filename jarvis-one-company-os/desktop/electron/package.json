@@ -1,0 +1,6 @@
+{
+  "name": "jarvis-one-company-os-desktop",
+  "private": true,
+  "type": "commonjs",
+  "main": "../dist-electron/main.js"
+}

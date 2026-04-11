@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-04-11T15:39:04.352805",
+  "risk_level": "HIGH",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "secret_leak",
+      "description": "AppSecret 泄露",
+      "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\scan_and_send.py",
+      "line": 14
+    },
+    {
+      "severity": "HIGH",
+      "category": "secret_leak",
+      "description": "AppSecret 泄露",
+      "file": "D:\\FY003\\openclaw_agents\\req-review-agent\\scan_and_send.py",
+      "line": 16
+    },
+    {
+      "severity": "LOW",
+      "category": "outdated_dep",
+      "description": "anyio 4.12.0 -> 4.13.0",
+      "file": "",
+      "line": 0
+    },
+    {
+      "severity": "LOW",
+      "category": "outdated_dep",
+      "description": "certifi 2025.11.12 -> 2026.2.25",
+      "file": "",
+      "line": 0
+    },
+    {
+      "severity": "LOW",
+      "category": "outdated_dep",
+      "description": "chardet 5.2.0 -> 7.4.1",
+      "file": "",
+      "line": 0
+    },
+    {
+      "severity": "LOW",
+      "category": "outdated_dep",
+      "description": "charset-normalizer 3.4.4 -> 3.4.7",
+      "file": "",
+      "line": 0
+    },
+    {
+      "severity": "LOW",
+      "category": "outdated_dep",
+      "description": "click 8.3.1 -> 8.3.2",
+      "file": "",
+      "line": 0
+    },
+    {
+      "severity": "LOW",
+      "category": "large_file",
+      "description": "31MB: D:\\FY003\\output\\publish_bundle_20260309\\finance_brief_20260309.mp4",
+      "file": "D:\\FY003\\output\\publish_bundle_20260309\\finance_brief_20260309.mp4",
+      "line": 0
+    }
+  ]
+}

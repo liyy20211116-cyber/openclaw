@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "doc_token": "doccn_demo_token",
+  "mode": "attachment_first",
+  "operations": [
+    {
+      "name": "write_doc_markdown",
+      "tool": "feishu_doc",
+      "payload": {
+        "action": "write",
+        "doc_token": "doccn_demo_token",
+        "content": "# workflow_publish_check\n\n## 流程步骤\n\n1. 明确需求\n2. 拆解任务\n3. 执行与跟进\n4. 验收与复盘\n\n## 产物清单\n\n- 当前环境未检测到可用 Mermaid CLI，暂未生成图片文件。\n- Mermaid 源文件：`D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.mmd`\n- 步骤摘要：`D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.txt`\n\n## 飞书落地建议\n\n- 若已有图片，优先上传图片到飞书文档。\n- 若当前没有图片，先上传 `.mmd` 与步骤摘要附件，后续安装渲染器后再补图片。\n"
+      },
+      "content_file": "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.md"
+    },
+    {
+      "name": "upload_mermaid_attachment",
+      "tool": "feishu_doc",
+      "payload": {
+        "action": "upload_file",
+        "doc_token": "doccn_demo_token",
+        "file_path": "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.mmd",
+        "filename": "workflow_demo.mmd"
+      }
+    },
+    {
+      "name": "upload_summary_attachment",
+      "tool": "feishu_doc",
+      "payload": {
+        "action": "upload_file",
+        "doc_token": "doccn_demo_token",
+        "file_path": "D:\\FY003\\workspace\\workflow_diagram\\output\\workflow_demo.txt",
+        "filename": "workflow_demo.txt"
+      }
+    }
+  ]
+}

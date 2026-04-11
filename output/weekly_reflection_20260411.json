@@ -1,0 +1,45 @@
+{
+  "report_date": "2026-04-11T14:57:54.248238",
+  "period": "2026-04-04 ~ 2026-04-11",
+  "summary": {
+    "memory_files_this_week": 3,
+    "learnings_this_week": 27,
+    "outputs_this_week": 5,
+    "cron_tasks": {
+      "total": 8,
+      "success": 6,
+      "error": 2
+    }
+  },
+  "top_topics": {
+    "ONES自动化": 169,
+    "内容创作": 66,
+    "Agent能力": 64,
+    "基础设施": 25,
+    "团队协作": 15
+  },
+  "outputs_list": [
+    "content_drafts_20260411.json",
+    "daily_report_20260411.json",
+    "finance_report_20260411.json",
+    "knowledge_base_20260411.json",
+    "tech_audit_20260411_1438.json"
+  ],
+  "key_learnings_sample": [
+    "记忆系统初始化成功，开始积累长期记忆。",
+    "【重要项目】ONES 需求审核自动化\n\n## 项目背景\n公司（稳健集团）使用飞书多维表格收集业务需求和 BUG，需要人工逐条审核后手动在 ONES 系统创建工作项。CEO 要求将此流程全自动化。\n\n## 当前架构\n飞书多维表格（数字化需求&BUG收集池）→ 审核卡片推送到 CEO 飞书 → CEO 点击通过/退回 → 自动在 ONES 创建工作项 → 回写飞书表格链接+编号 → 通知提报人\n\n##",
+    "ONES 需求审核自动化项目已完成飞书卡片交互、ONES UI 自动化及 Token 刷新逻辑，目前核心卡点在于端到端链路尚未跑通（pending_reviews 有记录但无处理日志）。",
+    "ONES 需求审核自动化项目已完成飞书交互、ONES UI 自动化及 Token 刷新逻辑，但尚未实现端到端闭环，目前 processed_log.json 为空。",
+    "ONES需求审核自动化项目已进入内测阶段。核心架构：飞书扫描→审核卡片→WebSocket回调→Playwright驱动ONES建单→飞书回写。当前关键问题是pending_reviews有22条但processed_log为空，端到端闭环尚未跑通。已安排赫敏做端到端调试、斯内普做异常处理审计、珀西监控Token消耗。"
+  ],
+  "reflection_prompts": [
+    "本周最重要的突破是什么？",
+    "本周反复出现的问题是什么？如何从根本上解决？",
+    "本周哪些记忆可以压缩或归档？",
+    "下周最应优先推进的 1 件事是什么？",
+    "是否有需要升级 CEO 决策的事项？"
+  ],
+  "action_items": [
+    "本周学习记录较多，建议运行 memory_consolidate.py 压缩"
+  ]
+}

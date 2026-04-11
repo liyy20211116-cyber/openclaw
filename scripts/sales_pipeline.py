@@ -48,8 +48,8 @@ max_count = max(stage_counts.values()) if stage_counts.values() else 1
 for stage in STAGES:
     count = stage_counts[stage]
     value = stage_values[stage]
-    bar = "█" * int(count / max(max_count, 1) * 20)
-    print(f"  {stage:6s} | {bar:20s} | {count} 条 | ¥{value:,.0f}")
+    bar = "#" * int(count / max(max_count, 1) * 20)
+    print(f"  {stage:6s} | {bar:20s} | {count} | CNY{value:,.0f}")
 
 total_value = sum(l.get("value", 0) for l in leads)
 won = sum(l.get("value", 0) for l in leads if l.get("stage") == "成交")
@@ -57,9 +57,9 @@ lost = sum(l.get("value", 0) for l in leads if l.get("stage") == "流失")
 
 print(f"\n--- 关键指标 ---")
 print(f"  总线索: {len(leads)} 条")
-print(f"  管线总价值: ¥{total_value:,.0f}")
-print(f"  已成交: ¥{won:,.0f}")
-print(f"  已流失: ¥{lost:,.0f}")
+print(f"  Pipeline Value: CNY{total_value:,.0f}")
+print(f"  Won: CNY{won:,.0f}")
+print(f"  Lost: CNY{lost:,.0f}")
 print(f"  转化率: {won/total_value*100:.1f}%" if total_value else "  转化率: N/A")
 
 # --- 输出报告 ---

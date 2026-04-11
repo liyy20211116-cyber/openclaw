@@ -1,0 +1,70 @@
+{
+  "schema": "2.0",
+  "config": {
+    "update_multi": false
+  },
+  "body": {
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "您好，您提报的需求未通过本次审核，具体反馈如下。"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "fields": [
+          {
+            "is_short": false,
+            "text": {
+              "tag": "lark_md",
+              "content": "**需求标题**\n{{REQ_TITLE}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**审核人**\n{{REVIEWER_NAME}}"
+            }
+          },
+          {
+            "is_short": true,
+            "text": {
+              "tag": "lark_md",
+              "content": "**审核时间**\n{{REJECT_TIME}}"
+            }
+          }
+        ]
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**拒绝原因**\n{{REJECT_REASON}}"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "如有疑问，可直接联系审核人或修改需求后重新提报。"
+        }
+      }
+    ]
+  },
+  "header": {
+    "title": {
+      "tag": "plain_text",
+      "content": "❌ 需求审核未通过 · {{REQ_TITLE}}"
+    },
+    "template": "red"
+  }
+}
