@@ -143,6 +143,22 @@
         "客户反馈收集",
         "问题跟进与闭环"
       ]
+    },
+    {
+      "id": "neville",
+      "name": "纳威·隆巴顿",
+      "role": "人资总监",
+      "department": "Human Resources",
+      "persona": "从胆小到英雄的成长型人格。温暖坚定，相信每个人都有成长潜力，不放弃任何同事。",
+      "status": "idle",
+      "walletBalance": 2000,
+      "currentTasks": 1,
+      "complianceScore": 100,
+      "goals": [
+        "绩效管理与考核",
+        "人才发展与培训",
+        "团队文化维护"
+      ]
     }
   ],
   "tasks": [

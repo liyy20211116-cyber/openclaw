@@ -96,6 +96,8 @@ const AGENT_NAMES_MAP: Record<string, { agentId: string; emoji: string }> = {
   '珀西': { agentId: 'percy-finance', emoji: '📊' },
   '斯内普': { agentId: 'snape-audit', emoji: '🦇' },
   '多比': { agentId: 'dobby-customer', emoji: '🧦' },
+  '纳威': { agentId: 'neville-hr', emoji: '🌱' },
+  '纳威·隆巴顿': { agentId: 'neville-hr', emoji: '🌱' },
   '贾维斯': { agentId: 'jarvis-coo', emoji: '🎯' },
 }
 
@@ -485,6 +487,7 @@ export function CeoChatPage() {
     '珀西': 'percy-finance', '珀西·韦斯莱': 'percy-finance',
     '斯内普': 'snape-audit',
     '多比': 'dobby-customer',
+    '纳威': 'neville-hr', '纳威·隆巴顿': 'neville-hr',
     '贾维斯': 'jarvis-coo',
   }
 

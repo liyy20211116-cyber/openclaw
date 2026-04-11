@@ -51,6 +51,24 @@ export function DashboardPage() {
         </article>
       </section>
 
+      <section className="metrics-grid metrics-grid-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+        <article className="metric-card">
+          <span style={{ color: '#22c55e' }}>Agent 团队</span>
+          <strong>10 人</strong>
+          <p>9部门 · 绩效均分 74.3</p>
+        </article>
+        <article className="metric-card">
+          <span style={{ color: '#38bdf8' }}>自动化脚本</span>
+          <strong>40+</strong>
+          <p>8部门全覆盖</p>
+        </article>
+        <article className="metric-card">
+          <span style={{ color: '#a78bfa' }}>服务目录</span>
+          <strong>4 项</strong>
+          <p>年潜力 CNY 312K</p>
+        </article>
+      </section>
+
       <section className="quick-actions-grid">
         <article className="panel action-card highlighted-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/playbook')}>
           <p className="eyebrow">核心</p>

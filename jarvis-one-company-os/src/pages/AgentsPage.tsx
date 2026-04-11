@@ -67,6 +67,14 @@ export function AgentsPage() {
                   <span>钱包 {agent.walletBalance}</span>
                   <span>任务 {agent.currentTasks}</span>
                   <span>合规 {agent.complianceScore}</span>
+                  {(agent as any).performanceScore != null && (
+                    <span style={{
+                      color: (agent as any).performanceScore >= 75 ? '#22c55e' : (agent as any).performanceScore >= 60 ? '#f59e0b' : '#ef4444',
+                      fontWeight: 600,
+                    }}>
+                      绩效 {(agent as any).performanceScore}
+                    </span>
+                  )}
                 </div>
               </button>
             )
@@ -91,6 +99,18 @@ export function AgentsPage() {
                   <span className="label">合规分</span>
                   <strong>{selectedAgent.complianceScore}</strong>
                 </div>
+                {(selectedAgent as any).performanceScore != null && (
+                  <div className="timeline-summary-card" style={{
+                    borderColor: (selectedAgent as any).performanceScore >= 75 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)',
+                  }}>
+                    <span className="label">绩效评分</span>
+                    <strong style={{
+                      color: (selectedAgent as any).performanceScore >= 75 ? '#22c55e' : (selectedAgent as any).performanceScore >= 60 ? '#f59e0b' : '#ef4444',
+                    }}>
+                      {(selectedAgent as any).performanceScore}/100 {(selectedAgent as any).performanceGrade ?? ''}
+                    </strong>
+                  </div>
+                )}
               </div>
 
               <div>
