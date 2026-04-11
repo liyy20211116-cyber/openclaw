@@ -1,0 +1,82 @@
+[
+  {
+    "id": "dobby_ux_walkthrough",
+    "name": "用户体验走查",
+    "description": "从用户视角走查产品流程，检查通知是否清晰、链接是否可用",
+    "type": "script",
+    "script": "skill_ux_walkthrough.py",
+    "timeout": 30
+  },
+  {
+    "id": "dobby_feedback_summary",
+    "name": "客户反馈汇总",
+    "description": "整理 memory 中的客户反馈记录，生成改进建议",
+    "type": "llm_to_file",
+    "outputDir": "output/feedback",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_onboard_guide",
+    "name": "新客户引导",
+    "description": "生成产品使用引导文档和 FAQ",
+    "type": "llm_to_file",
+    "outputDir": "output/guides",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_browser_ux_test",
+    "name": "浏览器 UX 测试",
+    "description": "使用浏览器自动化走查产品功能、截图记录、复现用户 Bug",
+    "type": "skill_ref",
+    "ref": "skills/browser-automation",
+    "timeout": 120
+  },
+  {
+    "id": "dobby_best_practice",
+    "name": "客服最佳实践搜索",
+    "description": "搜索客户成功方法论、FAQ 编写参考、用户研究方法",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_customer_notify",
+    "name": "客户消息通知",
+    "description": "通过飞书发送客户关怀、问题跟进、满意度调查",
+    "type": "skill_ref",
+    "ref": "skills/feishu-messaging",
+    "timeout": 30
+  },
+  {
+    "id": "dobby_knowledge_base",
+    "name": "知识库管理",
+    "description": "在飞书知识库维护帮助中心、FAQ、使用指南",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-wiki",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_feedback_bitable",
+    "name": "反馈跟踪表",
+    "description": "使用飞书多维表格管理客户反馈记录和满意度追踪",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-bitable",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_satisfaction_report",
+    "name": "满意度报表",
+    "description": "使用 Excel 制作满意度月报、问题趋势分析、NPS 统计",
+    "type": "skill_ref",
+    "ref": "skills/excel-data",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_guide_images",
+    "name": "引导配图生成",
+    "description": "使用 AI 生成使用指南配图、FAQ 说明图、流程示意图",
+    "type": "skill_ref",
+    "ref": "skills/image-gen",
+    "timeout": 60
+  }
+]

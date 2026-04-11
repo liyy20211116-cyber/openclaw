@@ -11,6 +11,18 @@ import requests
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 
+
+def _safe_json_dumps(data) -> str:
+    try:
+        return json.dumps(data, ensure_ascii=False)
+    except Exception:
+        return repr(data)
+
+
+def _truncate(text: str, limit: int = 500) -> str:
+    text = text or ""
+    return text if len(text) <= limit else text[:limit] + "..."
+
 # ------ 路径和常量 ------
 HERE        = Path(__file__).parent
 CACHE_FILE  = HERE / "token_cache.json"
@@ -21,9 +33,8 @@ WIS_SSO_URL = (BASE_WIS +
 CHROME_EXE  = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 CDP_PORT    = 9337
 
-# 凭据（由 WIS 域账号）
-WIS_USER    = "91764"
-WIS_PASS    = "LLll99..=="
+WIS_USER    = os.environ.get("WIS_USER", "91764")
+WIS_PASS    = os.environ.get("WIS_PASS", "")
 
 
 # ------ 缓存读写 ------
@@ -69,24 +80,53 @@ def _wis_login() -> tuple[str, dict]:
          "Referer": BASE_WIS + "/login.html", "Origin": BASE_WIS}
 
     # 获取 RSA 公钥
-    key_data = requests.get(BASE_WIS + "/api/user/password/key/get",
-                            headers=H, timeout=10).json()["data"]
+    key_resp = requests.get(BASE_WIS + "/api/user/password/key/get",
+                            headers=H, timeout=10)
+    key_resp.raise_for_status()
+    key_json = key_resp.json()
+    key_data = key_json["data"]
     pem = f"-----BEGIN PUBLIC KEY-----\n{key_data}\n-----END PUBLIC KEY-----"
     enc_pw = base64.b64encode(
-        PKCS1_v1_5.new(RSA.import_key(pem)).encrypt(WIS_PASS.encode())
+        PKCS1_v1_5.new(RSA.import_key(pem)).encrypt(WIS_PASS.encode("utf-8"))
     ).decode()
+
+    payload = {
+        "username": WIS_USER,
+        "password": enc_pw,
+        "codeKey": "",
+        "captchaCode": ""
+    }
 
     # 登录
     resp = requests.post(
         BASE_WIS + "/api/oauth/web/v2/login", headers=H,
-        json={"username": WIS_USER, "password": enc_pw,
-              "codeKey": "", "captchaCode": ""},
+        json=payload,
         timeout=10)
-    resp.raise_for_status()
-    rj = resp.json()
+
+    raw = resp.text
+    try:
+        rj = resp.json()
+    except Exception:
+        raise RuntimeError(
+            f"WIS 登录响应非 JSON: status={resp.status_code}, body={_truncate(raw)}"
+        )
+
+    if resp.status_code >= 400:
+        raise RuntimeError(
+            f"WIS 登录 HTTP 失败: status={resp.status_code}, body={_safe_json_dumps(rj)}"
+        )
+
     if rj.get("code") != 200:
-        raise RuntimeError(f"WIS 登录失败: {rj}")
-    wis_at = rj["data"]
+        raise RuntimeError(
+            f"WIS 登录失败: status={resp.status_code}, body={_safe_json_dumps(rj)}"
+        )
+
+    wis_at = rj.get("data")
+    if not wis_at:
+        raise RuntimeError(
+            f"WIS 登录成功但未返回 access token: body={_safe_json_dumps(rj)}"
+        )
+
     cookies = {c.name: c.value for c in resp.cookies}
     cookies["wis_access_token"] = wis_at
     return wis_at, cookies
@@ -177,25 +217,34 @@ def get_token_auto() -> str:
     token = cache.get("ones_lt", "")
 
     if token:
-        print(f"[TokenRefresh] 命中缓存 token，长度={len(token)}")
+        print(f"[TokenRefresh] cache token found, len={len(token)}")
         if _token_valid(token):
-            print("[TokenRefresh] 缓存 token 仍有效，直接使用")
+            print("[TokenRefresh] cache token still valid, reuse it")
             return token
         else:
-            print("[TokenRefresh] 缓存 token 判定已过期，准备刷新")
+            print("[TokenRefresh] cache token expired, refreshing")
 
-    print("[TokenRefresh] 缓存已过期，通过 WIS SSO 刷新...")
+    print("[TokenRefresh] cache expired, refresh via WIS SSO...")
+
+    if not WIS_PASS:
+        raise RuntimeError(
+            "WIS_PASS 环境变量未设置。请先设置: $env:WIS_PASS='你的密码' 或在系统环境变量中配置"
+        )
 
     # Step 1: WIS 登录
-    wis_at, wis_ck = _wis_login()
-    print(f"[TokenRefresh] WIS 登录成功")
+    try:
+        wis_at, wis_ck = _wis_login()
+    except Exception as e:
+        print(f"[TokenRefresh] WIS login failed: {e}")
+        raise
+    print("[TokenRefresh] WIS login ok")
 
     # Step 2: SSO -> ones-lt
     ones_lt = _playwright_sso(wis_at, wis_ck)
     if not ones_lt:
-        raise RuntimeError("ONES SSO 失败：未能获取 ones-lt token")
+        raise RuntimeError("ONES SSO failed: ones-lt token not found")
 
-    print(f"[TokenRefresh] ones-lt 获取成功，长度={len(ones_lt)}")
+    print(f"[TokenRefresh] ones-lt acquired, len={len(ones_lt)}")
 
     # 保存缓存
     cache["ones_lt"] = ones_lt

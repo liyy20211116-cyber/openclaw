@@ -8,7 +8,7 @@ card_action_handler.py — 飞书卡片按钮事件处理服务
 
 运行方式：python card_action_handler.py（后台常驻，随 OpenClaw 一起启动）
 """
-import json, subprocess, sys, datetime, requests, logging, re
+import json, subprocess, sys, datetime, requests, logging, re, threading
 from pathlib import Path
 
 import lark_oapi as lark
@@ -21,12 +21,12 @@ from lark_oapi.event.callback.model.p2_card_action_trigger import (
 HERE = Path(__file__).parent
 CONFIG = json.loads((HERE / "config.json").read_text(encoding="utf-8"))
 
-APP_ID     = "cli_a8e665e113a4500e"   # 白泽：卡片推送 + WebSocket 回调 + 消息发送
-APP_SECRET = "fFqJuhmuJZBOFxPvBSQ8RhouaPpg4I0k"
+APP_ID     = CONFIG["feishu_app_id"]
+APP_SECRET = CONFIG["feishu_app_secret"]
 
-# 白泽 app 凭据：用于 Bitable API
-BITABLE_APP_ID     = "cli_a8e665e113a4500e"
-BITABLE_APP_SECRET = "fFqJuhmuJZBOFxPvBSQ8RhouaPpg4I0k"
+# 当前配置下 Bitable 与卡片回调共用同一应用凭据
+BITABLE_APP_ID     = CONFIG["feishu_app_id"]
+BITABLE_APP_SECRET = CONFIG["feishu_app_secret"]
 FEISHU_API = "https://open.feishu.cn/open-apis"
 APP_TOKEN  = CONFIG["feishu"]["bitable_app_token"]
 TABLE_ID   = CONFIG["feishu"]["table_id"]
@@ -200,6 +200,16 @@ def build_done_card(title: str, action: str, detail: str = "") -> dict:
                 {"tag": "div", "text": {"tag": "lark_md", "content": f"_处理时间：{now_str}_"}}
             ]
         }
+    elif action == "failed":
+        return {
+            "config": {"wide_screen_mode": True},
+            "header": {"title": {"tag": "plain_text", "content": f"[处理失败] {title}"},
+                       "template": "red"},
+            "elements": [
+                {"tag": "div", "text": {"tag": "lark_md", "content": detail or "建单失败，请查看日志。"}},
+                {"tag": "div", "text": {"tag": "lark_md", "content": f"_处理时间：{now_str}_"}}
+            ]
+        }
     else:
         return {
             "config": {"wide_screen_mode": True},
@@ -229,8 +239,7 @@ def make_response(new_card: dict | None, toast_text: str | None = None,
 
 # ─────────────────────── 业务逻辑 ─────────────────────────────
 
-def handle_approve(value: dict) -> P2CardActionTriggerResponse:
-    """通过：调用 create_ones_task.py 创建 ONES 工单"""
+def _run_approve_job(value: dict) -> None:
     record_id      = value.get("record_id", "")
     title          = value.get("req_title", "未命名需求")
     desc           = value.get("description", "")
@@ -245,72 +254,89 @@ def handle_approve(value: dict) -> P2CardActionTriggerResponse:
     submitter_name = value.get("submitter_name", "")
     product_display = value.get("product_display", "")
 
-    log.info(f"[通过] record={record_id} title={title}")
+    log.info(f"[通过-后台] record={record_id} title={title}")
 
     cmd = [
-        sys.executable, str(HERE / "create_ones_task.py"),
+        sys.executable, str(HERE / "create_ones_task_ui.py"),
         title, desc, severity_uuid, issue_uuid, product_uuid,
         req_type, warehouse, priority, expected_date, value_amount,
         submitter_name, product_display
     ]
-    try:
-        result = subprocess.run(cmd, capture_output=True, timeout=90,
-                                encoding="utf-8", errors="replace")
-        output = result.stdout + result.stderr
-        log.info(f"[通过] create_ones_task 输出:\n{output[:600]}")
 
+    try:
         bitable_token = get_bitable_token()
         fields_cfg    = CONFIG["feishu"]["fields"]
         status_values = CONFIG["feishu"]["status_values"]
         auto_values   = CONFIG["feishu"].get("automation_status_values", {})
         now_ms = int(datetime.datetime.now().timestamp() * 1000)
 
-        # 先落中间态，便于失败恢复与排查
         pre_update = {
             fields_cfg["automation_status"]: auto_values.get("approved_waiting_create", "审批通过待建单"),
-            fields_cfg["approval_time"]: now_ms,
-            fields_cfg.get("recent_processed_time", "最近处理时间"): now_ms
+            fields_cfg["approval_time"]: now_ms
         }
-        # 审批人字段的 Person ID 体系与会话/开放平台 ID 存在差异，暂不在此处回写，先保证主流程闭环
+        if fields_cfg.get("recent_processed_time"):
+            pre_update[fields_cfg["recent_processed_time"]] = now_ms
         update_bitable_record(bitable_token, record_id, pre_update)
 
+        result = subprocess.run(cmd, capture_output=True, timeout=180,
+                                encoding="utf-8", errors="replace")
+        output = (result.stdout or "") + (result.stderr or "")
+        log.info(f"[通过-后台] create_ones_task 输出:\n{output[:4000]}")
+
         if result.returncode != 0:
-            raise RuntimeError(f"create_ones_task.py 失败(returncode={result.returncode}): {output[:500].strip()}")
+            raise RuntimeError(f"create_ones_task_ui.py 失败(returncode={result.returncode}): {output[:2000].strip()}")
 
         ones_url = ""
+        issue_no = ""
+        submitted = False
+        link_pending = False
+        parsed_json = None
         for line in output.splitlines():
-            m = re.search(r'https?://ones\.winnermedical\.com\S+', line)
-            if m:
-                ones_url = m.group(0).strip('",)')
-                break
-        if not ones_url:
-            raise RuntimeError(f"未从 create_ones_task.py 输出中解析到 ONES 链接: {output[:500].strip()}")
+            if not ones_url:
+                m = re.search(r'https?://ones\.winnermedical\.com\S+', line)
+                if m:
+                    ones_url = m.group(0).strip('\",)')
+            if not issue_no:
+                m = re.search(r'issue_no=([^\s]+)', line)
+                if m:
+                    issue_no = m.group(1).lstrip('#')
+            if parsed_json is None and line.strip().startswith('{') and 'submitted' in line:
+                try:
+                    parsed_json = json.loads(line.strip())
+                except Exception:
+                    pass
+
+        if parsed_json:
+            ones_url = parsed_json.get("ones_url") or ones_url
+            issue_no = (parsed_json.get("issue_no") or issue_no or "").lstrip('#')
+            submitted = bool(parsed_json.get("submitted"))
+            link_pending = bool(parsed_json.get("link_pending"))
+        else:
+            submitted = bool(issue_no)
+            link_pending = bool(issue_no) and not bool(ones_url)
+
+        if not issue_no:
+            raise RuntimeError(f"create_ones_task_ui.py 未拿到 ONES ID，当前不判定建单成功: {output[:800].strip()}")
+        if not submitted:
+            raise RuntimeError(f"create_ones_task_ui.py 未确认提交完成: {output[:500].strip()}")
 
         update_data = {
             fields_cfg["status"]: status_values.get("approved", "已提交ones"),
-            fields_cfg["automation_status"]: auto_values.get("create_success", "建单成功"),
-            fields_cfg["approval_time"]: now_ms,
-            fields_cfg.get("recent_processed_time", "最近处理时间"): now_ms
+            fields_cfg["automation_status"]: auto_values.get("create_success_pending_link", "已提交ONES-待补链接") if link_pending else auto_values.get("create_success", "建单成功"),
+            fields_cfg["approval_time"]: now_ms
         }
-        issue_no = ""
-        for line in output.splitlines():
-            m = re.search(r'#(\d+)', line)
-            if m:
-                issue_no = f"#{m.group(1)}"
-                break
-        if fields_cfg.get("ones_link"):
-            update_data[fields_cfg["ones_link"]] = f"{issue_no} {title} {ones_url}".strip()
+        if fields_cfg.get("recent_processed_time"):
+            update_data[fields_cfg["recent_processed_time"]] = now_ms
+        if ones_url and fields_cfg.get("ones_link"):
+            update_data[fields_cfg["ones_link"]] = ones_url.strip()
         if issue_no and fields_cfg.get("ones_number"):
-            update_data[fields_cfg["ones_number"]] = issue_no
+            update_data[fields_cfg["ones_number"]] = f"#{issue_no}"
         if fields_cfg.get("build_fail_reason"):
-            update_data[fields_cfg["build_fail_reason"]] = ""
+            update_data[fields_cfg["build_fail_reason"]] = "待补链接" if link_pending else ""
         update_bitable_record(bitable_token, record_id, update_data)
 
-        detail = f"工单链接：{ones_url}"
-        return make_response(build_done_card(title, "approved", detail), toast_text="工单创建成功")
-
     except Exception as e:
-        log.error(f"[通过] 执行失败: {e}", exc_info=True)
+        log.error(f"[通过-后台] 执行失败: {e}", exc_info=True)
         try:
             bitable_token = get_bitable_token()
             fields_cfg = CONFIG["feishu"]["fields"]
@@ -326,8 +352,15 @@ def handle_approve(value: dict) -> P2CardActionTriggerResponse:
             update_bitable_record(bitable_token, record_id, fail_update)
         except Exception:
             pass
-        return make_response(build_done_card(title, "approved", f"[错误] {e}"),
-                             toast_text="出错了，请查看日志", toast_type="error")
+
+
+def handle_approve(value: dict) -> P2CardActionTriggerResponse:
+    """通过：快速 ACK，后台执行 ONES 页面自动化建单"""
+    record_id = value.get("record_id", "")
+    title = value.get("req_title", "未命名需求")
+    log.info(f"[通过] record={record_id} title={title} -> 后台执行")
+    threading.Thread(target=_run_approve_job, args=(value,), daemon=True).start()
+    return make_response(None, toast_text="已接收，正在后台创建 ONES 工单", toast_type="info")
 
 
 def handle_reject(value: dict) -> P2CardActionTriggerResponse:

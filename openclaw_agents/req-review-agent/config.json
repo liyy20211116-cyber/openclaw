@@ -91,7 +91,7 @@
 
     "_api_endpoint": "POST https://ones.winnermedical.com/project/api/project/team/BSsxXFv2/items/graphql",
     "_task_create_endpoint": "POST https://ones.winnermedical.com/project/api/project/team/BSsxXFv2/tasks/add",
-    "_task_create_note": "payload: {tasks:[{uuid, assign, summary, parent_uuid, issue_type_uuid, project_uuid, watchers, field_values}]}. uuid=user_uuid+8随机字符(客户端生成). 必填字段: field001(title,type2), field016(desc_html,type20), ScqUnZYX(desc_plain,type15), field038(severity,type1), field004(assignee,type8), field029(product_uuids,type44).",
+    "_task_create_note": "当前 API 建单路径已确认存在 IssueTypeScope 作用域不匹配风险；主流程已改为优先走 ONES 页面自动化弹窗提报，再在成功后回填多维表。保留此接口信息仅供排障参考。",
 
     "issue_types": {
       "requirement": {

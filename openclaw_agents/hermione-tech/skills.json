@@ -1,0 +1,82 @@
+[
+  {
+    "id": "hermione_code_review",
+    "name": "代码审查",
+    "description": "检查指定目录/文件的代码质量、错误处理、安全隐患",
+    "type": "script",
+    "script": "skill_code_review.py",
+    "timeout": 60
+  },
+  {
+    "id": "hermione_run_test",
+    "name": "运行测试",
+    "description": "执行 req-review-agent 的测试脚本，验证核心流程",
+    "type": "script",
+    "script": "skill_run_test.py",
+    "timeout": 120
+  },
+  {
+    "id": "hermione_check_services",
+    "name": "检查服务状态",
+    "description": "检查所有服务（后端、飞书接口、ONES API）的连通性",
+    "type": "script",
+    "script": "skill_check_services.py",
+    "timeout": 30
+  },
+  {
+    "id": "hermione_deploy_fix",
+    "name": "修复部署问题",
+    "description": "诊断并修复常见的部署和配置问题",
+    "type": "script",
+    "script": "skill_deploy_fix.py",
+    "timeout": 60
+  },
+  {
+    "id": "hermione_web_search",
+    "name": "技术文档搜索",
+    "description": "搜索技术文档、GitHub 方案、Stack Overflow、API 参考",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 60
+  },
+  {
+    "id": "hermione_browser_test",
+    "name": "浏览器自动化测试",
+    "description": "使用 Playwright/browser-use 做 Web UI 功能测试和回归测试",
+    "type": "skill_ref",
+    "ref": "skills/browser-automation",
+    "timeout": 120
+  },
+  {
+    "id": "hermione_git_ops",
+    "name": "Git 版本控制",
+    "description": "代码提交、分支管理、PR 创建、冲突解决、GitHub 仓库操作",
+    "type": "skill_ref",
+    "ref": "skills/git-ops",
+    "timeout": 60
+  },
+  {
+    "id": "hermione_api_client",
+    "name": "API 接口调试",
+    "description": "HTTP API 测试、接口对接调试、Webhook 发送",
+    "type": "skill_ref",
+    "ref": "skills/api-http-client",
+    "timeout": 60
+  },
+  {
+    "id": "hermione_skill_dev",
+    "name": "技能开发部署",
+    "description": "为其他角色开发自动化技能脚本、安装依赖、注册到 skills.json",
+    "type": "skill_ref",
+    "ref": "skills/skill-installer",
+    "timeout": 120
+  },
+  {
+    "id": "hermione_file_ops",
+    "name": "文件与脚本执行",
+    "description": "管理代码文件、执行 Python/Node/Shell 脚本、安装依赖包",
+    "type": "skill_ref",
+    "ref": "skills/local-file-ops",
+    "timeout": 60
+  }
+]

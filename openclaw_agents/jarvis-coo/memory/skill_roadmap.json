@@ -1,0 +1,14 @@
+{
+  "last_review": "2026-04-10",
+  "next_review": "2026-04-17",
+  "planned": [],
+  "in_progress": [],
+  "completed": [
+    {
+      "date": "2026-04-10",
+      "action": "全公司技能体系升级",
+      "detail": "新增9个通用基础技能 + 8个角色专属增强技能，全公司技能从25个增至76个"
+    }
+  ],
+  "deprecated": []
+}

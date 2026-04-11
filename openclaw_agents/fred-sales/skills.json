@@ -1,0 +1,82 @@
+[
+  {
+    "id": "fred_pricing_proposal",
+    "name": "生成报价方案",
+    "description": "根据客户需求和服务类型生成定价方案和报价单",
+    "type": "llm_to_file",
+    "outputDir": "output/proposals",
+    "timeout": 60
+  },
+  {
+    "id": "fred_customer_analysis",
+    "name": "客户画像分析",
+    "description": "分析目标客户特征，生成获客策略建议",
+    "type": "llm_to_file",
+    "outputDir": "output/customers",
+    "timeout": 60
+  },
+  {
+    "id": "fred_sales_stats",
+    "name": "销售数据统计",
+    "description": "统计商务方案和客户记录，输出销售漏斗数据",
+    "type": "script",
+    "script": "skill_sales_stats.py",
+    "timeout": 15
+  },
+  {
+    "id": "fred_prospect_research",
+    "name": "客户网络调研",
+    "description": "使用 WebSearch 搜索潜在客户公司信息、行业背景、竞品报价",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 60
+  },
+  {
+    "id": "fred_site_analysis",
+    "name": "客户网站分析",
+    "description": "通过浏览器访问客户网站，截图分析产品和需求",
+    "type": "skill_ref",
+    "ref": "skills/browser-automation",
+    "timeout": 90
+  },
+  {
+    "id": "fred_excel_quotation",
+    "name": "Excel 报价单",
+    "description": "使用 Excel 生成格式化报价单、销售数据表、漏斗分析表",
+    "type": "skill_ref",
+    "ref": "skills/excel-data",
+    "timeout": 60
+  },
+  {
+    "id": "fred_crm_bitable",
+    "name": "CRM 客户管理",
+    "description": "使用飞书多维表格管理客户数据、跟进记录、销售漏斗",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-bitable",
+    "timeout": 60
+  },
+  {
+    "id": "fred_doc_export",
+    "name": "商务文档导出",
+    "description": "将方案/报价导出为 PDF 格式，使用 LibreOffice 安全导出",
+    "type": "skill_ref",
+    "ref": "skills/libreoffice-safe-export",
+    "timeout": 60
+  },
+  {
+    "id": "fred_feishu_followup",
+    "name": "飞书商务跟进",
+    "description": "通过飞书消息发送商务跟进提醒、成交通知、团队协同",
+    "type": "skill_ref",
+    "ref": "skills/feishu-messaging",
+    "timeout": 30
+  },
+  {
+    "id": "fred_proposal_image",
+    "name": "方案配图生成",
+    "description": "为商务方案生成产品宣传图、架构示意图、对比图表",
+    "type": "skill_ref",
+    "ref": "skills/image-gen",
+    "timeout": 60
+  }
+]

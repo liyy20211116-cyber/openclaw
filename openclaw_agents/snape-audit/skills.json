@@ -1,0 +1,82 @@
+[
+  {
+    "id": "snape_security_scan",
+    "name": "安全扫描",
+    "description": "扫描项目代码中的密钥泄露、裸 except、缺少 timeout 等安全隐患",
+    "type": "script",
+    "script": "skill_security_scan.py",
+    "timeout": 30
+  },
+  {
+    "id": "snape_audit_log",
+    "name": "审计日志检查",
+    "description": "检查系统操作日志完整性和异常行为",
+    "type": "script",
+    "script": "skill_audit_log.py",
+    "timeout": 15
+  },
+  {
+    "id": "snape_quality_gate",
+    "name": "质量门禁",
+    "description": "对产出物做质量抽检，检查是否存在 AI 幻觉或数据编造",
+    "type": "llm_to_file",
+    "outputDir": "output/audit",
+    "timeout": 60
+  },
+  {
+    "id": "snape_cve_search",
+    "name": "漏洞情报搜索",
+    "description": "使用 WebSearch 搜索 CVE 漏洞库、安全公告、依赖库漏洞",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 60
+  },
+  {
+    "id": "snape_pentest_browser",
+    "name": "浏览器渗透测试",
+    "description": "使用浏览器自动化模拟攻击者视角，检测输入验证、权限、信息泄露",
+    "type": "skill_ref",
+    "ref": "skills/browser-automation",
+    "timeout": 120
+  },
+  {
+    "id": "snape_api_security",
+    "name": "API 安全测试",
+    "description": "使用 HTTP 客户端测试未授权访问、注入、越权等安全问题",
+    "type": "skill_ref",
+    "ref": "skills/api-http-client",
+    "timeout": 60
+  },
+  {
+    "id": "snape_git_audit",
+    "name": "代码提交审计",
+    "description": "审查 Git 提交历史、检测敏感信息泄露、检查代码变更合规性",
+    "type": "skill_ref",
+    "ref": "skills/git-ops",
+    "timeout": 60
+  },
+  {
+    "id": "snape_skill_review",
+    "name": "技能安全审查",
+    "description": "对新安装的技能进行安全审查：代码来源、权限检查、依赖漏洞",
+    "type": "skill_ref",
+    "ref": "skills/skill-installer",
+    "timeout": 60
+  },
+  {
+    "id": "snape_alert_notify",
+    "name": "安全告警推送",
+    "description": "通过飞书消息推送安全告警、审计发现、风险预警",
+    "type": "skill_ref",
+    "ref": "skills/feishu-messaging",
+    "timeout": 30
+  },
+  {
+    "id": "snape_file_scanner",
+    "name": "文件系统扫描",
+    "description": "深度扫描文件系统，检查敏感文件、权限配置、日志完整性",
+    "type": "skill_ref",
+    "ref": "skills/local-file-ops",
+    "timeout": 60
+  }
+]

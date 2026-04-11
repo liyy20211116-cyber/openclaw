@@ -3,4 +3,25 @@ node_modules/
 .env.*
 npm-debug.log*
 *.log
-node_modules
+
+# OpenClaw 源码（本地运行需要，不提交）
+OpenClaw/
+
+# IDE
+.cursor/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# 归档目录
+归档_历史文档/
+
+# 临时文件
+*.tmp
+.DS_Store
+
+# 大文件
+*.zip
+*.exe

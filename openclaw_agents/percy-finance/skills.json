@@ -1,0 +1,74 @@
+[
+  {
+    "id": "percy_token_report",
+    "name": "Token 消耗报告",
+    "description": "统计各部门 LLM Token 使用量，生成财务日报",
+    "type": "script",
+    "script": "skill_token_report.py",
+    "timeout": 30
+  },
+  {
+    "id": "percy_budget_check",
+    "name": "预算审核",
+    "description": "检查各部门消耗是否超出预算，输出预警",
+    "type": "script",
+    "script": "skill_budget_check.py",
+    "timeout": 15
+  },
+  {
+    "id": "percy_project_settlement",
+    "name": "项目结算",
+    "description": "生成项目 ROI 报告和成本明细",
+    "type": "llm_to_file",
+    "outputDir": "output/finance",
+    "timeout": 60
+  },
+  {
+    "id": "percy_excel_report",
+    "name": "Excel 财务报表",
+    "description": "生成格式化的 Excel 财务报表（日报/周报/项目结算）",
+    "type": "skill_ref",
+    "ref": "skills/excel-data",
+    "timeout": 60
+  },
+  {
+    "id": "percy_bitable_ledger",
+    "name": "飞书财务台账",
+    "description": "在飞书多维表格维护实时 Token 流水台账和预算跟踪表",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-bitable",
+    "timeout": 60
+  },
+  {
+    "id": "percy_budget_alert",
+    "name": "预算预警通知",
+    "description": "通过飞书消息推送预算超标告警和财务日报",
+    "type": "skill_ref",
+    "ref": "skills/feishu-messaging",
+    "timeout": 30
+  },
+  {
+    "id": "percy_market_info",
+    "name": "财务信息查询",
+    "description": "搜索汇率、税务政策、行业成本基准、SaaS 定价参考",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 60
+  },
+  {
+    "id": "percy_pdf_export",
+    "name": "报表 PDF 导出",
+    "description": "将财务报表从 Excel/文档导出为 PDF 归档",
+    "type": "skill_ref",
+    "ref": "skills/libreoffice-safe-export",
+    "timeout": 60
+  },
+  {
+    "id": "percy_file_archive",
+    "name": "财务文件归档",
+    "description": "管理财务文件目录结构、归档历史报表",
+    "type": "skill_ref",
+    "ref": "skills/local-file-ops",
+    "timeout": 30
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "mcgonagall_write_prd",
+    "name": "撰写产品需求文档",
+    "description": "根据目标生成结构化的 PRD 文档，含用户故事、验收标准、优先级",
+    "type": "llm_to_file",
+    "outputDir": "output/prd",
+    "timeout": 60
+  },
+  {
+    "id": "mcgonagall_acceptance_check",
+    "name": "验收检查",
+    "description": "对照需求文档检查项目实际完成情况，输出验收报告",
+    "type": "script",
+    "script": "skill_acceptance_check.py",
+    "timeout": 30
+  },
+  {
+    "id": "mcgonagall_requirement_analysis",
+    "name": "需求分析",
+    "description": "分析飞书表格中的需求记录，输出需求清洗和优先级建议",
+    "type": "script",
+    "script": "skill_req_analysis.py",
+    "timeout": 60
+  },
+  {
+    "id": "mcgonagall_competitive_research",
+    "name": "竞品调研分析",
+    "description": "使用 WebSearch + browser-use 搜索竞品网站，截图对比，生成竞品分析报告",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 90
+  },
+  {
+    "id": "mcgonagall_browser_walkthrough",
+    "name": "产品功能走查",
+    "description": "通过浏览器自动化走查产品和竞品功能，截图记录体验",
+    "type": "skill_ref",
+    "ref": "skills/browser-automation",
+    "timeout": 120
+  },
+  {
+    "id": "mcgonagall_flow_diagram",
+    "name": "流程图生成",
+    "description": "使用 workflow-diagram-render 生成业务流程图、状态机图、信息架构图",
+    "type": "skill_ref",
+    "ref": "skills/workflow-diagram-render",
+    "timeout": 60
+  },
+  {
+    "id": "mcgonagall_prototype_image",
+    "name": "原型示意图",
+    "description": "使用 AI 图像生成简易原型示意图和功能说明配图",
+    "type": "skill_ref",
+    "ref": "skills/image-gen",
+    "timeout": 60
+  },
+  {
+    "id": "mcgonagall_data_analysis",
+    "name": "产品数据分析",
+    "description": "使用 Excel 分析用户数据、需求优先级矩阵、功能对比表",
+    "type": "skill_ref",
+    "ref": "skills/excel-data",
+    "timeout": 60
+  },
+  {
+    "id": "mcgonagall_feishu_doc",
+    "name": "产品文档管理",
+    "description": "在飞书创建和管理 PRD、方案文档、评审记录",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-doc",
+    "timeout": 60
+  }
+]

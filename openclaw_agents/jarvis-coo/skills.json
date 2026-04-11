@@ -1,0 +1,45 @@
+[
+  {
+    "id": "jarvis_company_status",
+    "name": "公司全局状态",
+    "description": "汇总所有部门的服务状态、项目进度、待办事项",
+    "type": "script",
+    "script": "skill_company_status.py",
+    "timeout": 30
+  },
+  {
+    "id": "jarvis_dispatch_tasks",
+    "name": "任务派发执行",
+    "description": "根据任务清单自动调度各部门执行对应技能",
+    "type": "script",
+    "script": "skill_dispatch.py",
+    "timeout": 180
+  },
+  {
+    "id": "jarvis_daily_report",
+    "name": "生成日报",
+    "description": "汇总各部门工作记录，生成 CEO 日报",
+    "type": "llm_to_file",
+    "outputDir": "output/reports",
+    "timeout": 60
+  },
+
+  {"id": "jarvis_web_research", "name": "网络搜索与情报", "description": "WebSearch/WebFetch 搜集行业动态、竞品信息、政策法规，整合到决策材料", "type": "skill_ref", "ref": "skills/web-search", "timeout": 60},
+  {"id": "jarvis_browser_ops", "name": "浏览器自动化", "description": "browser-use/Playwright 操控网页，监控竞品、验收产品、截图取证", "type": "skill_ref", "ref": "skills/browser-automation", "timeout": 120},
+  {"id": "jarvis_file_management", "name": "本地文件与软件", "description": "读写文件、调用 FFmpeg/Python/Node、管理公司目录结构", "type": "skill_ref", "ref": "skills/local-file-ops", "timeout": 60},
+  {"id": "jarvis_skill_manager", "name": "技能安装与管理", "description": "全公司技能盘点、从 GitHub 安装新技能、审批技能申请、维护技能路线图", "type": "skill_ref", "ref": "skills/skill-installer", "timeout": 120},
+  {"id": "jarvis_git_ops", "name": "Git 版本控制", "description": "监控代码仓库变更、查看提交历史、管理分支、GitHub 操作", "type": "skill_ref", "ref": "skills/git-ops", "timeout": 60},
+  {"id": "jarvis_api_client", "name": "API HTTP 调用", "description": "调用外部 API、测试接口、Webhook 通知、服务健康检查", "type": "skill_ref", "ref": "skills/api-http-client", "timeout": 60},
+  {"id": "jarvis_image_gen", "name": "AI 图片生成", "description": "生成汇报配图、品牌素材、演示插图", "type": "skill_ref", "ref": "skills/image-gen", "timeout": 60},
+  {"id": "jarvis_excel_dashboard", "name": "Excel 数据处理", "description": "制作管理报表、KPI看板、项目跟踪表、资源分配表", "type": "skill_ref", "ref": "skills/excel-data", "timeout": 60},
+  {"id": "jarvis_feishu_msg", "name": "飞书消息通信", "description": "向各部门/CEO发送消息、任务通知、进度催办、告警推送", "type": "skill_ref", "ref": "skills/feishu-messaging", "timeout": 30},
+
+  {"id": "jarvis_feishu_bitable", "name": "飞书多维表格", "description": "管理任务台账、项目跟踪表、全公司数据看板", "type": "skill_ref", "ref": "skills/feishu-workflow-bitable", "timeout": 60},
+  {"id": "jarvis_feishu_doc", "name": "飞书文档管理", "description": "创建和管理公司制度文档、会议纪要、方案文档", "type": "skill_ref", "ref": "skills/feishu-workflow-doc", "timeout": 60},
+  {"id": "jarvis_feishu_wiki", "name": "飞书知识库", "description": "维护公司知识库、制度手册、流程文档", "type": "skill_ref", "ref": "skills/feishu-workflow-wiki", "timeout": 60},
+  {"id": "jarvis_feishu_drive", "name": "飞书云盘归档", "description": "归档项目产出到飞书云盘、管理共享目录", "type": "skill_ref", "ref": "skills/feishu-drive-archive", "timeout": 60},
+  {"id": "jarvis_feishu_sync", "name": "飞书文档同步", "description": "文档与多维表格双落地同步", "type": "skill_ref", "ref": "skills/feishu-workflow-sync", "timeout": 60},
+  {"id": "jarvis_feishu_diagram", "name": "飞书流程图", "description": "生成业务流程图、组织架构图、决策流程图", "type": "skill_ref", "ref": "skills/feishu-workflow-diagram", "timeout": 60},
+  {"id": "jarvis_doc_export", "name": "文档 PDF 导出", "description": "将报告、方案、制度文档导出为 PDF 归档", "type": "skill_ref", "ref": "skills/libreoffice-safe-export", "timeout": 60},
+  {"id": "jarvis_diagram_render", "name": "流程图渲染", "description": "渲染工作流图表、架构图、决策树", "type": "skill_ref", "ref": "skills/workflow-diagram-render", "timeout": 60}
+]

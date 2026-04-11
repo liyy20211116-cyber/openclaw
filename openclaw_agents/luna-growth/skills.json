@@ -1,0 +1,74 @@
+[
+  {
+    "id": "luna_content_pipeline",
+    "name": "内容生产流水线",
+    "description": "抓取新闻 → 筛选排名 → 生成脚本 → 渲染视频，全链路自动执行",
+    "type": "script",
+    "script": "skill_content_pipeline.py",
+    "timeout": 120
+  },
+  {
+    "id": "luna_write_article",
+    "name": "撰写文章",
+    "description": "根据主题和目标受众生成公众号/博客文章",
+    "type": "llm_to_file",
+    "outputDir": "output/articles",
+    "timeout": 60
+  },
+  {
+    "id": "luna_content_stats",
+    "name": "内容产出统计",
+    "description": "统计 output 目录下的内容产出数量、类型和时间分布",
+    "type": "script",
+    "script": "skill_content_stats.py",
+    "timeout": 15
+  },
+  {
+    "id": "luna_trend_research",
+    "name": "热点趋势追踪",
+    "description": "使用 WebSearch 追踪行业热点、社媒趋势、竞品内容动态",
+    "type": "skill_ref",
+    "ref": "skills/web-search",
+    "timeout": 60
+  },
+  {
+    "id": "luna_social_automation",
+    "name": "社媒浏览器操作",
+    "description": "通过浏览器自动化辅助社媒平台数据采集和内容发布",
+    "type": "skill_ref",
+    "ref": "skills/browser-automation",
+    "timeout": 120
+  },
+  {
+    "id": "luna_image_creation",
+    "name": "素材图片生成",
+    "description": "使用 AI 生成文章封面、社媒配图、视频缩略图、信息图",
+    "type": "skill_ref",
+    "ref": "skills/image-gen",
+    "timeout": 60
+  },
+  {
+    "id": "luna_media_ops",
+    "name": "音视频素材处理",
+    "description": "使用 FFmpeg 处理视频剪辑、音频转换、素材格式转换",
+    "type": "skill_ref",
+    "ref": "skills/local-file-ops",
+    "timeout": 120
+  },
+  {
+    "id": "luna_content_calendar",
+    "name": "内容排期管理",
+    "description": "使用飞书多维表格管理内容排期、发布计划、数据复盘",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-bitable",
+    "timeout": 60
+  },
+  {
+    "id": "luna_feishu_publish",
+    "name": "飞书内容发布",
+    "description": "将内容发布到飞书文档/知识库，通知团队审阅",
+    "type": "skill_ref",
+    "ref": "skills/feishu-messaging",
+    "timeout": 30
+  }
+]
