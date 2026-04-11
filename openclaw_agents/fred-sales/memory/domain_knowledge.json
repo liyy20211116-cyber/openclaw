@@ -1,0 +1,19 @@
+{
+  "agent": "fred-sales",
+  "updated_at": "2026-04-11T15:30:04.667832",
+  "stats": {
+    "total_raw": 1,
+    "duplicates_removed": 0,
+    "unique": 1,
+    "sensitive_redacted": 0
+  },
+  "categories": {
+    "other": {
+      "count": 1,
+      "latest": "unknown"
+    }
+  },
+  "top_learnings": [
+    "_2026-04-11_ 记忆系统初始化成功。"
+  ]
+}

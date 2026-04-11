@@ -1,0 +1,19 @@
+{
+  "agent": "mcgonagall-product",
+  "updated_at": "2026-04-11T15:30:04.684636",
+  "stats": {
+    "total_raw": 1,
+    "duplicates_removed": 0,
+    "unique": 1,
+    "sensitive_redacted": 0
+  },
+  "categories": {
+    "other": {
+      "count": 1,
+      "latest": "2026-04-10 02:00"
+    }
+  },
+  "top_learnings": [
+    "【当前项目】ONES 需求审核自动化 - 产品视角\n\n## 业务流程\n1. 业务人员在飞书多维表格（稳健集团·数字化需求&BUG收集池）提交需求\n2. Agent 扫描\"待审批\"记录，向审核人（CEO 李原野）推送飞书审核卡片\n3. CEO 在飞书点击\"通过\"或\"退回\"\n4. 通过：自动在 ONES 创建业务需求/问题缺陷工作项，回写链接到飞书表格\n5. 退回：回写退回理由，通知提报人\n\n## 字"
+  ]
+}

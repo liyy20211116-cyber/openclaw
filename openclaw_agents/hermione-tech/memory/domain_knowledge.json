@@ -1,0 +1,19 @@
+{
+  "agent": "hermione-tech",
+  "updated_at": "2026-04-11T15:30:04.673186",
+  "stats": {
+    "total_raw": 1,
+    "duplicates_removed": 0,
+    "unique": 1,
+    "sensitive_redacted": 0
+  },
+  "categories": {
+    "ONES": {
+      "count": 1,
+      "latest": "2026-04-10 02:00"
+    }
+  },
+  "top_learnings": [
+    "【当前项目】ONES 需求审核自动化 - 技术状态\n\n## 代码位置\nd:\\FY003\\openclaw_agents\\req-review-agent\\\n\n## 已完成\n- scan_and_send.py：扫描飞书多维表格\"待审批\"记录，发送审核卡片 ✅\n- card_action_handler.py：飞书 WebSocket 长连接监听卡片回调，处理通过/退回 ✅\n- create_one"
+  ]
+}
