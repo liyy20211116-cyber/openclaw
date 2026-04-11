@@ -4,6 +4,8 @@ import { useSnapshot } from '../hooks/useSnapshot'
 import { agentService } from '../services/agentService'
 import { ledgerService } from '../services/ledgerService'
 import { taskService } from '../services/taskService'
+import { OrgChart } from '../components/OrgChart'
+import { MemoryBrowser } from '../components/MemoryBrowser'
 
 export function AgentsPage() {
   useSnapshot()
@@ -176,6 +178,14 @@ export function AgentsPage() {
             </div>
           )}
         </aside>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 10, marginTop: 10 }}>
+        <div className="panel" style={{ padding: 0 }}>
+          <p className="eyebrow" style={{ padding: '14px 14px 0' }}>组织架构</p>
+          <OrgChart />
+        </div>
+        <MemoryBrowser />
       </div>
     </section>
   )
