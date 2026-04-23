@@ -60,7 +60,15 @@ export const ModelName = {
   AuditEvent: 'AuditEvent',
   StoreItem: 'StoreItem',
   StoreOrder: 'StoreOrder',
-  Revenue: 'Revenue'
+  Revenue: 'Revenue',
+  WorkflowRun: 'WorkflowRun',
+  WorkflowStep: 'WorkflowStep',
+  AgentMemory: 'AgentMemory',
+  MemoryEntry: 'MemoryEntry',
+  LlmUsageLog: 'LlmUsageLog',
+  ChatTopic: 'ChatTopic',
+  ChatMessage: 'ChatMessage',
+  PerformanceReview: 'PerformanceReview'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -233,6 +241,133 @@ export const RevenueScalarFieldEnum = {
 } as const
 
 export type RevenueScalarFieldEnum = (typeof RevenueScalarFieldEnum)[keyof typeof RevenueScalarFieldEnum]
+
+
+export const WorkflowRunScalarFieldEnum = {
+  id: 'id',
+  workflowId: 'workflowId',
+  workflowName: 'workflowName',
+  status: 'status',
+  inputJson: 'inputJson',
+  contextJson: 'contextJson',
+  errorMessage: 'errorMessage',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkflowRunScalarFieldEnum = (typeof WorkflowRunScalarFieldEnum)[keyof typeof WorkflowRunScalarFieldEnum]
+
+
+export const WorkflowStepScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  nodeId: 'nodeId',
+  agentId: 'agentId',
+  skillId: 'skillId',
+  label: 'label',
+  status: 'status',
+  outputJson: 'outputJson',
+  errorMsg: 'errorMsg',
+  attempts: 'attempts',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type WorkflowStepScalarFieldEnum = (typeof WorkflowStepScalarFieldEnum)[keyof typeof WorkflowStepScalarFieldEnum]
+
+
+export const AgentMemoryScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  category: 'category',
+  content: 'content',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentMemoryScalarFieldEnum = (typeof AgentMemoryScalarFieldEnum)[keyof typeof AgentMemoryScalarFieldEnum]
+
+
+export const MemoryEntryScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  category: 'category',
+  content: 'content',
+  source: 'source',
+  embedding: 'embedding',
+  importance: 'importance',
+  citedCount: 'citedCount',
+  lastCitedAt: 'lastCitedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemoryEntryScalarFieldEnum = (typeof MemoryEntryScalarFieldEnum)[keyof typeof MemoryEntryScalarFieldEnum]
+
+
+export const LlmUsageLogScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  taskId: 'taskId',
+  provider: 'provider',
+  model: 'model',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  totalTokens: 'totalTokens',
+  estimatedCost: 'estimatedCost',
+  callerFunction: 'callerFunction',
+  durationMs: 'durationMs',
+  createdAt: 'createdAt'
+} as const
+
+export type LlmUsageLogScalarFieldEnum = (typeof LlmUsageLogScalarFieldEnum)[keyof typeof LlmUsageLogScalarFieldEnum]
+
+
+export const ChatTopicScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  messageCount: 'messageCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatTopicScalarFieldEnum = (typeof ChatTopicScalarFieldEnum)[keyof typeof ChatTopicScalarFieldEnum]
+
+
+export const ChatMessageScalarFieldEnum = {
+  id: 'id',
+  topicId: 'topicId',
+  role: 'role',
+  content: 'content',
+  attachmentsJson: 'attachmentsJson',
+  mentionsJson: 'mentionsJson',
+  quotedMessageJson: 'quotedMessageJson',
+  teamMessagesJson: 'teamMessagesJson',
+  llmModelUsed: 'llmModelUsed',
+  createdAt: 'createdAt'
+} as const
+
+export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
+
+
+export const PerformanceReviewScalarFieldEnum = {
+  id: 'id',
+  agentCode: 'agentCode',
+  agentFolder: 'agentFolder',
+  reviewer: 'reviewer',
+  version: 'version',
+  score: 'score',
+  grade: 'grade',
+  breakdownJson: 'breakdownJson',
+  improvementAreasJson: 'improvementAreasJson',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt'
+} as const
+
+export type PerformanceReviewScalarFieldEnum = (typeof PerformanceReviewScalarFieldEnum)[keyof typeof PerformanceReviewScalarFieldEnum]
 
 
 export const SortOrder = {

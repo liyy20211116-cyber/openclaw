@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { PrismaClient } from '../../src/generated/prisma/client'
 import { projectRoot } from './prismaClient'
+import { loadLatestPerformanceWithPrisma } from './performanceLoader'
 
 const outputPath = path.resolve(projectRoot, 'src/data/appSnapshot.ts')
 const publicOutputPath = path.resolve(projectRoot, 'public/appSnapshot.json')
@@ -48,7 +49,7 @@ function humanizeAction(actionType: string) {
 }
 
 export async function exportSnapshot(prisma: PrismaClient) {
-  const [agents, tasks, approvals, ledger, revenues, auditEvents, taskLogs, storeItems, storeOrders, treasuryRecord] = await Promise.all([
+  const [agents, tasks, approvals, ledger, revenues, auditEvents, taskLogs, storeItems, storeOrders, treasuryRecord, performance] = await Promise.all([
     prisma.agent.findMany({ orderBy: { createdAt: 'asc' } }),
     prisma.task.findMany({ include: { owner: true }, orderBy: { createdAt: 'asc' } }),
     prisma.approval.findMany({ include: { requester: true, approver: true }, orderBy: { createdAt: 'asc' } }),
@@ -59,7 +60,12 @@ export async function exportSnapshot(prisma: PrismaClient) {
     prisma.storeItem.findMany({ orderBy: { createdAt: 'asc' } }),
     prisma.storeOrder.findMany({ include: { buyer: true, item: true }, orderBy: { createdAt: 'asc' } }),
     prisma.treasury.findFirst(),
+    loadLatestPerformanceWithPrisma(prisma).catch(() => null),
   ])
+
+  const performanceByCode = new Map(
+    (performance?.records ?? []).map((record) => [record.agentCode, record]),
+  )
 
   const taskMap = new Map(tasks.map((task) => [task.id, task]))
   const taskCountByOwner = tasks.reduce<Record<string, number>>((acc, task) => {
@@ -76,18 +82,31 @@ export async function exportSnapshot(prisma: PrismaClient) {
   }, {})
 
   const snapshot = {
-    agents: agents.map((agent) => ({
-      id: agent.code,
-      name: agent.name,
-      role: agent.role,
-      department: agent.department,
-      persona: agent.persona,
-      status: agent.status,
-      walletBalance: agent.walletBalance,
-      currentTasks: taskCountByOwner[agent.id] ?? 0,
-      complianceScore: agent.complianceScore,
-      goals: JSON.parse(agent.goalsJson) as string[],
-    })),
+    agents: agents.map((agent) => {
+      const perf = performanceByCode.get(agent.code)
+      return {
+        id: agent.code,
+        name: agent.name,
+        role: agent.role,
+        department: agent.department,
+        persona: agent.persona,
+        status: agent.status,
+        walletBalance: agent.walletBalance,
+        currentTasks: taskCountByOwner[agent.id] ?? 0,
+        complianceScore: agent.complianceScore,
+        goals: JSON.parse(agent.goalsJson) as string[],
+        performance: perf
+          ? {
+              score: perf.score,
+              grade: perf.grade,
+              breakdown: perf.breakdown,
+              improvementAreas: perf.improvementAreas,
+              reviewedAt: perf.reviewedAt,
+              reviewer: perf.reviewer,
+            }
+          : undefined,
+      }
+    }),
     tasks: tasks.map((task) => {
       const logs = logsByTaskId[task.id] ?? []
       const taskApprovals = approvalsByTaskId[task.id] ?? []
@@ -242,6 +261,16 @@ export async function exportSnapshot(prisma: PrismaClient) {
       reservedBalance: treasuryRecord?.reservedBalance ?? 0,
       availableBalance: treasuryRecord?.availableBalance ?? 0,
     },
+    performanceSummary: performance
+      ? {
+          reviewDate: performance.reviewDate,
+          totalAgents: performance.records.length,
+          avgScore: performance.avgScore,
+          gradeDistribution: performance.gradeDistribution,
+          topPerformer: performance.topPerformer,
+          needsAttention: performance.needsAttention,
+        }
+      : undefined,
   }
 
   const content = `import type { AppSnapshot } from '../types'\n\nexport const appSnapshot: AppSnapshot = ${JSON.stringify(snapshot, null, 2)}\n`

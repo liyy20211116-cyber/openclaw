@@ -20,6 +20,39 @@ export interface TaskTimelineEvent {
   createdAt: string
 }
 
+export type PerformanceGrade = 'S' | 'A' | 'B' | 'C' | 'D'
+
+export interface PerformanceBreakdown {
+  completeness?: number
+  skills?: number
+  memory_activity?: number
+  scripts?: number
+  growth?: number
+  task_completion?: number
+  budget_discipline?: number
+  compliance_delta?: number
+  revenue_contribution?: number
+  [key: string]: number | undefined
+}
+
+export interface PerformanceHistoryPoint {
+  id: string
+  reviewedAt: string
+  score: number
+  grade: PerformanceGrade
+  reviewer: string
+  version: string
+}
+
+export interface AgentPerformance {
+  score: number
+  grade: PerformanceGrade
+  breakdown: PerformanceBreakdown
+  improvementAreas: string[]
+  reviewedAt: string
+  reviewer: string
+}
+
 export interface Agent {
   id: string
   name: string
@@ -31,6 +64,16 @@ export interface Agent {
   currentTasks: number
   complianceScore: number
   goals: string[]
+  performance?: AgentPerformance
+}
+
+export interface PerformanceSummary {
+  reviewDate: string
+  totalAgents: number
+  avgScore: number
+  gradeDistribution: Record<PerformanceGrade, number>
+  topPerformer: string
+  needsAttention: string[]
 }
 
 export interface TaskItem {
@@ -154,7 +197,7 @@ export interface TeamDiscussionMessage {
   role: string
   content: string
   timestamp: string
-  type: 'thinking' | 'speaking' | 'task_plan'
+  type: 'thinking' | 'speaking' | 'task_plan' | 'proposal'
 }
 
 export type AttachmentType = 'image' | 'file' | 'document' | 'code_ref' | 'url_preview'
@@ -199,6 +242,7 @@ export interface ChatMessage {
   quotedMessage?: QuotedMessage
   decomposition?: GoalDecomposition
   teamMessages?: TeamDiscussionMessage[]
+  llmModelUsed?: string
   createdAt: string
 }
 
@@ -274,6 +318,48 @@ export interface BusinessLineProfit {
   completedTasks: number
 }
 
+export interface LlmUsage {
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+  model: string
+  provider: string
+  durationMs: number
+}
+
+export interface LlmUsageLogItem {
+  id: string
+  agentId?: string
+  provider: string
+  model: string
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+  estimatedCost: number
+  callerFunction: string
+  durationMs: number
+  createdAt: string
+}
+
+export interface LlmCostByAgent {
+  agentId: string
+  agentName: string
+  totalTokens: number
+  estimatedCost: number
+  callCount: number
+}
+
+export interface LlmUsageSummary {
+  todayCost: number
+  todayTokens: number
+  todayCalls: number
+  weeklyCost: number
+  weeklyTokens: number
+  weeklyCalls: number
+  costByAgent: LlmCostByAgent[]
+  recentLogs: LlmUsageLogItem[]
+}
+
 export interface AppSnapshot {
   agents: Agent[]
   tasks: TaskItem[]
@@ -286,4 +372,5 @@ export interface AppSnapshot {
   treasury: TreasurySnapshot
   businessLines?: BusinessLine[]
   playbookRuns?: PlaybookRun[]
+  performanceSummary?: PerformanceSummary
 }

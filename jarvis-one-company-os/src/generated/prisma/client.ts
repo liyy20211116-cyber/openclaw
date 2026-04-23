@@ -91,3 +91,43 @@ export type StoreOrder = Prisma.StoreOrderModel
  * 
  */
 export type Revenue = Prisma.RevenueModel
+/**
+ * Model WorkflowRun
+ * 
+ */
+export type WorkflowRun = Prisma.WorkflowRunModel
+/**
+ * Model WorkflowStep
+ * 
+ */
+export type WorkflowStep = Prisma.WorkflowStepModel
+/**
+ * Model AgentMemory
+ * 
+ */
+export type AgentMemory = Prisma.AgentMemoryModel
+/**
+ * Model MemoryEntry
+ * 
+ */
+export type MemoryEntry = Prisma.MemoryEntryModel
+/**
+ * Model LlmUsageLog
+ * 
+ */
+export type LlmUsageLog = Prisma.LlmUsageLogModel
+/**
+ * Model ChatTopic
+ * 
+ */
+export type ChatTopic = Prisma.ChatTopicModel
+/**
+ * Model ChatMessage
+ * 
+ */
+export type ChatMessage = Prisma.ChatMessageModel
+/**
+ * Model PerformanceReview
+ * 
+ */
+export type PerformanceReview = Prisma.PerformanceReviewModel

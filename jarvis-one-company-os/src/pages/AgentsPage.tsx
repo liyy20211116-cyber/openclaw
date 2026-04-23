@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { statusLabelMap } from '../app/status'
 import { useSnapshot } from '../hooks/useSnapshot'
 import { agentService } from '../services/agentService'
@@ -6,6 +6,9 @@ import { ledgerService } from '../services/ledgerService'
 import { taskService } from '../services/taskService'
 import { OrgChart } from '../components/OrgChart'
 import { MemoryBrowser } from '../components/MemoryBrowser'
+import { PerformanceSparkline } from '../components/PerformanceSparkline'
+import { gradeColor, scoreColor, fetchPerformanceHistory } from '../services/performanceService'
+import type { PerformanceHistoryPoint } from '../types'
 
 export function AgentsPage() {
   useSnapshot()
@@ -29,6 +32,23 @@ export function AgentsPage() {
     const agentCode = selectedAgent.id.replace('agent_', '').replaceAll('_', ' ')
     return ledger.filter((l) => l.actor === agentCode || l.actor === selectedAgent.id || l.actor === selectedAgent.name)
   }, [ledger, selectedAgent])
+
+  const [historyByAgent, setHistoryByAgent] = useState<Record<string, PerformanceHistoryPoint[]>>({})
+
+  useEffect(() => {
+    let cancelled = false
+    const agentCode = selectedAgent?.id
+    if (!agentCode) return
+    if (historyByAgent[agentCode] !== undefined) return
+    fetchPerformanceHistory(agentCode, 20).then((points) => {
+      if (cancelled) return
+      setHistoryByAgent((prev) => ({ ...prev, [agentCode]: points }))
+    })
+    return () => { cancelled = true }
+  }, [selectedAgent, historyByAgent])
+
+  const history = selectedAgent ? historyByAgent[selectedAgent.id] ?? [] : []
+  const historyLoading = !!selectedAgent && historyByAgent[selectedAgent.id] === undefined
 
   return (
     <section className="panel page-panel">
@@ -69,12 +89,12 @@ export function AgentsPage() {
                   <span>钱包 {agent.walletBalance}</span>
                   <span>任务 {agent.currentTasks}</span>
                   <span>合规 {agent.complianceScore}</span>
-                  {(agent as any).performanceScore != null && (
+                  {agent.performance && (
                     <span style={{
-                      color: (agent as any).performanceScore >= 75 ? '#22c55e' : (agent as any).performanceScore >= 60 ? '#f59e0b' : '#ef4444',
+                      color: scoreColor(agent.performance.score),
                       fontWeight: 600,
                     }}>
-                      绩效 {(agent as any).performanceScore}
+                      绩效 {agent.performance.score} {agent.performance.grade}
                     </span>
                   )}
                 </div>
@@ -101,18 +121,49 @@ export function AgentsPage() {
                   <span className="label">合规分</span>
                   <strong>{selectedAgent.complianceScore}</strong>
                 </div>
-                {(selectedAgent as any).performanceScore != null && (
+                {selectedAgent.performance && (
                   <div className="timeline-summary-card" style={{
-                    borderColor: (selectedAgent as any).performanceScore >= 75 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)',
+                    borderColor: `${gradeColor(selectedAgent.performance.grade)}55`,
                   }}>
                     <span className="label">绩效评分</span>
-                    <strong style={{
-                      color: (selectedAgent as any).performanceScore >= 75 ? '#22c55e' : (selectedAgent as any).performanceScore >= 60 ? '#f59e0b' : '#ef4444',
-                    }}>
-                      {(selectedAgent as any).performanceScore}/100 {(selectedAgent as any).performanceGrade ?? ''}
+                    <strong style={{ color: scoreColor(selectedAgent.performance.score) }}>
+                      {selectedAgent.performance.score}/100 {selectedAgent.performance.grade}
                     </strong>
                   </div>
                 )}
+              </div>
+
+              {selectedAgent.performance && (
+                <div>
+                  <p className="eyebrow" style={{ marginBottom: 8 }}>
+                    绩效维度明细
+                    <span style={{ marginLeft: 8, color: '#64748b', fontWeight: 400 }}>
+                      评估时间 {selectedAgent.performance.reviewedAt.slice(0, 16).replace('T', ' ')} · 评估者 {selectedAgent.performance.reviewer}
+                    </span>
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 6 }}>
+                    {Object.entries(selectedAgent.performance.breakdown).map(([key, value]) => (
+                      <div key={key} style={{
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        background: 'rgba(15, 23, 42, 0.4)',
+                        border: '1px solid rgba(148, 163, 184, 0.14)',
+                      }}>
+                        <div style={{ fontSize: 10, color: '#94a3b8' }}>{key}</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedAgent.performance.improvementAreas.length > 0 && (
+                    <p style={{ marginTop: 8, fontSize: 11, color: '#f59e0b' }}>
+                      待提升：{selectedAgent.performance.improvementAreas.join(' · ')}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <PerformanceSparkline points={history} loading={historyLoading} />
               </div>
 
               <div>

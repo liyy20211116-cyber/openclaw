@@ -162,3 +162,25 @@ export const StoreOrderStatus = {
 } as const
 
 export type StoreOrderStatus = (typeof StoreOrderStatus)[keyof typeof StoreOrderStatus]
+
+
+export const WorkflowRunStatus = {
+  pending: 'pending',
+  running: 'running',
+  completed: 'completed',
+  failed: 'failed',
+  paused: 'paused'
+} as const
+
+export type WorkflowRunStatus = (typeof WorkflowRunStatus)[keyof typeof WorkflowRunStatus]
+
+
+export const WorkflowStepStatus = {
+  pending: 'pending',
+  running: 'running',
+  completed: 'completed',
+  failed: 'failed',
+  skipped: 'skipped'
+} as const
+
+export type WorkflowStepStatus = (typeof WorkflowStepStatus)[keyof typeof WorkflowStepStatus]

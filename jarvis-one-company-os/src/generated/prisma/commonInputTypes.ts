@@ -463,6 +463,84 @@ export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDecimalFilter<$PrismaModel>
 }
 
+export type EnumWorkflowRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowRunStatus | Prisma.EnumWorkflowRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowRunStatus[]
+  notIn?: $Enums.WorkflowRunStatus[]
+  not?: Prisma.NestedEnumWorkflowRunStatusFilter<$PrismaModel> | $Enums.WorkflowRunStatus
+}
+
+export type EnumWorkflowRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowRunStatus | Prisma.EnumWorkflowRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowRunStatus[]
+  notIn?: $Enums.WorkflowRunStatus[]
+  not?: Prisma.NestedEnumWorkflowRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.WorkflowRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWorkflowRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWorkflowRunStatusFilter<$PrismaModel>
+}
+
+export type EnumWorkflowStepStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowStepStatus | Prisma.EnumWorkflowStepStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowStepStatus[]
+  notIn?: $Enums.WorkflowStepStatus[]
+  not?: Prisma.NestedEnumWorkflowStepStatusFilter<$PrismaModel> | $Enums.WorkflowStepStatus
+}
+
+export type EnumWorkflowStepStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowStepStatus | Prisma.EnumWorkflowStepStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowStepStatus[]
+  notIn?: $Enums.WorkflowStepStatus[]
+  not?: Prisma.NestedEnumWorkflowStepStatusWithAggregatesFilter<$PrismaModel> | $Enums.WorkflowStepStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWorkflowStepStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWorkflowStepStatusFilter<$PrismaModel>
+}
+
+export type BytesNullableFilter<$PrismaModel = never> = {
+  equals?: runtime.Bytes | Prisma.BytesFieldRefInput<$PrismaModel> | null
+  in?: runtime.Bytes[] | null
+  notIn?: runtime.Bytes[] | null
+  not?: Prisma.NestedBytesNullableFilter<$PrismaModel> | runtime.Bytes | null
+}
+
+export type FloatFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  in?: number[]
+  notIn?: number[]
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatFilter<$PrismaModel> | number
+}
+
+export type BytesNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: runtime.Bytes | Prisma.BytesFieldRefInput<$PrismaModel> | null
+  in?: runtime.Bytes[] | null
+  notIn?: runtime.Bytes[] | null
+  not?: Prisma.NestedBytesNullableWithAggregatesFilter<$PrismaModel> | runtime.Bytes | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedBytesNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedBytesNullableFilter<$PrismaModel>
+}
+
+export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  in?: number[]
+  notIn?: number[]
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatWithAggregatesFilter<$PrismaModel> | number
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatFilter<$PrismaModel>
+  _sum?: Prisma.NestedFloatFilter<$PrismaModel>
+  _min?: Prisma.NestedFloatFilter<$PrismaModel>
+  _max?: Prisma.NestedFloatFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -927,6 +1005,73 @@ export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalFilter<$PrismaModel>
+}
+
+export type NestedEnumWorkflowRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowRunStatus | Prisma.EnumWorkflowRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowRunStatus[]
+  notIn?: $Enums.WorkflowRunStatus[]
+  not?: Prisma.NestedEnumWorkflowRunStatusFilter<$PrismaModel> | $Enums.WorkflowRunStatus
+}
+
+export type NestedEnumWorkflowRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowRunStatus | Prisma.EnumWorkflowRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowRunStatus[]
+  notIn?: $Enums.WorkflowRunStatus[]
+  not?: Prisma.NestedEnumWorkflowRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.WorkflowRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWorkflowRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWorkflowRunStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumWorkflowStepStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowStepStatus | Prisma.EnumWorkflowStepStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowStepStatus[]
+  notIn?: $Enums.WorkflowStepStatus[]
+  not?: Prisma.NestedEnumWorkflowStepStatusFilter<$PrismaModel> | $Enums.WorkflowStepStatus
+}
+
+export type NestedEnumWorkflowStepStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkflowStepStatus | Prisma.EnumWorkflowStepStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkflowStepStatus[]
+  notIn?: $Enums.WorkflowStepStatus[]
+  not?: Prisma.NestedEnumWorkflowStepStatusWithAggregatesFilter<$PrismaModel> | $Enums.WorkflowStepStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWorkflowStepStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWorkflowStepStatusFilter<$PrismaModel>
+}
+
+export type NestedBytesNullableFilter<$PrismaModel = never> = {
+  equals?: runtime.Bytes | Prisma.BytesFieldRefInput<$PrismaModel> | null
+  in?: runtime.Bytes[] | null
+  notIn?: runtime.Bytes[] | null
+  not?: Prisma.NestedBytesNullableFilter<$PrismaModel> | runtime.Bytes | null
+}
+
+export type NestedBytesNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: runtime.Bytes | Prisma.BytesFieldRefInput<$PrismaModel> | null
+  in?: runtime.Bytes[] | null
+  notIn?: runtime.Bytes[] | null
+  not?: Prisma.NestedBytesNullableWithAggregatesFilter<$PrismaModel> | runtime.Bytes | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedBytesNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedBytesNullableFilter<$PrismaModel>
+}
+
+export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  in?: number[]
+  notIn?: number[]
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatWithAggregatesFilter<$PrismaModel> | number
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatFilter<$PrismaModel>
+  _sum?: Prisma.NestedFloatFilter<$PrismaModel>
+  _min?: Prisma.NestedFloatFilter<$PrismaModel>
+  _max?: Prisma.NestedFloatFilter<$PrismaModel>
 }
 
 

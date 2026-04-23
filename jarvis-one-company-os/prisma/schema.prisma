@@ -308,3 +308,155 @@ model Revenue {
   @@index([businessLine])
   @@map("revenues")
 }
+
+enum WorkflowRunStatus {
+  pending
+  running
+  completed
+  failed
+  paused
+}
+
+enum WorkflowStepStatus {
+  pending
+  running
+  completed
+  failed
+  skipped
+}
+
+model WorkflowRun {
+  id           String            @id
+  workflowId   String
+  workflowName String
+  status       WorkflowRunStatus @default(pending)
+  inputJson    String            @default("{}")
+  contextJson  String            @default("{}")
+  errorMessage String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  steps        WorkflowStep[]
+
+  @@index([status])
+  @@index([workflowId])
+  @@map("workflow_runs")
+}
+
+model WorkflowStep {
+  id          String             @id
+  runId       String
+  nodeId      String
+  agentId     String
+  skillId     String
+  label       String
+  status      WorkflowStepStatus @default(pending)
+  outputJson  String             @default("{}")
+  errorMsg    String?
+  attempts    Int                @default(0)
+  startedAt   DateTime?
+  completedAt DateTime?
+  run         WorkflowRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("workflow_steps")
+}
+
+model AgentMemory {
+  id        String   @id
+  agentId   String
+  category  String
+  content   String
+  source    String
+  createdAt DateTime @default(now())
+
+  @@index([agentId, category])
+  @@map("agent_memories")
+}
+
+model MemoryEntry {
+  id          String    @id
+  agentId     String
+  category    String
+  content     String
+  source      String
+  embedding   Bytes?
+  importance  Float     @default(1.0)
+  citedCount  Int       @default(0)
+  lastCitedAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([agentId, category])
+  @@index([importance])
+  @@index([agentId, createdAt])
+  @@map("memory_entries")
+}
+
+model LlmUsageLog {
+  id             String   @id
+  agentId        String?
+  taskId         String?
+  provider       String
+  model          String
+  inputTokens    Int      @default(0)
+  outputTokens   Int      @default(0)
+  totalTokens    Int      @default(0)
+  estimatedCost  Float    @default(0)
+  callerFunction String   @default("")
+  durationMs     Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@index([agentId])
+  @@index([createdAt])
+  @@map("llm_usage_logs")
+}
+
+model ChatTopic {
+  id           String        @id
+  title        String
+  messageCount Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  messages     ChatMessage[]
+
+  @@index([updatedAt])
+  @@map("chat_topics")
+}
+
+model ChatMessage {
+  id                String    @id
+  topicId           String
+  role              String
+  content           String
+  attachmentsJson   String?
+  mentionsJson      String?
+  quotedMessageJson String?
+  teamMessagesJson  String?
+  llmModelUsed      String?
+  createdAt         DateTime  @default(now())
+  topic             ChatTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId, createdAt])
+  @@map("chat_messages")
+}
+
+model PerformanceReview {
+  id                   String   @id
+  agentCode            String
+  agentFolder          String
+  reviewer             String   @default("neville-hr")
+  version              String   @default("v2")
+  score                Float
+  grade                String
+  breakdownJson        String   @default("{}")
+  improvementAreasJson String   @default("[]")
+  metadataJson         String   @default("{}")
+  createdAt            DateTime @default(now())
+
+  @@index([agentCode, createdAt])
+  @@index([createdAt])
+  @@map("performance_reviews")
+}

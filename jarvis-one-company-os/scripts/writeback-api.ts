@@ -1,10 +1,51 @@
 import process from 'node:process'
 import fs from 'node:fs'
+import os from 'node:os'
+import dotenv from 'dotenv'
 import { spawn } from 'node:child_process'
 import { createServer, request as httpRequest } from 'node:http'
 import { request as httpsRequest } from 'node:https'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createPrismaClient } from './lib/prismaClient'
+import {
+  loadLatestPerformance,
+  loadLatestPerformanceWithPrisma,
+  loadPerformanceHistory,
+  findPerformanceScript,
+  dataRoot as performanceDataRoot,
+} from './lib/performanceLoader'
+import { evaluateAllAgentsV2, dumpReportToJson } from './lib/performanceEvaluator'
+import { exportSnapshot } from './lib/exportSnapshot'
+
+function detectOutboundLocalAddress(): string | undefined {
+  const preferred = (process.env.LLM_LOCAL_ADDRESS ?? '').trim()
+  if (preferred) return preferred
+
+  const ifaces = os.networkInterfaces()
+  const vpnNames = /^(lets?tap|tun|tap|wg|tailscale|zerotier)/i
+  const candidates: { name: string; address: string; priority: number }[] = []
+
+  for (const [name, addrs] of Object.entries(ifaces)) {
+    if (!addrs) continue
+    for (const a of addrs) {
+      if (a.family !== 'IPv4' || a.internal) continue
+      if (vpnNames.test(name)) continue
+      const p = /^(wi-?fi|wlan|ethernet|eth)/i.test(name) ? 10 : 5
+      candidates.push({ name, address: a.address, priority: p })
+    }
+  }
+
+  candidates.sort((a, b) => b.priority - a.priority)
+  const chosen = candidates[0]
+  if (chosen) {
+    console.log(`Outbound localAddress: ${chosen.address} (${chosen.name})`)
+    return chosen.address
+  }
+  return undefined
+}
+
+const OUTBOUND_LOCAL_ADDRESS = detectOutboundLocalAddress()
 
 type CreateTaskPayload = {
   title: string
@@ -75,7 +116,15 @@ type JsonRecord = Record<string, unknown>
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const projectRoot = path.resolve(__dirname, '..')
+const dataRoot = (process.env.JARVIS_COMPANY_DATA_DIR ?? '').trim() || path.resolve(projectRoot, '..')
+const envCandidates = [
+  path.resolve(projectRoot, '.env'),
+  path.resolve(__dirname, '.env'),
+]
+const envPath = envCandidates.find(p => fs.existsSync(p)) ?? envCandidates[0]
+dotenv.config({ path: envPath, override: true })
 const port = Number(process.env.WRITEBACK_API_PORT ?? 18782)
+const prisma = createPrismaClient()
 
 function sendJson(response: import('node:http').ServerResponse, statusCode: number, payload: JsonRecord) {
   const body = JSON.stringify(payload)
@@ -92,6 +141,7 @@ function sendJson(response: import('node:http').ServerResponse, statusCode: numb
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === 'object' && value !== null
 }
+
 
 function validateCreateTaskPayload(payload: unknown): payload is CreateTaskPayload {
   return isRecord(payload)
@@ -176,15 +226,41 @@ async function readJsonBody(request: import('node:http').IncomingMessage) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown
 }
 
+function resolveScript(scriptFile: string): { exe: string; args: string[] } {
+  const distBackendDir = path.resolve(projectRoot, 'dist-backend')
+  const baseName = path.basename(scriptFile).replace(/\.ts$/, '.js')
+  const bundled = path.resolve(distBackendDir, baseName)
+  if (fs.existsSync(bundled)) {
+    const env = process.env.ELECTRON_RUN_AS_NODE ? {} : { ELECTRON_RUN_AS_NODE: '1' }
+    return { exe: process.execPath, args: [bundled], ...env }
+  }
+  const tsxCli = path.resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs')
+  return { exe: process.execPath, args: [tsxCli, scriptFile] }
+}
+
+function runPythonScript(scriptFile: string, args: string[] = [], options: { cwd?: string } = {}) {
+  return new Promise<{ stdout: string; stderr: string; code: number }>((resolve) => {
+    const python = process.env.PYTHON_EXECUTABLE || (process.platform === 'win32' ? 'python' : 'python3')
+    const child = spawn(python, [scriptFile, ...args], {
+      cwd: options.cwd ?? path.dirname(scriptFile),
+      env: process.env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (chunk) => { stdout += chunk.toString() })
+    child.stderr.on('data', (chunk) => { stderr += chunk.toString() })
+    child.on('error', (err) => { resolve({ stdout, stderr: stderr + String(err), code: -1 }) })
+    child.on('close', (code) => { resolve({ stdout, stderr, code: code ?? -1 }) })
+  })
+}
+
 function runScript(scriptFile: string, payload: JsonRecord) {
   return new Promise<JsonRecord>((resolve, reject) => {
-    const child = spawn(process.execPath, [
-      path.resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs'),
-      scriptFile,
-      JSON.stringify(payload),
-    ], {
+    const { exe, args } = resolveScript(scriptFile)
+    const child = spawn(exe, [...args, JSON.stringify(payload)], {
       cwd: projectRoot,
-      env: process.env,
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
 
@@ -336,25 +412,167 @@ const server = createServer(async (request, response) => {
       return
     }
 
+    if (request.url === '/api/agents/performance') {
+      const report = await loadLatestPerformanceWithPrisma(prisma).catch(() => null)
+      if (!report) {
+        sendJson(response, 200, { ok: true, hasReport: false })
+        return
+      }
+      sendJson(response, 200, {
+        ok: true,
+        hasReport: true,
+        reviewDate: report.reviewDate,
+        reviewer: report.reviewer,
+        avgScore: report.avgScore,
+        gradeDistribution: report.gradeDistribution,
+        topPerformer: report.topPerformer,
+        needsAttention: report.needsAttention,
+        records: report.records,
+      } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/agents/performance/history') {
+      const body = payload as { agentCode?: string; limit?: number }
+      const agentCode = String(body.agentCode ?? '').trim()
+      if (!agentCode) {
+        sendJson(response, 400, { ok: false, error: 'agentCode required' })
+        return
+      }
+      const limit = Number.isFinite(Number(body.limit)) ? Number(body.limit) : 20
+      const history = await loadPerformanceHistory(prisma, agentCode, limit).catch(() => [])
+      sendJson(response, 200, { ok: true, agentCode, history } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/agents/performance/refresh') {
+      const body = payload as { version?: string }
+      const requestedVersion = String(body.version ?? 'v2').toLowerCase() === 'v1' ? 'v1' : 'v2'
+
+      if (requestedVersion === 'v1') {
+        const script = findPerformanceScript()
+        if (!script || !fs.existsSync(script)) {
+          sendJson(response, 404, { ok: false, error: `Performance script not found: ${script}` })
+          return
+        }
+        const exec = await runPythonScript(script, [], { cwd: performanceDataRoot() })
+        if (exec.code !== 0) {
+          sendJson(response, 500, {
+            ok: false,
+            error: `Python exited with code ${exec.code}`,
+            stderr: exec.stderr.slice(-2000),
+            stdout: exec.stdout.slice(-2000),
+          })
+          return
+        }
+        try { await exportSnapshot(prisma) } catch (err) { console.warn('[performance/refresh v1] exportSnapshot failed:', err) }
+        const report = await loadLatestPerformance().catch(() => null)
+        sendJson(response, 200, {
+          ok: true,
+          version: 'v1',
+          refreshedAt: new Date().toISOString(),
+          reviewDate: report?.reviewDate,
+          avgScore: report?.avgScore,
+          gradeDistribution: report?.gradeDistribution,
+          totalAgents: report?.records.length ?? 0,
+          stdoutTail: exec.stdout.slice(-500),
+        } as unknown as JsonRecord)
+        return
+      }
+
+      try {
+        const report = await evaluateAllAgentsV2(prisma, { persist: true })
+        const jsonPath = dumpReportToJson(report)
+        try { await exportSnapshot(prisma) } catch (err) { console.warn('[performance/refresh v2] exportSnapshot failed:', err) }
+        sendJson(response, 200, {
+          ok: true,
+          version: 'v2',
+          refreshedAt: new Date().toISOString(),
+          reviewDate: report.reviewDate,
+          avgScore: report.avgScore,
+          gradeDistribution: report.gradeDistribution,
+          totalAgents: report.records.length,
+          jsonPath,
+        } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        sendJson(response, 500, { ok: false, version: 'v2', error: msg })
+      }
+      return
+    }
+
     if (request.url === '/api/llm/models' && request.method === 'POST') {
       const providers = buildLlmProviderChain()
+      const defaultProviderId = (process.env.VITE_LLM_DEFAULT_PROVIDER ?? 'fandai-gemini-31').trim() || 'fandai-gemini-31'
+
+      const MODEL_DESCRIPTIONS: Record<string, string> = {
+        'fandai-nn-46': 'Claude 4.6 Opus · 高性能推理',
+        'fandai-gemini-31': 'Gemini 3.1 Flash · 稳定快速',
+        'fandai-glm-5': '智谱 GLM-5 · 稳定可用',
+        'siliconflow': 'DeepSeek-V3 · 需检查授权',
+        'ollama-local': '本地 Ollama · 需启动服务',
+      }
+
+      function getModelDescription(name: string): string | undefined {
+        if (MODEL_DESCRIPTIONS[name]) return MODEL_DESCRIPTIONS[name]
+        if (name.startsWith('chatgpt-plus-')) return 'ChatGPT Plus · 你的订阅账号 via CLIProxyAPI'
+        if (name.startsWith('openai-direct-')) return 'OpenAI API 直连'
+        return undefined
+      }
+
       const models = [
-        { id: 'cascade', name: '自动级联 (Auto)', description: '按优先级依次尝试所有可用模型', provider: 'auto', isDefault: true },
+        { id: 'cascade', name: '自动级联 (Auto)', description: '按优先级依次尝试所有可用模型', provider: 'auto', isDefault: defaultProviderId === 'cascade' },
         ...providers.map(p => ({
           id: p.name,
           name: p.modelOverride ?? p.name,
-          description: `${p.name} → ${p.baseUrl.replace(/https?:\/\//, '').replace(/\/v1$/, '')}`,
+          description: getModelDescription(p.name) ?? `${p.name} → ${p.baseUrl.replace(/https?:\/\//, '').replace(/\/v1$/, '')}`,
           provider: p.name,
-          isDefault: false,
+          isDefault: p.name === defaultProviderId || (p.modelOverride ?? '') === defaultProviderId,
         })),
       ]
       sendJson(response, 200, { ok: true, models } as unknown as JsonRecord)
       return
     }
 
+    if (request.url === '/api/llm/fallback-config' && request.method === 'POST') {
+      const providers = buildLlmProviderChain()
+      const providerFallbackMap = parseProviderFallbackMap(process.env.LLM_PROVIDER_FALLBACKS)
+      const items = providers.map(p => ({
+        provider: p.name,
+        model: p.modelOverride ?? p.name,
+        fallbackTo: providerFallbackMap[p.name] ?? p.fallbackTo ?? [],
+      }))
+      sendJson(response, 200, { ok: true, items } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/llm/fallback-config/save' && request.method === 'POST') {
+      const body = payload as { items?: Array<{ provider?: string; fallbackTo?: string[] }> }
+      const items = Array.isArray(body.items) ? body.items : []
+      const nextMap = items.reduce<Record<string, string[]>>((acc, item) => {
+        const provider = String(item.provider ?? '').trim()
+        const fallbackTo = Array.isArray(item.fallbackTo) ? item.fallbackTo.map(name => String(name).trim()).filter(Boolean) : []
+        if (provider && fallbackTo.length > 0) {
+          acc[provider] = fallbackTo
+        }
+        return acc
+      }, {})
+      const serialized = serializeProviderFallbackMap(nextMap)
+      const envPath = path.resolve(projectRoot, '.env')
+      updateDotEnvValue(envPath, 'LLM_PROVIDER_FALLBACKS', serialized)
+      process.env.LLM_PROVIDER_FALLBACKS = serialized
+      sendJson(response, 200, { ok: true, saved: serialized } as unknown as JsonRecord)
+      return
+    }
+
     if (request.url === '/api/llm/chat') {
       const body = payload as Record<string, unknown>
 
+      const openaiKey = (process.env.OPENAI_API_KEY ?? '').trim()
+      const deepseekKey = (process.env.DEEPSEEK_API_KEY ?? '').trim()
+      const moonshotKey = (process.env.MOONSHOT_API_KEY ?? '').trim()
+      const siliconflowKey = (process.env.SILICONFLOW_API_KEY ?? '').trim()
+      const openaiBase = (process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1').trim()
       const providers = buildLlmProviderChain()
       const requestModel = String(body.model ?? '')
       const targetProvider = String(body.provider ?? '')
@@ -374,12 +592,15 @@ const server = createServer(async (request, response) => {
         } catch { /* response already closed */ }
       }
 
+      const providerFailures: Array<{ provider: string; status?: number; body?: string; error?: string }> = []
+
       async function tryProvider(provider: LlmProvider): Promise<boolean> {
         const resolvedModel = provider.modelOverride ?? requestModel
         const postBody = JSON.stringify({ ...body, model: resolvedModel, provider: undefined })
         const targetUrl = new URL(`${provider.baseUrl}/chat/completions`)
         const isHttps = targetUrl.protocol === 'https:'
         const reqFn = isHttps ? httpsRequest : httpRequest
+        const isLocal = targetUrl.hostname === '127.0.0.1' || targetUrl.hostname === 'localhost'
 
         return new Promise<boolean>((resolve) => {
           const proxyReq = reqFn({
@@ -393,6 +614,7 @@ const server = createServer(async (request, response) => {
               ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {}),
           },
             timeout: 30000,
+            ...(!isLocal && OUTBOUND_LOCAL_ADDRESS ? { localAddress: OUTBOUND_LOCAL_ADDRESS } : {}),
           }, (proxyRes) => {
           let resBody = ''
           proxyRes.on('data', (chunk: Buffer) => { resBody += chunk.toString() })
@@ -422,6 +644,7 @@ const server = createServer(async (request, response) => {
                 safeReply(code, resBody)
                 resolve(true)
               } else if (isRetryable) {
+                providerFailures.push({ provider: provider.name, status: code, body: resBody.slice(0, 500) })
                 console.log(`LLM provider ${provider.name} returned ${code}, will try next`)
                 resolve(false)
               } else {
@@ -429,10 +652,20 @@ const server = createServer(async (request, response) => {
                 resolve(true)
               }
             })
-            proxyRes.on('error', () => resolve(false))
+            proxyRes.on('error', (err) => {
+              providerFailures.push({ provider: provider.name, error: String(err) })
+              resolve(false)
+            })
           })
-          proxyReq.on('error', () => resolve(false))
-          proxyReq.on('timeout', () => { proxyReq.destroy(); resolve(false) })
+          proxyReq.on('error', (err) => {
+            providerFailures.push({ provider: provider.name, error: String(err) })
+            resolve(false)
+          })
+          proxyReq.on('timeout', () => {
+            providerFailures.push({ provider: provider.name, error: 'timeout' })
+            proxyReq.destroy()
+            resolve(false)
+          })
           proxyReq.write(postBody)
           proxyReq.end()
         })
@@ -440,7 +673,15 @@ const server = createServer(async (request, response) => {
 
       ;(async () => {
         const selectedProviders = targetProvider && targetProvider !== 'cascade'
-          ? providers.filter(p => p.name === targetProvider)
+          ? (() => {
+              const primary = providers.find(p => p.name === targetProvider)
+              if (!primary) return []
+              const fallbackNames = primary.fallbackTo ?? []
+              const fallbackProviders = fallbackNames
+                .map(name => providers.find(p => p.name === name))
+                .filter((provider): provider is LlmProvider => Boolean(provider))
+              return [primary, ...fallbackProviders]
+            })()
           : providers
 
         if (selectedProviders.length === 0) {
@@ -448,13 +689,115 @@ const server = createServer(async (request, response) => {
           return
         }
 
+        const failedProviders: string[] = []
         for (const provider of selectedProviders) {
           const ok = await tryProvider(provider)
           if (ok) return
+          failedProviders.push(`${provider.name}${provider.modelOverride ? `(${provider.modelOverride})` : ''}`)
           console.log(`LLM provider ${provider.name} failed, trying next...`)
         }
-        safeReply(502, JSON.stringify({ ok: false, error: 'All LLM providers failed. Check API keys and network.' }))
+        safeReply(502, JSON.stringify({
+          ok: false,
+          error: 'All LLM providers failed. Check API keys and network.',
+          attemptedProviders: failedProviders,
+          providerFailures,
+          envSummary: {
+            openaiKeyPresent: !!openaiKey,
+            openaiBase,
+            deepseekKeyPresent: !!deepseekKey,
+            moonshotKeyPresent: !!moonshotKey,
+            siliconflowKeyPresent: !!siliconflowKey,
+          },
+        }))
       })()
+      return
+    }
+
+    if (request.url === '/api/llm/chat-stream') {
+      const body = payload as Record<string, unknown>
+      const providers = buildLlmProviderChain()
+      const requestModel = String(body.model ?? '')
+      const targetProvider = String(body.provider ?? '')
+
+      response.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+      })
+
+      const selectedProviders = targetProvider && targetProvider !== 'cascade'
+        ? (() => {
+            const primary = providers.find(p => p.name === targetProvider)
+            if (!primary) return []
+            const fallbackNames = primary.fallbackTo ?? []
+            const fallbackProviders = fallbackNames
+              .map(name => providers.find(p => p.name === name))
+              .filter((p): p is LlmProvider => Boolean(p))
+            return [primary, ...fallbackProviders]
+          })()
+        : providers
+
+      if (selectedProviders.length === 0) {
+        response.write(`data: ${JSON.stringify({ error: 'No providers available' })}\n\n`)
+        response.end()
+        return
+      }
+
+      let streamed = false
+
+      for (const provider of selectedProviders) {
+        if (streamed) break
+        const resolvedModel = provider.modelOverride ?? requestModel
+        const postBody = JSON.stringify({ ...body, model: resolvedModel, provider: undefined, stream: true })
+        const targetUrl = new URL(`${provider.baseUrl}/chat/completions`)
+        const isHttps = targetUrl.protocol === 'https:'
+        const reqFn = isHttps ? httpsRequest : httpRequest
+        const isLocal = targetUrl.hostname === '127.0.0.1' || targetUrl.hostname === 'localhost'
+
+        try {
+          streamed = await new Promise<boolean>((resolve) => {
+            const proxyReq = reqFn({
+              hostname: targetUrl.hostname,
+              port: targetUrl.port || (isHttps ? 443 : 80),
+              path: targetUrl.pathname,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postBody),
+                ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {}),
+              },
+              timeout: 60000,
+              ...(!isLocal && OUTBOUND_LOCAL_ADDRESS ? { localAddress: OUTBOUND_LOCAL_ADDRESS } : {}),
+            }, (proxyRes) => {
+              if ((proxyRes.statusCode ?? 0) >= 400) {
+                resolve(false)
+                return
+              }
+              proxyRes.on('data', (chunk: Buffer) => {
+                response.write(chunk)
+              })
+              proxyRes.on('end', () => {
+                response.write(`data: [DONE]\n\n`)
+                response.end()
+                resolve(true)
+              })
+              proxyRes.on('error', () => resolve(false))
+            })
+            proxyReq.on('error', () => resolve(false))
+            proxyReq.on('timeout', () => { proxyReq.destroy(); resolve(false) })
+            proxyReq.write(postBody)
+            proxyReq.end()
+          })
+        } catch {
+          continue
+        }
+      }
+
+      if (!streamed) {
+        response.write(`data: ${JSON.stringify({ error: 'All providers failed for streaming' })}\n\n`)
+        response.end()
+      }
       return
     }
 
@@ -535,7 +878,7 @@ const server = createServer(async (request, response) => {
     }
 
     if (request.url === '/api/agents/identities' && request.method === 'POST') {
-      const agentsDir = path.resolve(projectRoot, '..', 'openclaw_agents')
+      const agentsDir = path.resolve(dataRoot, 'openclaw_agents')
       const orgChartPath = path.join(agentsDir, 'ORG_CHART.md')
       const agents: { id: string; identity: string }[] = []
 
@@ -561,7 +904,7 @@ const server = createServer(async (request, response) => {
 
     if (request.url === '/api/agents/memory' && request.method === 'POST') {
       const body = payload as { agentId?: string; file?: string; content?: string; action?: string }
-      const agentsDir = path.resolve(projectRoot, '..', 'openclaw_agents')
+      const agentsDir = path.resolve(dataRoot, 'openclaw_agents')
       const agentId = body.agentId ?? ''
       const memFile = body.file ?? 'learnings.md'
 
@@ -623,7 +966,7 @@ const server = createServer(async (request, response) => {
     }
 
     if (request.url === '/api/agents/memory/all' && request.method === 'POST') {
-      const agentsDir = path.resolve(projectRoot, '..', 'openclaw_agents')
+      const agentsDir = path.resolve(dataRoot, 'openclaw_agents')
       const result: Record<string, Record<string, string>> = {}
 
       if (fs.existsSync(agentsDir)) {
@@ -645,11 +988,60 @@ const server = createServer(async (request, response) => {
       return
     }
 
+    if (request.url === '/api/company/app-config' && request.method === 'POST') {
+      const configPath = path.resolve(dataRoot, 'config', 'app-config.json')
+      if (fs.existsSync(configPath)) {
+        try {
+          const raw = fs.readFileSync(configPath, 'utf-8')
+          const cfg = JSON.parse(raw) as JsonRecord
+          sendJson(response, 200, cfg)
+        } catch {
+          sendJson(response, 500, { ok: false, error: 'parse error' } as unknown as JsonRecord)
+        }
+      } else {
+        sendJson(response, 404, { ok: false, error: 'app-config.json not found' } as unknown as JsonRecord)
+      }
+      return
+    }
+
+    if (request.url === '/api/company/app-config/update' && request.method === 'POST') {
+      const configPath = path.resolve(dataRoot, 'config', 'app-config.json')
+      try {
+        const newCfg = payload as JsonRecord
+        fs.writeFileSync(configPath, JSON.stringify(newCfg, null, 2), 'utf-8')
+
+        syncLlmConfigToEnv(newCfg)
+
+        sendJson(response, 200, { ok: true } as unknown as JsonRecord)
+      } catch (err) {
+        sendJson(response, 500, { ok: false, error: String(err) } as unknown as JsonRecord)
+      }
+      return
+    }
+
     if (request.url === '/api/company/rules' && request.method === 'POST') {
-      const rulesPath = path.resolve(projectRoot, '..', 'config', 'company-rules.md')
+      const rulesPath = path.resolve(dataRoot, 'config', 'company-rules.md')
       let content = ''
       if (fs.existsSync(rulesPath)) {
         try { content = fs.readFileSync(rulesPath, 'utf-8') } catch { /* empty */ }
+      }
+      sendJson(response, 200, { ok: true, content } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/company/config-file' && request.method === 'POST') {
+      const body = payload as { file?: string }
+      const file = body.file ?? ''
+      const allowedExts = ['.md', '.json']
+      const ext = path.extname(file).toLowerCase()
+      if (!file || !allowedExts.includes(ext) || file.includes('..') || file.includes('/') || file.includes('\\')) {
+        sendJson(response, 400, { ok: false, error: 'file not allowed' } as unknown as JsonRecord)
+        return
+      }
+      const filePath = path.resolve(dataRoot, 'config', file)
+      let content = ''
+      if (fs.existsSync(filePath)) {
+        try { content = fs.readFileSync(filePath, 'utf-8') } catch { /* empty */ }
       }
       sendJson(response, 200, { ok: true, content } as unknown as JsonRecord)
       return
@@ -659,14 +1051,26 @@ const server = createServer(async (request, response) => {
 
     if (request.url === '/api/skills/list' && request.method === 'POST') {
       const body = payload as { agentId?: string }
-      const agentsRoot = path.resolve(projectRoot, '..', 'openclaw_agents')
+      const agentsRoot = path.resolve(dataRoot, 'openclaw_agents')
       const allSkills: { id: string; name: string; description: string; agentId: string; agentName: string; type: string; available: boolean }[] = []
 
-      const agentNames: Record<string, string> = {
+      let agentNames: Record<string, string> = {
         'jarvis-coo': '贾维斯', 'hermione-tech': '赫敏', 'mcgonagall-product': '麦格教授',
         'luna-growth': '卢娜', 'fred-sales': '弗雷德', 'percy-finance': '珀西',
         'snape-audit': '斯内普', 'dobby-customer': '多比', 'req-review-agent': '需求审核',
       }
+      const appCfgPath = path.resolve(dataRoot, 'config', 'app-config.json')
+      try {
+        if (fs.existsSync(appCfgPath)) {
+          const appCfg = JSON.parse(fs.readFileSync(appCfgPath, 'utf-8')) as { agents?: { id: string; display_name: string }[] }
+          if (appCfg.agents?.length) {
+            const fromCfg: Record<string, string> = {}
+            for (const a of appCfg.agents) fromCfg[a.id] = a.display_name
+            fromCfg['req-review-agent'] = '需求审核'
+            agentNames = fromCfg
+          }
+        }
+      } catch { /* fallback to defaults */ }
 
       for (const [agentId, agentName] of Object.entries(agentNames)) {
         const skillsPath = path.join(agentsRoot, agentId, 'skills.json')
@@ -699,10 +1103,57 @@ const server = createServer(async (request, response) => {
       return
     }
 
+    if (request.url === '/api/skills/marketplace' && request.method === 'POST') {
+      const body = payload as { query?: string; agentType?: string; tags?: string[] }
+      const agentsRoot = path.resolve(dataRoot, 'openclaw_agents')
+      const allSkills: Array<Record<string, unknown>> = []
+
+      const agentDirs = fs.readdirSync(agentsRoot, { withFileTypes: true })
+        .filter(d => d.isDirectory() && !d.name.startsWith('_'))
+
+      for (const dir of agentDirs) {
+        const skillsPath = path.join(agentsRoot, dir.name, 'skills.json')
+        if (!fs.existsSync(skillsPath)) continue
+        try {
+          const skills = JSON.parse(fs.readFileSync(skillsPath, 'utf-8')) as Array<Record<string, unknown>>
+          for (const s of skills) {
+            const scriptFile = s.script ? path.join(agentsRoot, dir.name, String(s.script)) : null
+            allSkills.push({
+              ...s,
+              agentId: dir.name,
+              installed: scriptFile ? fs.existsSync(scriptFile) : true,
+              hasManifest: s.version !== undefined,
+            })
+          }
+        } catch { /* skip */ }
+      }
+
+      let filtered = allSkills
+      if (body.query) {
+        const q = body.query.toLowerCase()
+        filtered = filtered.filter(s =>
+          String(s.name ?? '').toLowerCase().includes(q) ||
+          String(s.description ?? '').toLowerCase().includes(q) ||
+          String(s.id ?? '').toLowerCase().includes(q)
+        )
+      }
+      if (body.agentType) {
+        filtered = filtered.filter(s => String(s.agentId ?? '').includes(body.agentType!))
+      }
+
+      sendJson(response, 200, {
+        ok: true,
+        skills: filtered.slice(0, 50),
+        total: filtered.length,
+        allCount: allSkills.length,
+      } as unknown as JsonRecord)
+      return
+    }
+
     if (request.url === '/api/skills/run' && request.method === 'POST') {
       const body = payload as { skillId?: string; agentId?: string; args?: string }
       const skillId = body.skillId ?? ''
-      const agentsRoot = path.resolve(projectRoot, '..', 'openclaw_agents')
+      const agentsRoot = path.resolve(dataRoot, 'openclaw_agents')
 
       // Built-in: ones_check_status
       if (skillId === 'ones_check_status') {
@@ -735,15 +1186,15 @@ const server = createServer(async (request, response) => {
 
         const pythonCmd = process.platform === 'win32' ? 'python' : 'python3'
         if (skillId === 'ones_start_listener') {
-          const c = spawn(pythonCmd, [scriptPath], { cwd: reqDir, detached: true, stdio: 'ignore', env: { ...process.env } })
+          const c = spawn(pythonCmd, [scriptPath], { cwd: reqDir, detached: true, stdio: 'ignore', env: { ...process.env, PYTHONIOENCODING: 'utf-8' }, windowsHide: true })
           c.unref()
           sendJson(response, 200, { ok: true, result: { message: `卡片监听已启动 (PID: ${c.pid})`, pid: c.pid } } as unknown as JsonRecord)
           return
         }
-        const c = spawn(pythonCmd, [scriptPath], { cwd: reqDir, env: { ...process.env }, timeout: 120000 })
+        const c = spawn(pythonCmd, [scriptPath], { cwd: reqDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONLEGACYWINDOWSSTDIO: '0' }, timeout: 120000, windowsHide: true })
         let sout = '', serr = ''
-        c.stdout?.on('data', (d: Buffer) => { sout += d.toString() })
-        c.stderr?.on('data', (d: Buffer) => { serr += d.toString() })
+        c.stdout?.on('data', (d: Buffer) => { sout += d.toString('utf-8') })
+        c.stderr?.on('data', (d: Buffer) => { serr += d.toString('utf-8') })
         c.on('close', (code) => {
           const output = (sout + '\n' + serr).trim()
           let parsed: unknown = null
@@ -760,25 +1211,23 @@ const server = createServer(async (request, response) => {
       let foundTimeout = 60
       let foundType = ''
 
-      if (!foundAgent) {
+      const searchAgentSkills = (agentName: string): boolean => {
+        const sp = path.join(agentsRoot, agentName, 'skills.json')
+        if (!fs.existsSync(sp)) return false
+        try {
+          const skills = JSON.parse(fs.readFileSync(sp, 'utf-8')) as { id: string; script?: string; timeout?: number; type?: string }[]
+          const match = skills.find(s => s.id === skillId)
+          if (match) { foundAgent = agentName; foundScript = match.script ?? ''; foundTimeout = match.timeout ?? 60; foundType = match.type ?? 'script'; return true }
+        } catch {}
+        return false
+      }
+
+      if (foundAgent) searchAgentSkills(foundAgent)
+
+      if (!foundScript) {
         for (const entry of fs.readdirSync(agentsRoot, { withFileTypes: true })) {
           if (!entry.isDirectory()) continue
-          const sp = path.join(agentsRoot, entry.name, 'skills.json')
-          if (!fs.existsSync(sp)) continue
-          try {
-            const skills = JSON.parse(fs.readFileSync(sp, 'utf-8')) as { id: string; script?: string; timeout?: number; type?: string }[]
-            const match = skills.find(s => s.id === skillId)
-            if (match) { foundAgent = entry.name; foundScript = match.script ?? ''; foundTimeout = match.timeout ?? 60; foundType = match.type ?? 'script'; break }
-          } catch {}
-        }
-      } else {
-        const sp = path.join(agentsRoot, foundAgent, 'skills.json')
-        if (fs.existsSync(sp)) {
-          try {
-            const skills = JSON.parse(fs.readFileSync(sp, 'utf-8')) as { id: string; script?: string; timeout?: number; type?: string }[]
-            const match = skills.find(s => s.id === skillId)
-            if (match) { foundScript = match.script ?? ''; foundTimeout = match.timeout ?? 60; foundType = match.type ?? 'script' }
-          } catch {}
+          if (searchAgentSkills(entry.name)) break
         }
       }
 
@@ -797,17 +1246,24 @@ const server = createServer(async (request, response) => {
 
       const pythonCmd = process.platform === 'win32' ? 'python' : 'python3'
       const args = body.args ? [scriptPath, body.args] : [scriptPath]
-      const child = spawn(pythonCmd, args, { cwd: agentDir, env: { ...process.env }, timeout: foundTimeout * 1000 })
+      const child = spawn(pythonCmd, args, { cwd: agentDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONLEGACYWINDOWSSTDIO: '0' }, timeout: foundTimeout * 1000, windowsHide: true })
 
       let stdout = '', stderr = ''
-      child.stdout?.on('data', (d: Buffer) => { stdout += d.toString() })
-      child.stderr?.on('data', (d: Buffer) => { stderr += d.toString() })
+      child.stdout?.on('data', (d: Buffer) => { stdout += d.toString('utf-8') })
+      child.stderr?.on('data', (d: Buffer) => { stderr += d.toString('utf-8') })
 
-      child.on('close', (code) => {
+      child.on('close', (code, signal) => {
         const output = (stdout + '\n' + stderr).trim()
         let parsed: Record<string, unknown> | null = null
         try { const jl = output.split('\n').filter(l => l.trim().startsWith('{')); if (jl.length) parsed = JSON.parse(jl[jl.length - 1]) as Record<string, unknown> } catch {}
-        const summary = (parsed?.summary as string) ?? (code === 0 ? '执行成功' : `执行失败 (exit ${code})`)
+        let summary: string
+        if (code === null && signal) {
+          summary = `执行超时被终止 (signal: ${signal}, timeout: ${foundTimeout}s)`
+        } else if (code === null) {
+          summary = `执行异常退出 (timeout: ${foundTimeout}s, 可能LLM响应过慢)`
+        } else {
+          summary = (parsed?.summary as string) ?? (code === 0 ? '执行成功' : `执行失败 (exit ${code})`)
+        }
         sendJson(response, 200, { ok: parsed?.ok ?? (code === 0), result: { exitCode: code, output: output.slice(-2000), parsed, message: summary, summary, agentId: foundAgent } } as unknown as JsonRecord)
       })
       child.on('error', (err) => { sendJson(response, 200, { ok: false, result: { message: `启动失败: ${err.message}`, agentId: foundAgent } } as unknown as JsonRecord) })
@@ -816,8 +1272,8 @@ const server = createServer(async (request, response) => {
 
     if (request.url === '/api/openclaw/skills' && request.method === 'POST') {
       const skillDirs = [
-        path.resolve(projectRoot, '..', 'skills'),
-        path.resolve(projectRoot, '..', 'openclaw_skills'),
+        path.resolve(dataRoot, 'skills'),
+        path.resolve(dataRoot, 'openclaw_skills'),
       ]
       const skills: { name: string; description: string; source: string }[] = []
 
@@ -892,7 +1348,7 @@ const server = createServer(async (request, response) => {
       const query = (body.query ?? '').toLowerCase().trim()
       if (!query) { sendJson(response, 400, { ok: false, error: 'query required' }); return }
 
-      const rootDir = path.resolve(projectRoot, '..')
+      const rootDir = dataRoot
       const results: { name: string; relativePath: string; size: number; ext: string; preview: string }[] = []
       const limit = Math.min(body.limit ?? 20, 50)
 
@@ -955,7 +1411,7 @@ const server = createServer(async (request, response) => {
       const body = payload as { relativePath?: string; startLine?: number; endLine?: number }
       if (!body.relativePath) { sendJson(response, 400, { ok: false, error: 'relativePath required' }); return }
 
-      const rootDir = path.resolve(projectRoot, '..')
+      const rootDir = dataRoot
       const filePath = path.resolve(rootDir, body.relativePath)
       if (!filePath.startsWith(rootDir)) { sendJson(response, 403, { ok: false, error: 'Access denied' }); return }
       if (!fs.existsSync(filePath)) { sendJson(response, 404, { ok: false, error: 'File not found' }); return }
@@ -990,6 +1446,7 @@ const server = createServer(async (request, response) => {
         const fetchFn = isHttps ? httpsRequest : httpRequest
 
         const result = await new Promise<{ title: string; summary: string }>((resolve, reject) => {
+          const isFetchLocal = targetUrl.hostname === '127.0.0.1' || targetUrl.hostname === 'localhost'
           const req = fetchFn({
             hostname: targetUrl.hostname,
             port: targetUrl.port || (isHttps ? 443 : 80),
@@ -997,6 +1454,7 @@ const server = createServer(async (request, response) => {
             method: 'GET',
             timeout: 10000,
             headers: { 'User-Agent': 'JarvisBot/1.0' },
+            ...(!isFetchLocal && OUTBOUND_LOCAL_ADDRESS ? { localAddress: OUTBOUND_LOCAL_ADDRESS } : {}),
           }, (res) => {
             let html = ''
             res.setEncoding('utf-8')
@@ -1070,6 +1528,553 @@ const server = createServer(async (request, response) => {
       return
     }
 
+    // ─── Chat Persistence API ───
+
+    if (request.url === '/api/chat/topics') {
+      const topics = await prisma.chatTopic.findMany({ orderBy: { updatedAt: 'desc' } })
+      sendJson(response, 200, { ok: true, topics } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/chat/topic/create') {
+      const body = payload as Record<string, unknown>
+      const title = String(body.title ?? '新对话')
+      const id = `topic_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      const topic = await prisma.chatTopic.create({ data: { id, title } })
+      sendJson(response, 200, { ok: true, topic } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/chat/topic/rename') {
+      const body = payload as Record<string, unknown>
+      const id = String(body.id ?? '')
+      const title = String(body.title ?? '')
+      if (!id || !title) { sendJson(response, 400, { ok: false, error: 'Missing id or title' }); return }
+      await prisma.chatTopic.update({ where: { id }, data: { title } })
+      sendJson(response, 200, { ok: true })
+      return
+    }
+
+    if (request.url === '/api/chat/topic/delete') {
+      const body = payload as Record<string, unknown>
+      const id = String(body.id ?? '')
+      if (!id) { sendJson(response, 400, { ok: false, error: 'Missing id' }); return }
+      await prisma.chatTopic.delete({ where: { id } })
+      sendJson(response, 200, { ok: true })
+      return
+    }
+
+    if (request.url === '/api/chat/messages') {
+      const body = payload as Record<string, unknown>
+      const topicId = String(body.topicId ?? '')
+      if (!topicId) { sendJson(response, 400, { ok: false, error: 'Missing topicId' }); return }
+      const rows = await prisma.chatMessage.findMany({
+        where: { topicId },
+        orderBy: { createdAt: 'asc' },
+        take: 200,
+      })
+      const messages = rows.map(r => ({
+        id: r.id,
+        role: r.role,
+        content: r.content,
+        attachments: r.attachmentsJson ? JSON.parse(r.attachmentsJson) : undefined,
+        mentions: r.mentionsJson ? JSON.parse(r.mentionsJson) : undefined,
+        quotedMessage: r.quotedMessageJson ? JSON.parse(r.quotedMessageJson) : undefined,
+        teamMessages: r.teamMessagesJson ? JSON.parse(r.teamMessagesJson) : undefined,
+        llmModelUsed: r.llmModelUsed ?? undefined,
+        createdAt: r.createdAt.toISOString().slice(0, 16).replace('T', ' '),
+      }))
+      sendJson(response, 200, { ok: true, messages } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/chat/message/append') {
+      const body = payload as Record<string, unknown>
+      const topicId = String(body.topicId ?? '')
+      const msg = body.message as Record<string, unknown> | undefined
+      if (!topicId || !msg) { sendJson(response, 400, { ok: false, error: 'Missing topicId or message' }); return }
+
+      const id = String(msg.id ?? `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`)
+      await prisma.chatMessage.create({
+        data: {
+          id,
+          topicId,
+          role: String(msg.role ?? 'ceo'),
+          content: String(msg.content ?? ''),
+          attachmentsJson: msg.attachments ? JSON.stringify(msg.attachments) : null,
+          mentionsJson: msg.mentions ? JSON.stringify(msg.mentions) : null,
+          quotedMessageJson: msg.quotedMessage ? JSON.stringify(msg.quotedMessage) : null,
+          teamMessagesJson: msg.teamMessages ? JSON.stringify(msg.teamMessages) : null,
+          llmModelUsed: msg.llmModelUsed ? String(msg.llmModelUsed) : null,
+        },
+      })
+
+      const count = await prisma.chatMessage.count({ where: { topicId } })
+      const topicUpdate: Record<string, unknown> = { messageCount: count }
+      if (msg.role === 'ceo' && count <= 2) {
+        const content = String(msg.content ?? '')
+        if (content.length > 0) {
+          const topic = await prisma.chatTopic.findUnique({ where: { id: topicId } })
+          if (topic && topic.title === '新对话') {
+            topicUpdate.title = content.slice(0, 30) + (content.length > 30 ? '...' : '')
+          }
+        }
+      }
+      await prisma.chatTopic.update({ where: { id: topicId }, data: topicUpdate })
+
+      sendJson(response, 200, { ok: true, messageId: id })
+      return
+    }
+
+    if (request.url === '/api/chat/messages/clear') {
+      const body = payload as Record<string, unknown>
+      const topicId = String(body.topicId ?? '')
+      if (!topicId) { sendJson(response, 400, { ok: false, error: 'Missing topicId' }); return }
+      await prisma.chatMessage.deleteMany({ where: { topicId } })
+      await prisma.chatTopic.update({ where: { id: topicId }, data: { messageCount: 0 } })
+      sendJson(response, 200, { ok: true })
+      return
+    }
+
+    if (request.url === '/api/chat/import') {
+      const body = payload as { topics?: Array<{ id: string; title: string; createdAt: string; updatedAt: string; messageCount: number; messages: Array<Record<string, unknown>> }> }
+      if (!Array.isArray(body.topics)) { sendJson(response, 400, { ok: false, error: 'Missing topics array' }); return }
+      let imported = 0
+      for (const t of body.topics) {
+        const existing = await prisma.chatTopic.findUnique({ where: { id: t.id } })
+        if (existing) continue
+        await prisma.chatTopic.create({
+          data: {
+            id: t.id,
+            title: t.title,
+            messageCount: t.messageCount ?? 0,
+            createdAt: new Date(t.createdAt),
+          },
+        })
+        for (const m of (t.messages ?? [])) {
+          await prisma.chatMessage.create({
+            data: {
+              id: String(m.id ?? `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
+              topicId: t.id,
+              role: String(m.role ?? 'ceo'),
+              content: String(m.content ?? ''),
+              attachmentsJson: m.attachments ? JSON.stringify(m.attachments) : null,
+              mentionsJson: m.mentions ? JSON.stringify(m.mentions) : null,
+              quotedMessageJson: m.quotedMessage ? JSON.stringify(m.quotedMessage) : null,
+              teamMessagesJson: m.teamMessages ? JSON.stringify(m.teamMessages) : null,
+              llmModelUsed: m.llmModelUsed ? String(m.llmModelUsed) : null,
+            },
+          })
+        }
+        imported++
+      }
+      sendJson(response, 200, { ok: true, imported })
+      return
+    }
+
+    // ─── Memory Service API ───
+
+    if (request.url === '/api/memory/save') {
+      const body = payload as Record<string, unknown>
+      const id = `mem_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      const agentId = String(body.agentId ?? '')
+      const category = String(body.category ?? 'learnings')
+      const content = String(body.content ?? '')
+      const source = String(body.source ?? 'unknown')
+      const importance = Number(body.importance ?? 0.8)
+
+      if (!agentId || !content) {
+        sendJson(response, 400, { ok: false, error: 'agentId and content required' })
+        return
+      }
+
+      try {
+        await prisma.$executeRawUnsafe(
+          `INSERT INTO memory_entries (id, agentId, category, content, source, importance, citedCount, createdAt, updatedAt)
+           VALUES (?, ?, ?, ?, ?, ?, 0, datetime('now'), datetime('now'))`,
+          id, agentId, category, content, source, importance,
+        )
+
+        const agentsRoot = path.resolve(dataRoot, 'openclaw_agents')
+        const memDir = path.join(agentsRoot, agentId.replace(/-/g, '_').replace('_', '-'), 'memory')
+        if (fs.existsSync(memDir)) {
+          const fileMap: Record<string, string> = {
+            learnings: 'learnings.md',
+            ceo_preferences: 'ceo_preferences.md',
+            decisions: 'decisions.md',
+          }
+          const memFile = fileMap[category] ?? `${category}.md`
+          const filePath = path.join(memDir, memFile)
+          const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ')
+          const line = `\n- [${timestamp}] ${content}\n`
+          fs.appendFileSync(filePath, line, 'utf-8')
+        }
+
+        sendJson(response, 200, { ok: true, id } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        sendJson(response, 200, { ok: false, error: msg })
+      }
+      return
+    }
+
+    if (request.url === '/api/memory/search') {
+      const body = payload as Record<string, unknown>
+      const agentId = String(body.agentId ?? '')
+      const query = String(body.query ?? '')
+      const category = body.category ? String(body.category) : null
+      const limit = Math.min(Number(body.limit ?? 10), 50)
+
+      try {
+        const keywords = query.split(/[\s,，。！？]+/).filter(w => w.length >= 2).slice(0, 5)
+        let whereClause = 'WHERE agentId = ?'
+        const params: unknown[] = [agentId]
+
+        if (category) {
+          whereClause += ' AND category = ?'
+          params.push(category)
+        }
+
+        if (keywords.length > 0) {
+          const likeConditions = keywords.map(() => 'content LIKE ?').join(' OR ')
+          whereClause += ` AND (${likeConditions})`
+          keywords.forEach(k => params.push(`%${k}%`))
+        }
+
+        params.push(limit)
+
+        const rows = await prisma.$queryRawUnsafe(
+          `SELECT id, agentId, category, content, source, importance, citedCount, createdAt
+           FROM memory_entries ${whereClause}
+           ORDER BY importance DESC, createdAt DESC
+           LIMIT ?`,
+          ...params,
+        ) as Array<Record<string, unknown>>
+
+        for (const row of rows) {
+          await prisma.$executeRawUnsafe(
+            `UPDATE memory_entries SET citedCount = citedCount + 1, lastCitedAt = datetime('now') WHERE id = ?`,
+            row.id,
+          )
+        }
+
+        sendJson(response, 200, {
+          entries: rows.map(r => ({
+            id: r.id,
+            agentId: r.agentId,
+            category: r.category,
+            content: r.content,
+            source: r.source,
+            importance: Number(r.importance),
+            citedCount: Number(r.citedCount),
+            createdAt: r.createdAt,
+          })),
+        } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        sendJson(response, 200, { entries: [], error: msg } as unknown as JsonRecord)
+      }
+      return
+    }
+
+    if (request.url === '/api/memory/list') {
+      const body = payload as Record<string, unknown>
+      const agentId = String(body.agentId ?? '')
+      const category = body.category ? String(body.category) : null
+      const limit = Math.min(Number(body.limit ?? 20), 100)
+
+      try {
+        let whereClause = 'WHERE agentId = ?'
+        const params: unknown[] = [agentId]
+
+        if (category) {
+          whereClause += ' AND category = ?'
+          params.push(category)
+        }
+        params.push(limit)
+
+        const rows = await prisma.$queryRawUnsafe(
+          `SELECT id, agentId, category, content, source, importance, citedCount, createdAt
+           FROM memory_entries ${whereClause}
+           ORDER BY importance DESC, createdAt DESC
+           LIMIT ?`,
+          ...params,
+        ) as Array<Record<string, unknown>>
+
+        sendJson(response, 200, {
+          entries: rows.map(r => ({
+            id: r.id,
+            agentId: r.agentId,
+            category: r.category,
+            content: r.content,
+            source: r.source,
+            importance: Number(r.importance),
+            citedCount: Number(r.citedCount),
+            createdAt: r.createdAt,
+          })),
+        } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        sendJson(response, 200, { entries: [], error: msg } as unknown as JsonRecord)
+      }
+      return
+    }
+
+    if (request.url === '/api/memory/decay') {
+      try {
+        const decayRate = 0.98
+        await prisma.$executeRawUnsafe(
+          `UPDATE memory_entries SET importance = importance * ?, updatedAt = datetime('now')
+           WHERE importance > 0.1`,
+          decayRate,
+        )
+        await prisma.$executeRawUnsafe(
+          `DELETE FROM memory_entries WHERE importance < 0.05 AND citedCount = 0
+           AND createdAt < datetime('now', '-30 days')`,
+        )
+        const remaining = await prisma.$queryRawUnsafe(
+          `SELECT COUNT(*) as cnt FROM memory_entries`,
+        ) as Array<{ cnt: number }>
+        sendJson(response, 200, { ok: true, remaining: Number(remaining[0]?.cnt ?? 0) } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        sendJson(response, 200, { ok: false, error: msg })
+      }
+      return
+    }
+
+    // ─── LLM Usage Tracking ───
+
+    if (request.url === '/api/llm/usage-log') {
+      const body = payload as Record<string, unknown>
+      const id = `llm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      try {
+        await prisma.$executeRawUnsafe(
+          `INSERT INTO llm_usage_logs (id, agentId, taskId, provider, model, inputTokens, outputTokens, totalTokens, estimatedCost, callerFunction, durationMs, createdAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+          id,
+          body.agentId ?? null,
+          body.taskId ?? null,
+          String(body.provider ?? ''),
+          String(body.model ?? ''),
+          Number(body.inputTokens ?? 0),
+          Number(body.outputTokens ?? 0),
+          Number(body.totalTokens ?? 0),
+          Number(body.estimatedCost ?? 0),
+          String(body.callerFunction ?? ''),
+          Number(body.durationMs ?? 0),
+        )
+        sendJson(response, 200, { ok: true, id } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error('[LLM Usage Log] write error:', msg)
+        sendJson(response, 200, { ok: false, error: msg })
+      }
+      return
+    }
+
+    if (request.url === '/api/llm/usage-stats') {
+      try {
+        const now = new Date()
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+        const todayRows = await prisma.$queryRawUnsafe(
+          `SELECT COALESCE(SUM(totalTokens),0) as tokens, COALESCE(SUM(estimatedCost),0) as cost, COUNT(*) as calls
+           FROM llm_usage_logs WHERE createdAt >= ?`, todayStart
+        ) as Array<{ tokens: number; cost: number; calls: number }>
+
+        const weekRows = await prisma.$queryRawUnsafe(
+          `SELECT COALESCE(SUM(totalTokens),0) as tokens, COALESCE(SUM(estimatedCost),0) as cost, COUNT(*) as calls
+           FROM llm_usage_logs WHERE createdAt >= ?`, weekAgo
+        ) as Array<{ tokens: number; cost: number; calls: number }>
+
+        const byAgent = await prisma.$queryRawUnsafe(
+          `SELECT agentId, SUM(totalTokens) as tokens, SUM(estimatedCost) as cost, COUNT(*) as calls
+           FROM llm_usage_logs WHERE createdAt >= ? GROUP BY agentId ORDER BY cost DESC LIMIT 20`, weekAgo
+        ) as Array<{ agentId: string | null; tokens: number; cost: number; calls: number }>
+
+        const recentLogs = await prisma.$queryRawUnsafe(
+          `SELECT id, agentId, provider, model, inputTokens, outputTokens, totalTokens, estimatedCost, callerFunction, durationMs, createdAt
+           FROM llm_usage_logs ORDER BY createdAt DESC LIMIT 30`
+        ) as Array<Record<string, unknown>>
+
+        const today = todayRows[0] ?? { tokens: 0, cost: 0, calls: 0 }
+        const week = weekRows[0] ?? { tokens: 0, cost: 0, calls: 0 }
+
+        sendJson(response, 200, {
+          todayCost: Number(today.cost),
+          todayTokens: Number(today.tokens),
+          todayCalls: Number(today.calls),
+          weeklyCost: Number(week.cost),
+          weeklyTokens: Number(week.tokens),
+          weeklyCalls: Number(week.calls),
+          costByAgent: byAgent.map(r => ({
+            agentId: r.agentId ?? 'unknown',
+            agentName: r.agentId ?? 'unknown',
+            totalTokens: Number(r.tokens),
+            estimatedCost: Number(r.cost),
+            callCount: Number(r.calls),
+          })),
+          recentLogs: recentLogs.map(r => ({
+            id: r.id,
+            agentId: r.agentId,
+            provider: r.provider,
+            model: r.model,
+            inputTokens: Number(r.inputTokens),
+            outputTokens: Number(r.outputTokens),
+            totalTokens: Number(r.totalTokens),
+            estimatedCost: Number(r.estimatedCost),
+            callerFunction: r.callerFunction,
+            durationMs: Number(r.durationMs),
+            createdAt: r.createdAt,
+          })),
+        } as unknown as JsonRecord)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error('[LLM Usage Stats] query error:', msg)
+        sendJson(response, 200, {
+          todayCost: 0, todayTokens: 0, todayCalls: 0,
+          weeklyCost: 0, weeklyTokens: 0, weeklyCalls: 0,
+          costByAgent: [], recentLogs: [],
+        } as unknown as JsonRecord)
+      }
+      return
+    }
+
+    // ─── Webhook Management API ───
+
+    if (request.url === '/api/webhooks/list') {
+      const configPath = path.resolve(dataRoot, 'config', 'webhook-config.json')
+      let config = { webhooks: [] as Array<Record<string, unknown>>, events: [] as string[] }
+      if (fs.existsSync(configPath)) {
+        try { config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) } catch { /* use default */ }
+      }
+      sendJson(response, 200, config as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/webhooks/register') {
+      const body = payload as { url?: string; events?: string[]; secret?: string }
+      if (!body.url) { sendJson(response, 400, { ok: false, error: 'url required' }); return }
+
+      const configPath = path.resolve(dataRoot, 'config', 'webhook-config.json')
+      let config: { webhooks: Array<Record<string, unknown>>; events: string[] } = { webhooks: [], events: [] }
+      if (fs.existsSync(configPath)) {
+        try { config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) } catch { /* use default */ }
+      }
+
+      const webhook = {
+        id: `wh_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        url: body.url,
+        secret: body.secret ?? '',
+        events: body.events ?? ['*'],
+        enabled: true,
+        retryMax: 3,
+        createdAt: new Date().toISOString(),
+      }
+      config.webhooks.push(webhook)
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8')
+      sendJson(response, 200, { ok: true, webhook } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/webhooks/test') {
+      const body = payload as { webhookId?: string; event?: string }
+      const configPath = path.resolve(dataRoot, 'config', 'webhook-config.json')
+      let config: { webhooks: Array<Record<string, unknown>> } = { webhooks: [] }
+      if (fs.existsSync(configPath)) {
+        try { config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) } catch { /* */ }
+      }
+      const wh = config.webhooks.find(w => w.id === body.webhookId)
+      if (!wh) { sendJson(response, 404, { ok: false, error: 'Webhook not found' }); return }
+
+      const testPayload = {
+        id: `evt_test_${Date.now()}`,
+        event: body.event ?? 'test.ping',
+        timestamp: new Date().toISOString(),
+        data: { message: 'Webhook test from Jarvis OS' },
+      }
+
+      try {
+        const targetUrl = new URL(String(wh.url))
+        const isHttps = targetUrl.protocol === 'https:'
+        const reqFn = isHttps ? httpsRequest : httpRequest
+        const postBody = JSON.stringify(testPayload)
+
+        await new Promise<void>((resolve, reject) => {
+          const req = reqFn({
+            hostname: targetUrl.hostname,
+            port: targetUrl.port || (isHttps ? 443 : 80),
+            path: targetUrl.pathname,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postBody) },
+            timeout: 10000,
+          }, (res) => {
+            res.resume()
+            res.on('end', () => resolve())
+          })
+          req.on('error', reject)
+          req.write(postBody)
+          req.end()
+        })
+        sendJson(response, 200, { ok: true, sent: testPayload } as unknown as JsonRecord)
+      } catch (err) {
+        sendJson(response, 200, { ok: false, error: String(err) })
+      }
+      return
+    }
+
+    // ─── Public REST API (External) — Bearer Token Auth ───
+
+    if (request.url?.startsWith('/api/v1/')) {
+      const apiToken = process.env.JARVIS_API_TOKEN
+      if (apiToken) {
+        const authHeader = request.headers['authorization'] ?? ''
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : ''
+        if (token !== apiToken) {
+          sendJson(response, 401, { ok: false, error: 'Unauthorized: invalid or missing Bearer token' })
+          return
+        }
+      }
+    }
+
+    if (request.url === '/api/v1/status') {
+      const agents = await prisma.$queryRawUnsafe('SELECT COUNT(*) as cnt FROM agents') as Array<{ cnt: number }>
+      const tasks = await prisma.$queryRawUnsafe('SELECT COUNT(*) as total, SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active FROM tasks') as Array<{ total: number; active: number }>
+      sendJson(response, 200, {
+        ok: true,
+        version: '0.1.0',
+        agents: Number(agents[0]?.cnt ?? 0),
+        totalTasks: Number(tasks[0]?.total ?? 0),
+        activeTasks: Number(tasks[0]?.active ?? 0),
+        uptime: process.uptime(),
+      } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/v1/agents') {
+      const agents = await prisma.$queryRawUnsafe('SELECT id, name, role, status, emoji FROM agents ORDER BY name') as Array<Record<string, unknown>>
+      sendJson(response, 200, { ok: true, agents } as unknown as JsonRecord)
+      return
+    }
+
+    if (request.url === '/api/v1/tasks') {
+      const body = payload as { status?: string; limit?: number }
+      const limit = Math.min(Number(body.limit ?? 20), 100)
+      let query = 'SELECT id, title, status, taskType, ownerAgentId, priority, createdAt FROM tasks'
+      const params: unknown[] = []
+      if (body.status) {
+        query += ' WHERE status = ?'
+        params.push(body.status)
+      }
+      query += ' ORDER BY createdAt DESC LIMIT ?'
+      params.push(limit)
+      const tasks = await prisma.$queryRawUnsafe(query, ...params) as Array<Record<string, unknown>>
+      sendJson(response, 200, { ok: true, tasks } as unknown as JsonRecord)
+      return
+    }
+
     sendJson(response, 404, { ok: false, error: 'Not found' })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown server error'
@@ -1082,43 +2087,284 @@ type LlmProvider = {
   baseUrl: string
   apiKey: string
   modelOverride?: string
+  fallbackTo?: string[]
+}
+
+function parseModelList(raw: string | undefined): string[] {
+  if (!raw) return []
+  return raw.split(',').map(item => item.trim()).filter(Boolean)
+}
+
+function parseProviderFallbackMap(raw: string | undefined): Record<string, string[]> {
+  if (!raw) return {}
+
+  return raw
+    .split(';')
+    .map(item => item.trim())
+    .filter(Boolean)
+    .reduce<Record<string, string[]>>((acc, item) => {
+      const parts = item.split('=')
+      if (parts.length < 2) return acc
+      const providerName = parts[0]?.trim()
+      const fallbackNames = parts.slice(1).join('=').split(',').map(name => name.trim()).filter(Boolean)
+      if (providerName && fallbackNames.length > 0) {
+        acc[providerName] = fallbackNames
+      }
+      return acc
+    }, {})
+}
+
+function serializeProviderFallbackMap(map: Record<string, string[]>): string {
+  return Object.entries(map)
+    .map(([provider, fallbackNames]) => {
+      const cleanProvider = provider.trim()
+      const cleanFallbacks = fallbackNames.map(name => name.trim()).filter(Boolean)
+      return cleanProvider && cleanFallbacks.length > 0 ? `${cleanProvider}=${cleanFallbacks.join(',')}` : ''
+    })
+    .filter(Boolean)
+    .join(';')
+}
+
+function syncLlmConfigToEnv(cfg: JsonRecord): void {
+  const envFilePath = path.resolve(projectRoot, '.env')
+  const llm = cfg.llm as { providers?: AppConfigLlmProvider[]; default_provider?: string; default_model?: string; fallback_chains?: Record<string, string[]> } | undefined
+  if (!llm?.providers) return
+
+  for (const p of llm.providers) {
+    if (!p.enabled) continue
+
+    if (p.type === 'relay') {
+      if (p.api_key) updateDotEnvValue(envFilePath, 'OPENAI_API_KEY', p.api_key)
+      if (p.base_url) updateDotEnvValue(envFilePath, 'OPENAI_BASE_URL', p.base_url)
+      const modelNames = p.models.map(m => m.name).filter(Boolean)
+      if (modelNames.length > 0) updateDotEnvValue(envFilePath, 'OPENAI_COMPAT_MODELS', modelNames.join(','))
+      const defaultModel = p.models.find(m => m.is_default)?.name ?? modelNames[0]
+      if (defaultModel) updateDotEnvValue(envFilePath, 'OPENAI_MODEL', defaultModel)
+    }
+
+    if (p.type === 'cliproxy') {
+      if (p.port) updateDotEnvValue(envFilePath, 'CLIPROXY_PORT', String(p.port))
+      if (p.api_key) updateDotEnvValue(envFilePath, 'CLIPROXY_API_KEY', p.api_key)
+      const modelNames = p.models.map(m => m.name).filter(Boolean)
+      if (modelNames.length > 0) updateDotEnvValue(envFilePath, 'CLIPROXY_MODELS', modelNames.join(','))
+    }
+
+    if (p.id === 'openai-direct' && p.type === 'official') {
+      if (p.api_key) updateDotEnvValue(envFilePath, 'OPENAI_DIRECT_KEY', p.api_key)
+      if (p.base_url) updateDotEnvValue(envFilePath, 'OPENAI_DIRECT_BASE', p.base_url)
+      const modelNames = p.models.map(m => m.name).filter(Boolean)
+      if (modelNames.length > 0) updateDotEnvValue(envFilePath, 'OPENAI_DIRECT_MODELS', modelNames.join(','))
+    }
+
+    if (p.id === 'deepseek' && p.api_key) updateDotEnvValue(envFilePath, 'DEEPSEEK_API_KEY', p.api_key)
+    if (p.id === 'moonshot' && p.api_key) updateDotEnvValue(envFilePath, 'MOONSHOT_API_KEY', p.api_key)
+    if (p.id === 'siliconflow' && p.api_key) updateDotEnvValue(envFilePath, 'SILICONFLOW_API_KEY', p.api_key)
+  }
+
+  if (llm.default_provider) {
+    updateDotEnvValue(envFilePath, 'VITE_LLM_DEFAULT_PROVIDER', llm.default_provider)
+    process.env.VITE_LLM_DEFAULT_PROVIDER = llm.default_provider
+  }
+  if (llm.default_model) {
+    updateDotEnvValue(envFilePath, 'VITE_LLM_MODEL', llm.default_model)
+  }
+
+  if (llm.fallback_chains) {
+    const serialized = serializeProviderFallbackMap(llm.fallback_chains)
+    updateDotEnvValue(envFilePath, 'LLM_PROVIDER_FALLBACKS', serialized)
+    process.env.LLM_PROVIDER_FALLBACKS = serialized
+  }
+
+  dotenv.config({ path: envFilePath, override: true })
+}
+
+function updateDotEnvValue(filePath: string, key: string, value: string) {
+  const escapedValue = `"${value.replace(/"/g, '\\"')}"`
+  const line = `${key}=${escapedValue}`
+  const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : ''
+  const pattern = new RegExp(`^${key}=.*$`, 'm')
+  const next = pattern.test(existing)
+    ? existing.replace(pattern, line)
+    : `${existing.trimEnd()}${existing.trimEnd() ? '\n' : ''}${line}\n`
+  fs.writeFileSync(filePath, next, 'utf-8')
+}
+
+function sanitizeModelId(model: string): string {
+  return model.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'model'
+}
+
+function getHostname(rawUrl: string): string {
+  try {
+    return new URL(rawUrl).hostname.toLowerCase()
+  } catch {
+    return rawUrl.toLowerCase()
+  }
+}
+
+function isOfficialOpenAIBase(rawUrl: string): boolean {
+  return getHostname(rawUrl) === 'api.openai.com'
+}
+
+function isFandaiBase(rawUrl: string): boolean {
+  return /(^|\.)sxzhong10667\.eu\.cc$/i.test(getHostname(rawUrl)) || /sxzhong10667\.eu\.cc/i.test(rawUrl)
+}
+
+type AppConfigLlmProvider = {
+  id: string
+  type: 'official' | 'cliproxy' | 'relay'
+  name: string
+  enabled: boolean
+  base_url?: string
+  api_key?: string
+  port?: number
+  models: { id: string; name: string; alias?: string; is_default?: boolean }[]
+}
+
+type AppConfigLlm = {
+  providers?: AppConfigLlmProvider[]
+  fallback_chains?: Record<string, string[]>
+}
+
+function loadAppConfigLlm(): AppConfigLlm | null {
+  const configPath = path.resolve(dataRoot, 'config', 'app-config.json')
+  try {
+    if (fs.existsSync(configPath)) {
+      const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as { llm?: AppConfigLlm }
+      return raw.llm ?? null
+    }
+  } catch { /* fall through */ }
+  return null
+}
+
+function buildLlmProviderChainFromConfig(appLlm: AppConfigLlm): LlmProvider[] {
+  const chain: LlmProvider[] = []
+  const fallbackChains = appLlm.fallback_chains ?? {}
+
+  for (const p of (appLlm.providers ?? [])) {
+    if (!p.enabled) continue
+
+    if (p.type === 'cliproxy') {
+      const port = p.port ?? 18800
+      const apiKey = (p.api_key ?? '').trim()
+      for (const m of p.models) {
+        chain.push({
+          name: m.id,
+          baseUrl: `http://127.0.0.1:${port}/v1`,
+          apiKey,
+          modelOverride: m.name,
+          fallbackTo: fallbackChains[m.id],
+        })
+      }
+    } else {
+      const baseUrl = (p.base_url ?? '').trim()
+      const apiKey = (p.api_key ?? '').trim()
+      if (!baseUrl && p.type !== 'official') continue
+
+      for (const m of p.models) {
+        chain.push({
+          name: m.id,
+          baseUrl: baseUrl || 'https://api.openai.com/v1',
+          apiKey,
+          modelOverride: m.name,
+          fallbackTo: fallbackChains[m.id],
+        })
+      }
+    }
+  }
+  return chain
 }
 
 function buildLlmProviderChain(): LlmProvider[] {
+  const appLlm = loadAppConfigLlm()
+  if (appLlm?.providers && appLlm.providers.length > 0) {
+    const configChain = buildLlmProviderChainFromConfig(appLlm)
+    if (configChain.length > 0) return configChain
+  }
+
   const chain: LlmProvider[] = []
 
-  const openaiKey = process.env.OPENAI_API_KEY ?? ''
-  const deepseekKey = process.env.DEEPSEEK_API_KEY ?? ''
-  const moonshotKey = process.env.MOONSHOT_API_KEY ?? ''
-  const siliconflowKey = process.env.SILICONFLOW_API_KEY ?? ''
-  const explicitBase = process.env.LLM_API_BASE
-  const explicitKey = process.env.LLM_API_KEY
+  const openaiKey = (process.env.OPENAI_API_KEY ?? '').trim()
+  const deepseekKey = (process.env.DEEPSEEK_API_KEY ?? '').trim()
+  const moonshotKey = (process.env.MOONSHOT_API_KEY ?? '').trim()
+  const siliconflowKey = (process.env.SILICONFLOW_API_KEY ?? '').trim()
+  const explicitBase = (process.env.LLM_API_BASE ?? '').trim()
+  const explicitKey = (process.env.LLM_API_KEY ?? '').trim()
+  const openaiBase = (process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1').trim()
+  const openaiModel = (process.env.OPENAI_MODEL ?? 'gpt-4o').trim() || 'gpt-4o'
+  const openaiCompatModels = parseModelList(process.env.OPENAI_COMPAT_MODELS)
+  const providerFallbackMap = parseProviderFallbackMap(process.env.LLM_PROVIDER_FALLBACKS)
 
   if (explicitBase && explicitBase !== 'http://localhost:11434/v1') {
     chain.push({
       name: 'configured',
       baseUrl: explicitBase,
-      apiKey: explicitKey ?? openaiKey,
+      apiKey: explicitKey || openaiKey,
     })
   }
 
+  const cliproxyPort = (process.env.CLIPROXY_PORT ?? '').trim()
+  const cliproxyKey = (process.env.CLIPROXY_API_KEY ?? '').trim()
+  const cliproxyModelsRaw = (process.env.CLIPROXY_MODELS ?? '').trim()
+  if (cliproxyPort && cliproxyModelsRaw) {
+    const cliproxyModels = cliproxyModelsRaw.split(',').map(m => m.trim()).filter(Boolean)
+    for (const modelName of cliproxyModels) {
+      const providerId = `chatgpt-plus-${sanitizeModelId(modelName)}`
+      chain.push({
+        name: providerId,
+        baseUrl: `http://127.0.0.1:${cliproxyPort}/v1`,
+        apiKey: cliproxyKey,
+        modelOverride: modelName,
+        fallbackTo: providerFallbackMap[providerId] ?? ['fandai-nn-46', 'fandai-gemini-31', 'fandai-glm-5'],
+      })
+    }
+  }
+
   if (openaiKey && openaiKey.length > 10) {
-    const isFandai = openaiKey.startsWith('sk-fandai')
-    if (isFandai) {
-      const fandaiBase = 'https://sxzhong10667.eu.cc/v1'
+    const isFandaiKey = /^(?:sk|k)-fandai/i.test(openaiKey)
+    const usesFandaiBase = isFandaiBase(openaiBase)
+    const usesOfficialOpenAIBase = isOfficialOpenAIBase(openaiBase)
+
+    if (isFandaiKey || usesFandaiBase) {
+      const fandaiBase = openaiBase || 'https://sxzhong10667.eu.cc/v1'
       const fandaiModels = [
-        { name: 'fandai-nn4.6',         model: 'Nshen-NN-4.6' },
-        { name: 'fandai-gemini3.1',     model: 'Nshen-gemini-3.1' },
-        { name: 'fandai-gpt5.4',        model: 'gpt-5.4' },
-        { name: 'fandai-nshen5.4-med',  model: 'Nshen-5.4-medium' },
-        { name: 'fandai-nshen-mini',    model: 'Nshen-mini' },
+        { name: 'fandai-nn-46', model: 'Nshen-NN-4.6', fallbackTo: ['fandai-gemini-31', 'fandai-glm-5'] },
+        { name: 'fandai-gemini-31', model: 'Nshen-gemini-3.1', fallbackTo: ['fandai-nn-46', 'fandai-glm-5'] },
+        { name: 'fandai-glm-5', model: 'GLM-5', fallbackTo: ['fandai-gemini-31', 'fandai-nn-46'] },
       ]
       for (const fm of fandaiModels) {
-        chain.push({ name: fm.name, baseUrl: fandaiBase, apiKey: openaiKey, modelOverride: fm.model })
+        chain.push({
+          name: fm.name,
+          baseUrl: fandaiBase,
+          apiKey: openaiKey,
+          modelOverride: fm.model,
+          fallbackTo: providerFallbackMap[fm.name] ?? fm.fallbackTo,
+        })
       }
     } else {
-      const openaiBase = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1'
-      chain.push({ name: 'openai', baseUrl: openaiBase, apiKey: openaiKey, modelOverride: 'gpt-4o' })
+      const models = openaiCompatModels.length > 0 ? openaiCompatModels : [openaiModel]
+      for (const modelName of models) {
+        const providerName = usesOfficialOpenAIBase && models.length === 1 && modelName === openaiModel
+          ? 'openai'
+          : `openai-compat-${sanitizeModelId(modelName)}`
+        chain.push({ name: providerName, baseUrl: openaiBase, apiKey: openaiKey, modelOverride: modelName })
+      }
+    }
+  }
+
+  const directKey = (process.env.OPENAI_DIRECT_KEY ?? '').trim()
+  const directBase = (process.env.OPENAI_DIRECT_BASE ?? 'https://api.openai.com/v1').trim()
+  const directModelsRaw = (process.env.OPENAI_DIRECT_MODELS ?? 'gpt-4o,gpt-4o-mini').trim()
+  if (directKey && directKey.length > 10) {
+    const directModels = directModelsRaw.split(',').map(m => m.trim()).filter(Boolean)
+    for (const modelName of directModels) {
+      const providerId = `openai-direct-${sanitizeModelId(modelName)}`
+      chain.push({
+        name: providerId,
+        baseUrl: directBase,
+        apiKey: directKey,
+        modelOverride: modelName,
+        fallbackTo: providerFallbackMap[providerId] ?? ['fandai-gemini-31', 'fandai-glm-5'],
+      })
     }
   }
 
@@ -1128,6 +2374,7 @@ function buildLlmProviderChain(): LlmProvider[] {
       baseUrl: 'https://api.deepseek.com/v1',
       apiKey: deepseekKey,
       modelOverride: 'deepseek-chat',
+      fallbackTo: providerFallbackMap['deepseek'] ?? ['fandai-gemini-31', 'fandai-glm-5'],
     })
   }
 
@@ -1137,6 +2384,7 @@ function buildLlmProviderChain(): LlmProvider[] {
       baseUrl: 'https://api.moonshot.cn/v1',
       apiKey: moonshotKey,
       modelOverride: 'kimi-k2.5',
+      fallbackTo: providerFallbackMap['moonshot'] ?? ['fandai-gemini-31', 'fandai-glm-5'],
     })
   }
 
@@ -1146,6 +2394,7 @@ function buildLlmProviderChain(): LlmProvider[] {
       baseUrl: 'https://api.siliconflow.cn/v1',
       apiKey: siliconflowKey,
       modelOverride: 'deepseek-ai/DeepSeek-V3',
+      fallbackTo: providerFallbackMap['siliconflow'] ?? ['fandai-gemini-31', 'fandai-glm-5'],
     })
   }
 
@@ -1201,6 +2450,7 @@ async function pollOpenClawSession(apiBase: string, sessionId: string, timeoutSe
 
 server.listen(port, '127.0.0.1', () => {
   console.log(`Writeback API listening on http://127.0.0.1:${port}`)
+  console.log(`Company data root: ${dataRoot}`)
   const chain = buildLlmProviderChain()
   console.log(`LLM provider chain (${chain.length}): ${chain.map(p => {
     const model = p.modelOverride ? ` → ${p.modelOverride}` : ''

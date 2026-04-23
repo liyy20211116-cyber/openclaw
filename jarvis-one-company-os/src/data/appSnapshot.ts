@@ -32,7 +32,28 @@ export const appSnapshot: AppSnapshot = {
         "拆解目标",
         "协调各部门",
         "上报结果"
-      ]
+      ],
+      "performance": {
+        "score": 70.9,
+        "grade": "B",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 7.6,
+          "scripts": 8,
+          "growth": 3,
+          "task_completion": 0,
+          "budget_discipline": 10,
+          "compliance_delta": 9.8,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "task_completion",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.055Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "hermione",
@@ -48,7 +69,28 @@ export const appSnapshot: AppSnapshot = {
         "搭建系统架构",
         "代码开发与自动化",
         "API 对接与排障"
-      ]
+      ],
+      "performance": {
+        "score": 73.4,
+        "grade": "B",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 6.4,
+          "scripts": 10,
+          "growth": 5,
+          "task_completion": 0,
+          "budget_discipline": 10,
+          "compliance_delta": 9.5,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "task_completion",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.051Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "mcgonagall",
@@ -64,7 +106,29 @@ export const appSnapshot: AppSnapshot = {
         "需求分析与 PRD",
         "流程设计与验收标准",
         "优先级判断"
-      ]
+      ],
+      "performance": {
+        "score": 68.7,
+        "grade": "B",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 1.2,
+          "scripts": 10,
+          "growth": 5,
+          "task_completion": 0,
+          "budget_discipline": 10,
+          "compliance_delta": 10,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "memory_activity",
+          "task_completion",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.067Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "luna",
@@ -80,7 +144,28 @@ export const appSnapshot: AppSnapshot = {
         "制定内容策略",
         "产出获客内容",
         "引流与增长复盘"
-      ]
+      ],
+      "performance": {
+        "score": 77.3,
+        "grade": "A",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 1.2,
+          "scripts": 10,
+          "growth": 5,
+          "task_completion": 9,
+          "budget_discipline": 10,
+          "compliance_delta": 9.6,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "memory_activity",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.061Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "fred",
@@ -96,7 +181,28 @@ export const appSnapshot: AppSnapshot = {
         "客户开发与获客",
         "商务谈判与成交",
         "定价策略与竞品分析"
-      ]
+      ],
+      "performance": {
+        "score": 77.5,
+        "grade": "A",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 1.2,
+          "scripts": 10,
+          "growth": 5,
+          "task_completion": 9,
+          "budget_discipline": 10,
+          "compliance_delta": 9.8,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "memory_activity",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.047Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "percy",
@@ -112,7 +218,29 @@ export const appSnapshot: AppSnapshot = {
         "管理国库与预算",
         "成本核算与 ROI",
         "流水记账与报告"
-      ]
+      ],
+      "performance": {
+        "score": 68.7,
+        "grade": "B",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 1.2,
+          "scripts": 10,
+          "growth": 5,
+          "task_completion": 0,
+          "budget_discipline": 10,
+          "compliance_delta": 10,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "memory_activity",
+          "task_completion",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.077Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "snape",
@@ -128,7 +256,29 @@ export const appSnapshot: AppSnapshot = {
         "代码审查与安全",
         "质量检测与幻觉检测",
         "风险预警与合规审计"
-      ]
+      ],
+      "performance": {
+        "score": 66.7,
+        "grade": "B",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 1.2,
+          "scripts": 8,
+          "growth": 5,
+          "task_completion": 0,
+          "budget_discipline": 10,
+          "compliance_delta": 10,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "memory_activity",
+          "task_completion",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:07.134Z",
+        "reviewer": "neville-hr-v2"
+      }
     },
     {
       "id": "dobby",
@@ -144,23 +294,29 @@ export const appSnapshot: AppSnapshot = {
         "用户体验评估",
         "客户反馈收集",
         "问题跟进与闭环"
-      ]
-    },
-    {
-      "id": "neville",
-      "name": "纳威·隆巴顿",
-      "role": "人资总监",
-      "department": "Human Resources",
-      "persona": "从胆小到英雄的成长型人格。温暖坚定，相信每个人都有成长潜力，不放弃任何同事。",
-      "status": "idle",
-      "walletBalance": 2000,
-      "currentTasks": 1,
-      "complianceScore": 100,
-      "goals": [
-        "绩效管理与考核",
-        "人才发展与培训",
-        "团队文化维护"
-      ]
+      ],
+      "performance": {
+        "score": 68.7,
+        "grade": "B",
+        "breakdown": {
+          "completeness": 15,
+          "skills": 10,
+          "memory_activity": 1.2,
+          "scripts": 10,
+          "growth": 5,
+          "task_completion": 0,
+          "budget_discipline": 10,
+          "compliance_delta": 10,
+          "revenue_contribution": 7.5
+        },
+        "improvementAreas": [
+          "memory_activity",
+          "task_completion",
+          "revenue_contribution"
+        ],
+        "reviewedAt": "2026-04-23T07:10:06.947Z",
+        "reviewer": "neville-hr-v2"
+      }
     }
   ],
   "tasks": [
@@ -1340,5 +1496,19 @@ export const appSnapshot: AppSnapshot = {
     "totalBalance": 200000,
     "reservedBalance": 8600,
     "availableBalance": 191400
+  },
+  "performanceSummary": {
+    "reviewDate": "2026-04-23T07:10:07.134Z",
+    "totalAgents": 9,
+    "avgScore": 72.5,
+    "gradeDistribution": {
+      "S": 0,
+      "A": 3,
+      "B": 6,
+      "C": 0,
+      "D": 0
+    },
+    "topPerformer": "neville",
+    "needsAttention": []
   }
 }
