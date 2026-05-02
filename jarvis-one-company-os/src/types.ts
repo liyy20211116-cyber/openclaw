@@ -847,6 +847,7 @@ export interface ChatMessage {
   decomposition?: GoalDecomposition
   teamMessages?: TeamDiscussionMessage[]
   llmModelUsed?: string
+  isError?: boolean
   createdAt: string
 }
 

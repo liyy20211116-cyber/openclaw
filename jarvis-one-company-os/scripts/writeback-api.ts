@@ -745,6 +745,7 @@ const server = createServer(async (request, response) => {
       }
 
       let streamed = false
+      const streamFailures: Array<{ provider: string; status?: number; reason: string }> = []
 
       for (const provider of selectedProviders) {
         if (streamed) break
@@ -770,32 +771,128 @@ const server = createServer(async (request, response) => {
               timeout: 60000,
               ...(!isLocal && OUTBOUND_LOCAL_ADDRESS ? { localAddress: OUTBOUND_LOCAL_ADDRESS } : {}),
             }, (proxyRes) => {
-              if ((proxyRes.statusCode ?? 0) >= 400) {
-                resolve(false)
+              const statusCode = proxyRes.statusCode ?? 0
+              if (statusCode >= 400) {
+                let errBody = ''
+                proxyRes.on('data', (chunk: Buffer) => { errBody += chunk.toString() })
+                proxyRes.on('end', () => {
+                  streamFailures.push({ provider: provider.name, status: statusCode, reason: errBody.slice(0, 300) })
+                  console.log(`[chat-stream] provider ${provider.name} HTTP ${statusCode}, will try next`)
+                  resolve(false)
+                })
+                proxyRes.on('error', () => {
+                  streamFailures.push({ provider: provider.name, status: statusCode, reason: 'proxy_res_error' })
+                  resolve(false)
+                })
                 return
               }
+
+              let buffer = ''
+              let emittedContent = ''
+              let bufferedReasoning = ''
+              let upstreamErrored = false
+
+              const emit = (text: string) => {
+                if (!text) return
+                emittedContent += text
+                const chunkOut = JSON.stringify({
+                  choices: [{ delta: { content: text } }],
+                  model: resolvedModel,
+                  model_provider: provider.name,
+                })
+                response.write(`data: ${chunkOut}\n\n`)
+              }
+
+              const handleSseLine = (rawLine: string) => {
+                if (!rawLine.startsWith('data: ')) return
+                const payloadText = rawLine.slice(6).trim()
+                if (!payloadText || payloadText === '[DONE]') return
+                let parsed: {
+                  choices?: Array<{
+                    delta?: { content?: string; reasoning_content?: string }
+                    message?: { content?: string; reasoning_content?: string }
+                  }>
+                  error?: unknown
+                  model?: string
+                } | null = null
+                try { parsed = JSON.parse(payloadText) } catch { return }
+                if (!parsed) return
+                if (parsed.error) {
+                  upstreamErrored = true
+                  return
+                }
+                const choice = parsed.choices?.[0]
+                const directContent = choice?.delta?.content ?? choice?.message?.content ?? ''
+                const reasoning = choice?.delta?.reasoning_content ?? choice?.message?.reasoning_content ?? ''
+                if (directContent) {
+                  emit(directContent)
+                } else if (reasoning) {
+                  bufferedReasoning += reasoning
+                }
+              }
+
               proxyRes.on('data', (chunk: Buffer) => {
-                response.write(chunk)
+                buffer += chunk.toString('utf8')
+                const lines = buffer.split('\n')
+                buffer = lines.pop() ?? ''
+                for (const line of lines) handleSseLine(line)
               })
               proxyRes.on('end', () => {
+                if (buffer) handleSseLine(buffer)
+
+                if (!emittedContent && bufferedReasoning) {
+                  emit(bufferedReasoning)
+                }
+
+                if (!emittedContent) {
+                  const reason = upstreamErrored
+                    ? 'upstream_error_in_stream'
+                    : 'empty_stream_content'
+                  streamFailures.push({ provider: provider.name, status: statusCode, reason })
+                  console.log(`[chat-stream] provider ${provider.name} ${reason}, will try next`)
+                  resolve(false)
+                  return
+                }
+
                 response.write(`data: [DONE]\n\n`)
                 response.end()
                 resolve(true)
               })
-              proxyRes.on('error', () => resolve(false))
+              proxyRes.on('error', (err) => {
+                streamFailures.push({ provider: provider.name, status: statusCode, reason: `res_error:${err.message}` })
+                if (emittedContent) {
+                  try { response.write(`data: [DONE]\n\n`); response.end() } catch { /* closed */ }
+                  resolve(true)
+                } else {
+                  resolve(false)
+                }
+              })
             })
-            proxyReq.on('error', () => resolve(false))
-            proxyReq.on('timeout', () => { proxyReq.destroy(); resolve(false) })
+            proxyReq.on('error', (err) => {
+              streamFailures.push({ provider: provider.name, reason: `req_error:${err.message}` })
+              resolve(false)
+            })
+            proxyReq.on('timeout', () => {
+              streamFailures.push({ provider: provider.name, reason: 'timeout' })
+              proxyReq.destroy()
+              resolve(false)
+            })
             proxyReq.write(postBody)
             proxyReq.end()
           })
-        } catch {
+        } catch (err) {
+          streamFailures.push({ provider: provider.name, reason: `exception:${err instanceof Error ? err.message : String(err)}` })
           continue
         }
       }
 
       if (!streamed) {
-        response.write(`data: ${JSON.stringify({ error: 'All providers failed for streaming' })}\n\n`)
+        const errPayload = JSON.stringify({
+          error: 'All providers failed for streaming',
+          attemptedProviders: selectedProviders.map(p => p.name),
+          providerFailures: streamFailures,
+        })
+        response.write(`data: ${errPayload}\n\n`)
         response.end()
       }
       return

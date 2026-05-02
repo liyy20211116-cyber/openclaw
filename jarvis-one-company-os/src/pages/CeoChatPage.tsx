@@ -509,6 +509,7 @@ ${resultsSummary}
 
       const jarvisMsgId = `msg_${Date.now()}_jarvis`
       let jarvisReply = ''
+      let placeholderVisible = false
 
       try {
         const streamMsg: ChatMessage = {
@@ -519,6 +520,7 @@ ${resultsSummary}
           createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
         }
         setMessages(prev => [...prev, streamMsg])
+        placeholderVisible = true
 
         const streamReply = await chatCompletionStream(
           [
@@ -541,19 +543,33 @@ ${resultsSummary}
         setMessages(prev => prev.map(m => m.id === jarvisMsgId ? { ...m, content: jarvisReply, llmModelUsed: getLastUsedModel() || undefined } : m))
       } catch (streamErr) {
         console.warn('[CeoChatPage] streaming failed, falling back to non-streaming jarvisChat:', streamErr)
-        setMessages(prev => prev.filter(m => m.id !== jarvisMsgId))
+        if (placeholderVisible) {
+          setMessages(prev => prev.filter(m => m.id !== jarvisMsgId))
+          placeholderVisible = false
+        }
+        let fallbackErr: unknown = null
         try {
           jarvisReply = await jarvisChat(fullGoal, history)
-        } catch (fallbackErr) {
-          console.error('[CeoChatPage] non-streaming fallback also failed:', fallbackErr)
+        } catch (err) {
+          fallbackErr = err
+          console.error('[CeoChatPage] non-streaming fallback also failed:', err)
           jarvisReply = ''
         }
 
         if (!jarvisReply || !jarvisReply.trim()) {
+          const streamSummary = summarizeLlmError(streamErr)
+          const fallbackSummary = fallbackErr ? summarizeLlmError(fallbackErr) : '回退接口同样未返回内容'
+          console.error('[CeoChatPage] both streaming and non-streaming returned empty', {
+            streamErr,
+            fallbackErr,
+            model: getLastUsedModel(),
+          })
           const errorMsg: ChatMessage = {
             id: jarvisMsgId,
             role: 'jarvis',
-            content: `⚠️ Jarvis 回复失败，请检查模型接口或运行日志。\n（${summarizeLlmError(streamErr)}）`,
+            content: `⚠️ Jarvis 回复失败，请检查模型接口或运行日志。\n· 流式通道：${streamSummary}\n· 兜底通道：${fallbackSummary}`,
+            isError: true,
+            llmModelUsed: getLastUsedModel() || undefined,
             createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
           }
           chatTopicService.appendMessage(activeTopicId, errorMsg)
@@ -638,11 +654,12 @@ ${resultsSummary}
         }
       }
     } catch (err) {
-      console.error('Jarvis chat failed after all retries', err)
+      console.error('[CeoChatPage] Jarvis chat failed after all retries', err)
       const errorMsg: ChatMessage = {
         id: `msg_${Date.now()}_error`,
         role: 'jarvis',
         content: `⚠️ ${summarizeLlmError(err)}`,
+        isError: true,
         createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
       chatTopicService.appendMessage(activeTopicId, errorMsg)
@@ -961,12 +978,26 @@ ${resultsSummary}
                       .map((tm, i) => renderTeamMessage(tm, i))}
                   </div>
                 ) : (
-                  <div className="prompt-box">
+                  <div
+                    className="prompt-box"
+                    style={msg.isError ? {
+                      borderColor: 'rgba(239, 68, 68, 0.5)',
+                      background: 'rgba(239, 68, 68, 0.08)',
+                    } : undefined}
+                  >
                     <div className="msg-action-row">
                       <button type="button" className="msg-action-btn" onClick={() => handleQuoteMessage(msg)}>引用</button>
                     </div>
-                    <p className="prompt-label">🎯 贾维斯</p>
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+                    <p
+                      className="prompt-label"
+                      style={msg.isError ? { color: '#f87171' } : undefined}
+                    >
+                      {msg.isError ? '⚠️ 贾维斯（回复失败）' : '🎯 贾维斯'}
+                    </p>
+                    <p style={{
+                      whiteSpace: 'pre-wrap',
+                      color: msg.isError ? '#fecaca' : undefined,
+                    }}>{msg.content}</p>
                     {msg.llmModelUsed && (
                       <div style={{
                         display: 'inline-flex',
