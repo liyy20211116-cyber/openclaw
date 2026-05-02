@@ -1,0 +1,98 @@
+[
+  {
+    "id": "neville_hr_report",
+    "name": "人事汇总报告",
+    "description": "汇总全公司 Agent 配置状态、技能覆盖率和人员编制情况",
+    "type": "script",
+    "script": "skill_hr_report.py",
+    "timeout": 30
+  },
+  {
+    "id": "neville_performance_review",
+    "name": "绩效评估",
+    "description": "基于各部门工作日志和任务完成率生成绩效评估报告",
+    "type": "llm_to_file",
+    "outputDir": "output/performance",
+    "timeout": 60
+  },
+  {
+    "id": "neville_team_roster",
+    "name": "团队花名册",
+    "description": "生成公司组织架构和人员配置清单",
+    "type": "script",
+    "script": "skill_team_roster.py",
+    "timeout": 15
+  },
+  {
+    "id": "neville_onboarding",
+    "name": "新员工入职",
+    "description": "为新 Agent 角色生成入职指南和配置检查清单",
+    "type": "llm_to_file",
+    "outputDir": "output/onboarding",
+    "timeout": 60
+  },
+  {
+    "id": "neville_feishu_hr",
+    "name": "飞书人事管理",
+    "description": "在飞书多维表格维护团队信息、考勤和绩效记录",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-bitable",
+    "timeout": 60
+  },
+  {
+    "id": "neville_hr_notify",
+    "name": "人事通知",
+    "description": "通过飞书发送人事变动、绩效结果、制度更新等通知",
+    "type": "skill_ref",
+    "ref": "skills/feishu-messaging",
+    "timeout": 30
+  },
+  {
+    "id": "neville_hr_docs",
+    "name": "制度文档管理",
+    "description": "在飞书创建和维护公司制度文档、员工手册",
+    "type": "skill_ref",
+    "ref": "skills/feishu-workflow-doc",
+    "timeout": 60
+  },
+  {
+    "id": "neville_hr_excel",
+    "name": "人事数据分析",
+    "description": "使用 Excel 生成人事报表、绩效统计、团队配置分析",
+    "type": "skill_ref",
+    "ref": "skills/excel-data",
+    "timeout": 60
+  },
+  {
+    "id": "neville_performance_review",
+    "name": "全员绩效评估",
+    "description": "对每个 Agent 进行多维度绩效评分（完整度/技能/记忆/脚本/成长），输出等级排名",
+    "type": "script",
+    "script": "skill_performance_review.py",
+    "timeout": 30
+  },
+  {
+    "id": "neville_team_growth_report",
+    "name": "团队成长周报",
+    "description": "汇总各 Agent 的学习记录和文件变化，输出成长活跃度报告",
+    "type": "script",
+    "script": "skill_team_growth_report.py",
+    "timeout": 30
+  },
+  {
+    "id": "neville_capability_gap",
+    "name": "能力缺口分析",
+    "description": "扫描所有 Agent 的技能注册和脚本覆盖，分析能力缺口并给出补强建议",
+    "type": "script",
+    "script": "skill_capability_gap.py",
+    "timeout": 90
+  },
+  {
+    "id": "neville_platform_viral_learning",
+    "name": "跨平台爆款学习沉淀",
+    "description": "学习抖音、B站、公众号的平台内容规律，沉淀知识库、素材包和部门赋能任务，不自动发布。",
+    "type": "script",
+    "script": "../../scripts/hr_platform_learning.py",
+    "timeout": 60
+  }
+]

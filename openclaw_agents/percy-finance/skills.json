@@ -70,5 +70,29 @@
     "type": "skill_ref",
     "ref": "skills/local-file-ops",
     "timeout": 30
+  },
+  {
+    "id": "percy_roi_calculator",
+    "name": "ROI 投资回报计算",
+    "description": "计算项目/服务的投资回报率，支持多场景对比和定价优化建议",
+    "type": "script",
+    "script": "skill_roi_calculator.py",
+    "timeout": 90
+  },
+  {
+    "id": "percy_cost_tracker",
+    "name": "真实成本追踪",
+    "description": "统计各部门LLM调用量、CEO对话Token、API成本，输出成本明细",
+    "type": "script",
+    "script": "skill_cost_tracker.py",
+    "timeout": 30
+  },
+  {
+    "id": "percy_invoice_manager",
+    "name": "发票账单管理",
+    "description": "管理客户发票、应收账款、逾期催收，生成回款率和现金流分析",
+    "type": "script",
+    "script": "skill_invoice_manager.py",
+    "timeout": 60
   }
 ]

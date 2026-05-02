@@ -1,68 +1,79 @@
 """
-skill_content_pipeline.py — 卢娜的技能：驱动内容生产流水线
-调用 pipeline_api (127.0.0.1:18781) 执行 fetch→rank→script→video
+skill_content_pipeline.py — 卢娜的技能：内容生产流水线
+全链路执行：热点抓取 → 筛选排名 → 生成内容草稿 → 输出到 output/
 """
-import json, sys, time, urllib.request, urllib.error
+import json, os, sys, time, urllib.request
 
-API = "http://127.0.0.1:18781"
+HERE = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output", "content")
+BACKEND_URL = "http://127.0.0.1:18782/api/llm/chat"
 
-def api_call(method, path, body=None):
-    url = f"{API}{path}"
-    data = json.dumps(body).encode() if body else None
-    req = urllib.request.Request(url, data=data, method=method,
-                                headers={"Content-Type": "application/json"} if data else {})
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        return json.loads(resp.read().decode())
+task_arg = sys.argv[1] if len(sys.argv) > 1 else "AI自动化"
 
-try:
-    api_call("GET", "/health")
-except Exception as e:
-    print(json.dumps({
-        "ok": False,
-        "summary": "内容流水线服务未启动",
-        "message": f"无法连接 {API}/health: {e}\n请运行 scripts\\start_pipeline_api.bat 启动服务"
-    }, ensure_ascii=False))
-    sys.exit(0)
 
-step = sys.argv[1] if len(sys.argv) > 1 else "daily"
-
-try:
-    start_resp = api_call("POST", "/run", {"step": step})
-    print(json.dumps({"phase": "started", "step": step, "response": start_resp}, ensure_ascii=False), file=sys.stderr)
-except Exception as e:
-    print(json.dumps({"ok": False, "summary": f"启动失败: {e}"}, ensure_ascii=False))
-    sys.exit(0)
-
-wait_map = {"all": 70, "daily": 20, "video": 50, "fetch": 10, "rank": 3, "script": 5}
-time.sleep(wait_map.get(step, 20))
-
-for attempt in range(5):
+def call_llm(prompt, system_msg="你是卢娜·洛夫古德，一人公司增长官(CGO)。你正在执行内容生产，请直接输出内容。", max_tokens=1200):
+    body = json.dumps({
+        "model": "cascade",
+        "messages": [{"role": "system", "content": system_msg}, {"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": max_tokens,
+    }).encode("utf-8")
+    req = urllib.request.Request(BACKEND_URL, data=body, headers={"Content-Type": "application/json"}, method="POST")
     try:
-        status = api_call("GET", "/status")
-        if status.get("status") == "done":
-            outputs = status.get("outputs", {})
-            summary_parts = [f"流水线 [{step}] 完成，耗时 {status.get('elapsed_sec', '?')}s"]
-            if outputs.get("script_content"):
-                summary_parts.append(f"脚本: {len(outputs['script_content'])} 字")
-            if outputs.get("video_path"):
-                summary_parts.append(f"视频: {outputs.get('video_size_kb', '?')}KB")
-            print(json.dumps({
-                "ok": True,
-                "summary": " | ".join(summary_parts),
-                "outputs": outputs,
-            }, ensure_ascii=False))
-            sys.exit(0)
-        elif status.get("status") == "error":
-            print(json.dumps({
-                "ok": False,
-                "summary": f"流水线执行出错: {status.get('stderr', '未知错误')[:300]}",
-            }, ensure_ascii=False))
-            sys.exit(0)
-    except:
-        pass
-    time.sleep(15)
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    except Exception as e:
+        return f"[LLM 调用失败: {e}]"
 
-print(json.dumps({
-    "ok": False,
-    "summary": f"流水线 [{step}] 超时，可能仍在运行。稍后查询 GET {API}/status 获取结果"
-}, ensure_ascii=False))
+
+def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    topic = task_arg
+    timestamp = time.strftime("%Y%m%d_%H%M")
+    results = []
+
+    # Step 1: 生成选题方向
+    topics_prompt = f"请围绕「{topic}」这个主题，生成 5 个适合小红书/抖音的选题方向。每个选题包含：标题（15字内）、角度、目标人群。用 JSON 数组格式输出。"
+    topics_raw = call_llm(topics_prompt)
+    try:
+        start = topics_raw.find("[")
+        end = topics_raw.rfind("]") + 1
+        topics_list = json.loads(topics_raw[start:end]) if start >= 0 else []
+    except:
+        topics_list = [{"title": topic, "angle": "通用", "target": "职场人"}]
+
+    results.append({"step": "选题生成", "count": len(topics_list)})
+
+    # Step 2: 为 Top 3 选题生成草稿
+    drafts = []
+    for t in topics_list[:3]:
+        title = t.get("title", topic)
+        draft_prompt = f"""请为小红书写一篇关于「{title}」的种草文：
+- 标题（含 emoji，20字内）
+- 正文（300-500字，口语化，分段，含 emoji）
+- 3-5 个标签
+目标人群：{t.get('target', '年轻职场人')}"""
+        draft = call_llm(draft_prompt)
+        drafts.append({"title": title, "content": draft})
+
+        out_file = os.path.join(OUTPUT_DIR, f"draft_{timestamp}_{len(drafts)}.md")
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(f"# {title}\n\n{draft}\n")
+
+    results.append({"step": "草稿生成", "count": len(drafts)})
+
+    result = {
+        "ok": len(drafts) > 0,
+        "summary": f"内容流水线完成: 生成 {len(topics_list)} 个选题, {len(drafts)} 篇草稿已保存到 output/content/",
+        "topics": [t.get("title", "") for t in topics_list],
+        "drafts_count": len(drafts),
+        "output_dir": OUTPUT_DIR,
+        "steps": results,
+    }
+    print(json.dumps(result, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

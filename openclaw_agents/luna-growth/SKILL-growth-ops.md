@@ -127,6 +127,20 @@ python -u D:\FY003\scripts\growth_content_gen.py
 
 前置步骤：先运行 `python -u D:\FY003\scripts\fetch_news.py` 抓取最新新闻。
 
+## 运营知识库
+
+在执行增长/运营相关任务时，**必须先加载以下知识库**（位于 `config/knowledge/`）：
+
+| 文件 | 内容 | 适用场景 |
+|------|------|---------|
+| `xhs-operations.md` | 小红书运营方法论（算法、爆款公式、发布策略） | 小红书相关任务 |
+| `douyin-operations.md` | 抖音运营方法论（推荐机制、视频公式） | 抖音相关任务 |
+| `content-strategy.md` | 内容策略框架（选题、生产、复用） | 所有内容任务 |
+| `growth-playbook.md` | 增长方法论（AARRR、实验、渠道） | 增长策略任务 |
+| `monetization-models.md` | 变现模式库（定价、漏斗、多元化） | 商业化任务 |
+
+加载方式：读取 `config/knowledge/{文件名}` 的内容，注入到 LLM 上下文中。
+
 ## 协作引用技能
 
 | 技能 | 用途 |

@@ -1,5 +1,13 @@
 [
   {
+    "id": "hermione_tech_analysis",
+    "name": "技术缺口分析",
+    "description": "深度扫描项目代码，调用 LLM 分析技术缺口、风险和闭环方案",
+    "type": "script",
+    "script": "skill_tech_analysis.py",
+    "timeout": 90
+  },
+  {
     "id": "hermione_code_review",
     "name": "代码审查",
     "description": "检查指定目录/文件的代码质量、错误处理、安全隐患",
@@ -78,5 +86,29 @@
     "type": "skill_ref",
     "ref": "skills/local-file-ops",
     "timeout": 60
+  },
+  {
+    "id": "hermione_web_monitor",
+    "name": "网页变化监控",
+    "description": "监控指定网页变化，截图+内容哈希对比，输出变化报告",
+    "type": "script",
+    "script": "skill_web_monitor.py",
+    "timeout": 120
+  },
+  {
+    "id": "hermione_competitor_watch",
+    "name": "竞品网站监控",
+    "description": "定期访问竞品关键页面，截图存档，检测定价/功能变化",
+    "type": "script",
+    "script": "skill_competitor_watch.py",
+    "timeout": 120
+  },
+  {
+    "id": "hermione_ui_smoke_test",
+    "name": "前端冒烟测试",
+    "description": "Headless 浏览器访问 Jarvis OS 全部页面，验证可加载性",
+    "type": "script",
+    "script": "skill_ui_smoke_test.py",
+    "timeout": 90
   }
 ]

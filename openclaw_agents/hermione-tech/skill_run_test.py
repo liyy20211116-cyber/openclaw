@@ -1,67 +1,73 @@
 """
-skill_run_test.py — 赫敏的技能：运行 req-review-agent 的测试验证
+skill_run_test.py — 赫敏的技能：运行测试
+执行项目测试脚本，验证核心流程，输出测试报告
 """
-import json, os, sys, importlib.util, traceback
+import json, os, sys, subprocess, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TARGET = os.path.join(HERE, "..", "req-review-agent")
-sys.path.insert(0, TARGET)
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+JARVIS_DIR = os.path.join(PROJECT_ROOT, "jarvis-one-company-os")
 
-results = []
+task_arg = sys.argv[1] if len(sys.argv) > 1 else ""
 
-def test_config():
-    config_path = os.path.join(TARGET, "config.json")
+
+def run_cmd(cmd, cwd, timeout=60):
     try:
-        cfg = json.loads(open(config_path, encoding="utf-8").read())
-        required = ["feishu", "ones", "reviewer_open_id"]
-        missing = [k for k in required if k not in cfg]
-        if missing:
-            return {"test": "config.json 完整性", "status": "fail", "message": f"缺少字段: {missing}"}
-        return {"test": "config.json 完整性", "status": "pass", "message": f"包含 {len(cfg)} 个顶层配置项"}
+        start = time.time()
+        proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout, shell=True)
+        elapsed = round(time.time() - start, 1)
+        return {
+            "cmd": cmd if isinstance(cmd, str) else " ".join(cmd),
+            "exit_code": proc.returncode,
+            "stdout": proc.stdout[-800:] if proc.stdout else "",
+            "stderr": proc.stderr[-400:] if proc.stderr else "",
+            "elapsed_s": elapsed,
+            "ok": proc.returncode == 0,
+        }
+    except subprocess.TimeoutExpired:
+        return {"cmd": cmd, "exit_code": -1, "stdout": "", "stderr": "超时", "elapsed_s": timeout, "ok": False}
     except Exception as e:
-        return {"test": "config.json 完整性", "status": "fail", "message": str(e)}
+        return {"cmd": cmd, "exit_code": -1, "stdout": "", "stderr": str(e), "elapsed_s": 0, "ok": False}
 
-def test_token_cache():
-    path = os.path.join(TARGET, "token_cache.json")
-    try:
-        cache = json.loads(open(path, encoding="utf-8").read())
-        has_token = bool(cache.get("ones_lt"))
-        return {"test": "token_cache.json", "status": "pass" if has_token else "warn", "message": "ones_lt " + ("存在" if has_token else "为空")}
-    except:
-        return {"test": "token_cache.json", "status": "warn", "message": "文件不存在或不可读"}
 
-def test_templates():
-    tpl_dir = os.path.join(TARGET, "templates")
-    if not os.path.isdir(tpl_dir):
-        return {"test": "卡片模板目录", "status": "fail", "message": "templates/ 目录不存在"}
-    files = os.listdir(tpl_dir)
-    json_files = [f for f in files if f.endswith(".json")]
-    return {"test": "卡片模板目录", "status": "pass" if json_files else "warn", "message": f"{len(json_files)} 个 JSON 模板"}
+def main():
+    results = []
 
-def test_scan_import():
-    try:
-        spec = importlib.util.spec_from_file_location("scan", os.path.join(TARGET, "scan_and_send.py"))
-        mod = importlib.util.module_from_spec(spec)
-        return {"test": "scan_and_send.py 可导入", "status": "pass", "message": "模块加载成功"}
-    except Exception as e:
-        return {"test": "scan_and_send.py 可导入", "status": "fail", "message": str(e)[:100]}
+    tsc_result = run_cmd("npx tsc --noEmit", JARVIS_DIR, timeout=90)
+    tsc_result["label"] = "TypeScript 类型检查"
+    results.append(tsc_result)
 
-def test_memory_dir():
-    mem = os.path.join(TARGET, "memory")
-    if not os.path.isdir(mem):
-        return {"test": "memory 目录", "status": "warn", "message": "不存在，将在首次运行时创建"}
-    files = os.listdir(mem)
-    return {"test": "memory 目录", "status": "pass", "message": f"包含 {len(files)} 个文件"}
+    build_result = run_cmd("npx vite build", JARVIS_DIR, timeout=60)
+    build_result["label"] = "Vite 前端构建"
+    results.append(build_result)
 
-results.append(test_config())
-results.append(test_token_cache())
-results.append(test_templates())
-results.append(test_scan_import())
-results.append(test_memory_dir())
+    for agent_dir in sorted(os.listdir(os.path.join(PROJECT_ROOT, "openclaw_agents"))):
+        skills_path = os.path.join(PROJECT_ROOT, "openclaw_agents", agent_dir, "skills.json")
+        if os.path.isfile(skills_path):
+            try:
+                skills = json.loads(open(skills_path, encoding="utf-8").read())
+                if not isinstance(skills, list):
+                    results.append({"label": f"{agent_dir}/skills.json 格式校验", "ok": False, "stderr": "不是数组"})
+                else:
+                    for s in skills:
+                        if s.get("type") == "script":
+                            script_path = os.path.join(PROJECT_ROOT, "openclaw_agents", agent_dir, s["script"])
+                            if not os.path.isfile(script_path):
+                                results.append({"label": f"脚本存在性: {agent_dir}/{s['script']}", "ok": False, "stderr": "文件不存在"})
+                    results.append({"label": f"{agent_dir}/skills.json 格式校验", "ok": True, "stderr": ""})
+            except Exception as e:
+                results.append({"label": f"{agent_dir}/skills.json 格式校验", "ok": False, "stderr": str(e)})
 
-passed = sum(1 for r in results if r["status"] == "pass")
-failed = sum(1 for r in results if r["status"] == "fail")
-warned = sum(1 for r in results if r["status"] == "warn")
+    ok_count = sum(1 for r in results if r.get("ok"))
+    fail_count = len(results) - ok_count
 
-summary = f"测试完成: {passed} 通过 / {warned} 警告 / {failed} 失败（共 {len(results)} 项）"
-print(json.dumps({"ok": failed == 0, "summary": summary, "tests": results}, ensure_ascii=False))
+    result = {
+        "ok": fail_count == 0,
+        "summary": f"测试完成: {ok_count} 通过 / {fail_count} 失败 (共 {len(results)} 项)",
+        "results": [{"label": r.get("label", r.get("cmd", "")), "ok": r["ok"], "error": r.get("stderr", "")[:200]} for r in results],
+    }
+    print(json.dumps(result, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

@@ -78,5 +78,45 @@
     "type": "skill_ref",
     "ref": "skills/image-gen",
     "timeout": 60
+  },
+  {
+    "id": "dobby_feedback_collector",
+    "name": "客户反馈采集",
+    "description": "扫描 memory 和 output 目录，自动汇总客户反馈数据并生成改进建议",
+    "type": "script",
+    "script": "skill_feedback_collector.py",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_satisfaction_survey",
+    "name": "满意度调查生成",
+    "description": "生成结构化的客户满意度调查问卷和 NPS 跟踪模板",
+    "type": "script",
+    "script": "skill_satisfaction_survey.py",
+    "timeout": 30
+  },
+  {
+    "id": "dobby_onboarding_checklist",
+    "name": "客户入职清单",
+    "description": "为新签约客户生成标准化入职流程和检查清单，含4阶段任务和个性化建议",
+    "type": "script",
+    "script": "skill_onboarding_checklist.py",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_customer_health",
+    "name": "客户健康评分",
+    "description": "综合评估客户健康度（交互频率/合同状态/满意度），输出风险预警和行动建议",
+    "type": "script",
+    "script": "skill_customer_health.py",
+    "timeout": 60
+  },
+  {
+    "id": "dobby_smart_cs",
+    "name": "7x24智能客服",
+    "description": "多渠道智能客服，自动识别客户意图、生成回复、识别销售线索、引导私域转化",
+    "type": "script",
+    "script": "skill_smart_customer_service.py",
+    "timeout": 60
   }
 ]

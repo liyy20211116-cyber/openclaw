@@ -1,8 +1,40 @@
-# 纳威（人资部 CHRO）— 长期记忆
+# 纳威长期记忆
 
-Domain: Agent performance management, team growth, onboarding, culture
-Categories: performance, onboarding, culture, incentive, organization
+## 2026-04-30 | 平台运营学习负责人
+- HR 角色明确为 Neville。Neville 不只是做绩效和能力缺口分析，还要负责组织学习、平台运营知识沉淀、以及跨部门 Agent 赋能。
+- 执行方案 B：半自动学习。Neville 从各平台公开观察、创作者后台数据、内部内容表现和 CEO 手动笔记中学习，沉淀到 `config/knowledge/platform-ops/`，但不自动发布、评论、私信或执行账号风险动作。
+- Neville 每天至少沉淀 1 条可复用平台运营 lesson，每周输出 1 份部门赋能 memo，训练 Luna、Fred、Dobby、Snape、Jarvis、Hermione、McGonagall。
+- 当前首个训练案例：小红书第一条被下架、第二条存活、第三条恢复叙事。HR 要把这组案例转成内容规则、合规规则、线索承接规则和 COO 调度规则。
 
----
-_2026-04-11 16:05_ Memory system initialized. Neville joins the company as CHRO.
-First priorities: establish baseline performance metrics for all 9 agents, create growth tracking system.
+## 2026-04-30 | Day 1 学习执行记录
+- Neville 已执行平台运营学习 Day 1：把小红书“第一条下架、第二条存活、第三条恢复叙事”沉淀为 `config/knowledge/platform-ops/lessons/2026-04-30-xhs-recovery-case.md`。
+- 新增训练结论：小红书现阶段优先写真实运营日记，不急于硬销售；被下架内容必须在 24 小时内转成 Luna 写作规则、Snape 合规规则和 Jarvis 调度规则。
+- 新增销售边界：浏览、点赞、收藏、分享只是注意力信号，不是线索信号；Fred 只有在用户询问流程适配、实施成本、交付周期或服务范围时才进入销售承接。
+
+## 2026-04-30 | Day 2 小红书公开样本学习
+- Neville 已执行公开样本结构观察：围绕 AI创业、一人公司、AI副业 3 类关键词，只学习标题结构、受众角度、证明信号、收藏理由和风险，不搬运正文或图片。
+- 学到 5 个可复用结构：时间窗口、普通人视角、路径/系统/步骤、身份变化、具体数字。
+- 下一条内容方向确定为：把 HR 学爆款结构并训练其他 Agent 的过程本身内容化，标题为“我让HR去小红书学习爆款，不是为了抄”。
+
+## 公司人员配置
+- 全公司 10 个 Agent 角色（含需求审核），9 个核心部门
+- CEO 李原野同时是产品开发者和第一个用户
+- 所有 Agent 通过 LLM 对话工作，不直接执行代码
+
+## 当前状态
+- 一人公司应用处于开发内测阶段
+- ONES 自动化是内测业务验证项目
+- 技能系统已部署，各部门技能配置完整
+
+## 2026-04-29 · 7 天实验角色绩效规则
+
+- 7 天实验期间，每个角色每天必须有一个可检查交付物。
+- Jarvis 负责调度，但不能代替所有角色工作。
+- 若角色无交付，Neville 记录缺口并要求 COO 重排任务。
+
+## 2026-04-29 · S1 训练评分新增项
+
+- Luna：真实感、平台感、低 AI 味。
+- Snape：是否提前拦截互动诱导和硬广风险。
+- Hermione：是否能把复盘沉淀为脚本和测试。
+- Jarvis：是否控制节奏，不为了引流牺牲账号安全。

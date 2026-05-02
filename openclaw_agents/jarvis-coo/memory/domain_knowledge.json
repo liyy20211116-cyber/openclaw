@@ -1,27 +1,31 @@
 {
   "agent": "jarvis-coo",
-  "updated_at": "2026-04-11T15:30:04.677718",
+  "updated_at": "2026-04-15T14:00:00.000000",
   "stats": {
     "total_raw": 27,
-    "duplicates_removed": 0,
-    "unique": 27,
+    "duplicates_removed": 5,
+    "unique": 22,
     "sensitive_redacted": 0
   },
   "categories": {
-    "other": {
-      "count": 15,
-      "latest": "2026-04-11 05:54"
+    "company_identity": {
+      "count": 5,
+      "latest": "2026-04-15 14:00"
     },
     "ONES": {
       "count": 12,
-      "latest": "2026-04-11 01:01"
+      "latest": "2026-04-14 10:00"
+    },
+    "operations": {
+      "count": 5,
+      "latest": "2026-04-14 10:00"
     }
   },
   "top_learnings": [
-    "赫敏Agent反复失败的根本原因是平台环境未配置代码执行工具、HTTP请求工具和Playwright浏览器驱动，不是逻辑问题而是'没配武器'。麦格等不需要联网和代码执行的角色工作正常。贾维斯自身也没有系统级操作权限，无法帮赫敏修复环境，需要CEO在后台配置。",
-    "Agent的执行能力受限于平台配置的工具集（如Code Interpreter、Web Fetch），若平台未开启相关权限，Agent无法通过自身指令完成环境修复。",
-    "Agent的执行能力受限于平台配置的底层工具（如沙箱、网络请求、文件系统），而非Agent自身的逻辑能力；赫敏执行失败是因为缺乏必要的环境配置工具。",
-    "Agent的执行能力取决于平台是否挂载了Code Interpreter、Web Fetch和File System等底层工具，而非单纯的权限授权。",
-    "Agent的执行能力完全受限于平台配置的工具（沙箱、联网、文件系统），若无底层工具挂载，Agent仅具备语言处理能力，无法执行自动化任务。"
+    "一人公司 = CEO 李原野（唯一真人）+ 9 个 AI Agent 部门主管。产品名 OpenClaw One Company OS，面向市场的商用产品，不是内部工具。",
+    "ONES 需求审核自动化是第一个内测项目，用于验证产品能力。飞书多维表格扫描→审批卡片→ONES建单→回写，代码在 req-review-agent/。",
+    "Agent 团队通过对话提供决策建议和任务规划，不是执行代码。所有 10 个 Agent 均已配备技能脚本且可执行。技能系统已全部就绪，不存在'底层能力失真'。",
+    "Q2 核心目标：6月30日前实现至少1个业务线持续盈利。候选：AI自动化服务、内容矩阵、AI培训、数据分析服务、客户成功外包。本月聚焦：选定业务线+产出第一个可售卖交付物。",
+    "CEO 偏好：结果导向、简洁直接、对空转零容忍、Token成本意识。回复控制3段以内，用数据说话。"
   ]
 }

@@ -1,44 +1,68 @@
 """
 skill_content_stats.py — 卢娜的技能：内容产出统计
-扫描 output 目录，统计各类内容的产出数量和时间
+统计 output 目录下的内容产出数量、类型和时间分布
 """
-import json, os, time
-from datetime import datetime
+import json, os, sys, time
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from _shared.output import SkillOutput
+from collections import defaultdict
 
-PROJECT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUTPUT = os.path.join(PROJECT, "output")
+HERE = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+OUTPUT_ROOT = os.path.join(PROJECT_ROOT, "output")
 
-stats = {"scripts": 0, "videos": 0, "articles": 0, "others": 0, "total_size_mb": 0, "recent_files": []}
 
-if not os.path.isdir(OUTPUT):
-    print(json.dumps({"ok": True, "summary": "output 目录不存在，尚无内容产出", "stats": stats}, ensure_ascii=False))
-    exit()
+def scan_outputs():
+    stats = {"total_files": 0, "total_size_kb": 0, "by_type": defaultdict(int), "by_dir": defaultdict(int), "recent_files": []}
+    now = time.time()
+    week_ago = now - 7 * 86400
 
-all_files = []
-for root, dirs, files in os.walk(OUTPUT):
-    for f in files:
-        fpath = os.path.join(root, f)
-        try:
-            size = os.path.getsize(fpath)
-            mtime = os.path.getmtime(fpath)
-        except:
-            continue
-        ext = os.path.splitext(f)[1].lower()
-        stats["total_size_mb"] += size / (1024 * 1024)
-        if ext in (".txt", ".md"):
-            stats["scripts"] += 1
-        elif ext in (".mp4", ".avi", ".mkv", ".webm"):
-            stats["videos"] += 1
-        elif ext in (".html", ".doc", ".docx", ".pdf"):
-            stats["articles"] += 1
-        else:
-            stats["others"] += 1
-        all_files.append({"name": f, "size_kb": round(size / 1024, 1), "modified": datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")})
+    if not os.path.isdir(OUTPUT_ROOT):
+        return stats
 
-stats["total_size_mb"] = round(stats["total_size_mb"], 2)
-all_files.sort(key=lambda x: x["modified"], reverse=True)
-stats["recent_files"] = all_files[:10]
+    for root, _dirs, files in os.walk(OUTPUT_ROOT):
+        rel_dir = os.path.relpath(root, OUTPUT_ROOT)
+        for fname in files:
+            if fname.startswith("."):
+                continue
+            fpath = os.path.join(root, fname)
+            try:
+                fstat = os.stat(fpath)
+            except:
+                continue
 
-total = stats["scripts"] + stats["videos"] + stats["articles"] + stats["others"]
-summary = f"内容总产出: {total} 个文件 ({stats['total_size_mb']}MB) | 脚本: {stats['scripts']} / 视频: {stats['videos']} / 文档: {stats['articles']}"
-print(json.dumps({"ok": True, "summary": summary, "stats": stats}, ensure_ascii=False))
+            ext = os.path.splitext(fname)[1].lower()
+            stats["total_files"] += 1
+            stats["total_size_kb"] += fstat.st_size / 1024
+            stats["by_type"][ext or "other"] += 1
+            stats["by_dir"][rel_dir if rel_dir != "." else "root"] += 1
+
+            if fstat.st_mtime >= week_ago:
+                stats["recent_files"].append({
+                    "name": fname,
+                    "dir": rel_dir,
+                    "size_kb": round(fstat.st_size / 1024, 1),
+                    "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(fstat.st_mtime)),
+                })
+
+    stats["total_size_kb"] = round(stats["total_size_kb"], 1)
+    stats["by_type"] = dict(stats["by_type"])
+    stats["by_dir"] = dict(stats["by_dir"])
+    stats["recent_files"] = sorted(stats["recent_files"], key=lambda x: x["modified"], reverse=True)[:20]
+    return stats
+
+
+def main():
+    stats = scan_outputs()
+    recent_count = len(stats["recent_files"])
+
+    out = SkillOutput()
+    out.summary = f"内容统计: 总计 {stats['total_files']} 个文件 ({stats['total_size_kb']} KB), 近 7 天新增 {recent_count} 个"
+    out.data = stats
+    out.metrics["totalFiles"] = stats["total_files"]
+    out.metrics["recentFiles"] = recent_count
+    out.emit()
+
+
+if __name__ == "__main__":
+    main()

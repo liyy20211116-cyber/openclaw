@@ -1,85 +1,94 @@
-"""多比·客户部 — 客户入职检查清单生成器
-为新签约客户生成标准化入职流程和检查清单。
 """
-import json, os
-from datetime import datetime, timedelta
+skill_onboarding_checklist.py — 多比的技能：客户入职检查清单
+为新签约客户生成标准化入职流程和检查清单
+"""
+import json, os, sys, time, urllib.request
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from _shared.output import SkillOutput
 
-ROOT = r"D:\FY003"
-OUTPUT = os.path.join(ROOT, "output")
-os.makedirs(OUTPUT, exist_ok=True)
+HERE = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output", "onboarding")
+BACKEND_URL = "http://127.0.0.1:18782/api/llm/chat"
+
+task_arg = sys.argv[1] if len(sys.argv) > 1 else ""
+
+
+def call_llm(prompt, max_tokens=1200):
+    body = json.dumps({
+        "model": "cascade",
+        "messages": [
+            {"role": "system", "content": "你是多比，一人公司客户成功官(CXO)。你擅长设计客户入职流程，确保客户获得良好的第一体验。"},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.4, "max_tokens": max_tokens,
+    }).encode("utf-8")
+    req = urllib.request.Request(BACKEND_URL, data=body, headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    except Exception as e:
+        return f"[LLM 调用失败: {e}]"
+
 
 ONBOARDING_TEMPLATE = {
-    "day_1": {
-        "title": "Day 1 - Welcome",
-        "tasks": [
-            "Send welcome email with project overview",
-            "Share access credentials and documentation",
-            "Schedule kickoff meeting",
-            "Create project folder in workspace",
-        ]
+    "day1": {
+        "title": "Day 1 — 欢迎",
+        "tasks": ["发送欢迎邮件+项目概要", "分享访问凭据和文档", "预约启动会议", "创建项目协作空间"],
     },
-    "week_1": {
-        "title": "Week 1 - Setup",
-        "tasks": [
-            "Complete requirements gathering",
-            "Set up development environment",
-            "Define success metrics and KPIs",
-            "Establish communication cadence",
-        ]
+    "week1": {
+        "title": "第1周 — 配置",
+        "tasks": ["完成需求收集", "搭建开发/测试环境", "明确成功指标和KPI", "建立沟通节奏"],
     },
-    "week_2": {
-        "title": "Week 2 - Build",
-        "tasks": [
-            "Deliver first prototype/MVP",
-            "Collect initial feedback",
-            "Iterate based on feedback",
-            "Mid-project review meeting",
-        ]
+    "week2": {
+        "title": "第2周 — 构建",
+        "tasks": ["交付首个原型/MVP", "收集初步反馈", "基于反馈迭代", "项目中期回顾"],
     },
-    "week_4": {
-        "title": "Week 4 - Deliver",
-        "tasks": [
-            "Final delivery and handover",
-            "Training session for client team",
-            "Documentation handover",
-            "Satisfaction survey",
-            "Discuss maintenance/follow-up",
-        ]
-    }
+    "week4": {
+        "title": "第4周 — 交付",
+        "tasks": ["最终交付和移交", "客户团队培训", "文档移交", "满意度调查", "讨论后续维护"],
+    },
 }
 
-def generate_checklist(client_name, project_name, start_date=None):
-    if not start_date:
-        start_date = datetime.now()
+
+def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    timestamp = time.strftime("%Y%m%d_%H%M")
+    client = task_arg or "新客户"
+
+    phases = {}
+    total_tasks = 0
+    for key, phase in ONBOARDING_TEMPLATE.items():
+        tasks = [{"task": t, "done": False} for t in phase["tasks"]]
+        phases[key] = {"title": phase["title"], "tasks": tasks}
+        total_tasks += len(tasks)
+
+    prompt = f"""为客户「{client}」定制入职建议。
+
+标准流程已有 {total_tasks} 个任务项，覆盖 Day1 到第4周。
+请补充 3 条针对 AI 一人公司产品的特殊入职建议（100字内）。"""
+
+    extra_advice = call_llm(prompt)
 
     checklist = {
-        "client": client_name,
-        "project": project_name,
-        "start_date": start_date.strftime("%Y-%m-%d"),
-        "generated_at": datetime.now().isoformat(),
-        "phases": {}
+        "client": client,
+        "generated_at": timestamp,
+        "total_tasks": total_tasks,
+        "phases": phases,
+        "extra_advice": extra_advice,
     }
 
-    for phase_key, phase in ONBOARDING_TEMPLATE.items():
-        checklist["phases"][phase_key] = {
-            "title": phase["title"],
-            "tasks": [{"task": t, "done": False, "notes": ""} for t in phase["tasks"]]
-        }
+    out_file = os.path.join(OUTPUT_DIR, f"onboarding_{timestamp}.json")
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump(checklist, f, ensure_ascii=False, indent=2)
 
-    out_file = os.path.join(OUTPUT, f"onboarding_{client_name}_{datetime.now():%Y%m%d}.json")
-    json.dump(checklist, open(out_file, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    out = SkillOutput()
+    out.summary = f"客户入职清单: {client} | {total_tasks} 个任务 | 4个阶段 | 已保存 {os.path.basename(out_file)}"
+    out.data = checklist
+    out.metrics["totalTasks"] = total_tasks
+    out.emit()
 
-    print(f"=== Onboarding Checklist: {client_name} ===\n")
-    for phase_key, phase in checklist["phases"].items():
-        print(f"  {phase['title']}")
-        for t in phase["tasks"]:
-            print(f"    [ ] {t['task']}")
-    print(f"\nSaved: {out_file}")
-    return out_file
 
 if __name__ == "__main__":
-    import sys
-    if "--demo" in sys.argv:
-        generate_checklist("DemoClient", "AI Automation Setup")
-    else:
-        print("Usage: python skill_onboarding_checklist.py --demo")
+    main()

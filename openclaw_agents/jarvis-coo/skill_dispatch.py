@@ -17,6 +17,7 @@ agent_skill_map = {
     "percy-finance": "percy_token_report",
     "snape-audit": "snape_security_scan",
     "dobby-customer": "dobby_ux_walkthrough",
+    "neville-hr": "neville_hr_report",
 }
 
 def run_agent_skill(agent_id, skill_id=None):
@@ -44,11 +45,13 @@ def run_agent_skill(agent_id, skill_id=None):
         return {"agent": agent_id, "ok": False, "message": f"脚本不存在: {target['script']}"}
 
     try:
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
         result = subprocess.run(
             [PYTHON, script_path],
             cwd=agent_dir,
-            capture_output=True, text=True,
+            capture_output=True, text=True, encoding="utf-8",
             timeout=target.get("timeout", 60),
+            env=env,
         )
         output = result.stdout.strip()
         try:

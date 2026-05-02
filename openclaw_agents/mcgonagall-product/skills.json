@@ -13,7 +13,7 @@
     "description": "对照需求文档检查项目实际完成情况，输出验收报告",
     "type": "script",
     "script": "skill_acceptance_check.py",
-    "timeout": 30
+    "timeout": 90
   },
   {
     "id": "mcgonagall_requirement_analysis",
@@ -21,7 +21,7 @@
     "description": "分析飞书表格中的需求记录，输出需求清洗和优先级建议",
     "type": "script",
     "script": "skill_req_analysis.py",
-    "timeout": 60
+    "timeout": 90
   },
   {
     "id": "mcgonagall_competitive_research",
@@ -70,5 +70,29 @@
     "type": "skill_ref",
     "ref": "skills/feishu-workflow-doc",
     "timeout": 60
+  },
+  {
+    "id": "mcgonagall_content_analysis",
+    "name": "内容数据分析",
+    "description": "分析小红书/抖音数据，发现爆款规律，输出内容策略建议",
+    "type": "script",
+    "script": "skill_content_analysis.py",
+    "timeout": 30
+  },
+  {
+    "id": "mcgonagall_topic_planner",
+    "name": "选题规划引擎",
+    "description": "基于 ICE 评分模型，生成评分排序的选题列表",
+    "type": "script",
+    "script": "skill_topic_planner.py",
+    "timeout": 30
+  },
+  {
+    "id": "mcgonagall_service_packager",
+    "name": "服务包管理",
+    "description": "定义和管理可销售的标准化服务包，维护产品目录和定价策略",
+    "type": "script",
+    "script": "skill_service_packager.py",
+    "timeout": 90
   }
 ]

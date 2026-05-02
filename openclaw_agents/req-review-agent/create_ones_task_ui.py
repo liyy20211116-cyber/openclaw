@@ -1232,7 +1232,12 @@ def create_via_ui():
                 print(f"[OK] ones_url={issue_url}")
             print(json.dumps(result, ensure_ascii=False))
         finally:
-            browser.close()
+            # 这里附着的是用户现有浏览器会话，只清理本脚本新开的页面，避免把整个浏览器一起关掉。
+            try:
+                if opened_here and not page.is_closed():
+                    page.close()
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":

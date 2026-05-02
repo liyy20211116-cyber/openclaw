@@ -78,5 +78,21 @@
     "type": "skill_ref",
     "ref": "skills/local-file-ops",
     "timeout": 60
+  },
+  {
+    "id": "snape_revenue_audit",
+    "name": "收支审计",
+    "description": "审计发票、销售管道、服务定价和 API 成本，检查异常交易和预算偏差",
+    "type": "script",
+    "script": "skill_revenue_audit.py",
+    "timeout": 60
+  },
+  {
+    "id": "snape_compliance_check",
+    "name": "合规检查",
+    "description": "检查数据隐私、API密钥保护、日志规范、代码安全等合规项，输出合规评分",
+    "type": "script",
+    "script": "skill_compliance_check.py",
+    "timeout": 60
   }
 ]

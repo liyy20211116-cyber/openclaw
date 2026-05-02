@@ -1,73 +1,86 @@
 """
 skill_req_analysis.py — 麦格教授的技能：需求分析
-分析 req-review-agent 的配置和历史数据，输出需求健康度报告
+分析需求记录，输出需求清洗和优先级建议
 """
-import json, os
-from datetime import datetime
+import json, os, sys, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REQ_AGENT = os.path.join(HERE, "..", "req-review-agent")
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+BACKEND_URL = "http://127.0.0.1:18782/api/llm/chat"
 
-report = {"fields": {}, "stats": {}, "recommendations": []}
+task_arg = sys.argv[1] if len(sys.argv) > 1 else ""
 
-config_path = os.path.join(REQ_AGENT, "config.json")
-try:
-    cfg = json.loads(open(config_path, encoding="utf-8").read())
-    fields = cfg.get("feishu", {}).get("fields", {})
-    report["fields"]["mapped_count"] = len(fields)
-    report["fields"]["field_list"] = list(fields.keys())
 
-    products = cfg.get("ones", {}).get("product_uuids", {})
-    report["fields"]["product_count"] = len(products)
-    report["fields"]["products"] = list(products.keys())
+def call_llm(prompt, max_tokens=1500):
+    body = json.dumps({
+        "model": "cascade",
+        "messages": [
+            {"role": "system", "content": "你是麦格教授，一人公司 CPO。你在做需求分析，请用结构化方式输出优先级建议。"},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.3,
+        "max_tokens": max_tokens,
+    }).encode("utf-8")
+    req = urllib.request.Request(BACKEND_URL, data=body, headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    except Exception as e:
+        return f"[LLM 调用失败: {e}]"
 
-    issue_types = cfg.get("ones", {}).get("issue_types", {})
-    report["fields"]["issue_types"] = issue_types
-except Exception as e:
-    report["fields"]["error"] = str(e)
 
-mem_dir = os.path.join(REQ_AGENT, "memory")
-processed_path = os.path.join(mem_dir, "processed_log.json")
-try:
-    processed = json.loads(open(processed_path, encoding="utf-8").read())
-    if isinstance(processed, list):
-        report["stats"]["total_processed"] = len(processed)
-        approved = sum(1 for p in processed if p.get("action") == "approved")
-        rejected = sum(1 for p in processed if p.get("action") == "rejected")
-        report["stats"]["approved"] = approved
-        report["stats"]["rejected"] = rejected
-        report["stats"]["approval_rate"] = f"{round(approved / len(processed) * 100)}%" if processed else "N/A"
+def load_tasks():
+    """从快照加载现有任务列表"""
+    snapshot_dir = os.path.join(PROJECT_ROOT, "jarvis-one-company-os")
+    snapshot_candidates = [
+        os.path.join(snapshot_dir, "data", "snapshot.json"),
+        os.path.join(PROJECT_ROOT, "output", "app-snapshot.json"),
+    ]
+    for sp in snapshot_candidates:
+        if os.path.isfile(sp):
+            try:
+                data = json.loads(open(sp, encoding="utf-8").read())
+                return data.get("tasks", [])
+            except:
+                pass
+    return []
 
-        types = {}
-        for p in processed:
-            t = p.get("req_type", "未知")
-            types[t] = types.get(t, 0) + 1
-        report["stats"]["by_type"] = types
-except:
-    report["stats"]["total_processed"] = 0
-    report["stats"]["note"] = "暂无处理记录"
 
-pending_path = os.path.join(mem_dir, "pending_reviews.json")
-try:
-    pending = json.loads(open(pending_path, encoding="utf-8").read())
-    count = len(pending) if isinstance(pending, (list, dict)) else 0
-    report["stats"]["pending_count"] = count
-except:
-    report["stats"]["pending_count"] = 0
+def main():
+    tasks = load_tasks()
+    task_summary = "\n".join([
+        f"- [{t.get('status', '?')}] {t.get('title', '无标题')} (负责: {t.get('owner', '?')}, 优先级: {t.get('priority', '?')})"
+        for t in tasks[:20]
+    ]) or "暂无任务记录"
 
-if report["stats"].get("total_processed", 0) == 0:
-    report["recommendations"].append("尚无处理记录，建议先运行一次扫描流程验证端到端通路")
-if report["stats"].get("pending_count", 0) > 10:
-    report["recommendations"].append(f"待审批积压 {report['stats']['pending_count']} 条，建议增加审批频率")
-if report["fields"].get("product_count", 0) < 3:
-    report["recommendations"].append("产品映射较少，确认是否需要补充更多产品线")
+    extra_context = task_arg or "一人公司当前主线目标：验证商业模式、获取首批客户、产出增长内容"
 
-summary_parts = [
-    f"字段映射: {report['fields'].get('mapped_count', 0)} 个",
-    f"产品线: {report['fields'].get('product_count', 0)} 个",
-    f"已处理: {report['stats'].get('total_processed', 0)} 条",
-    f"待审批: {report['stats'].get('pending_count', 0)} 条",
-]
-summary = " | ".join(summary_parts)
+    prompt = f"""## 需求分析
 
-print(json.dumps({"ok": True, "summary": summary, "report": report}, ensure_ascii=False))
+### 背景
+{extra_context}
+
+### 现有任务列表
+{task_summary}
+
+### 请完成需求分析
+1. **需求分类**：将现有任务按「核心功能 / 增长引擎 / 运营保障 / 技术基建」分类
+2. **优先级矩阵**：用「影响力 × 紧迫性」二维矩阵对每个需求评分（1-5）
+3. **缺失需求**：基于一人公司业务模式，指出还缺少哪些关键需求
+4. **建议执行顺序**：给出接下来 7 天的执行排序建议
+5. **资源预估**：每个需求的 Token 预算和预计耗时"""
+
+    analysis = call_llm(prompt)
+
+    result = {
+        "ok": True,
+        "summary": f"需求分析完成: 分析 {len(tasks)} 个现有任务, 输出优先级矩阵和执行建议",
+        "analysis": analysis,
+        "task_count": len(tasks),
+    }
+    print(json.dumps(result, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

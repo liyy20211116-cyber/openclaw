@@ -70,5 +70,141 @@
     "type": "skill_ref",
     "ref": "skills/feishu-messaging",
     "timeout": 30
+  },
+  {
+    "id": "luna_xhs_research",
+    "name": "小红书话题研究",
+    "description": "搜索小红书关键词，分析话题热度、竞争密度、爆款模式",
+    "type": "script",
+    "script": "skill_xhs_research.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_xhs_competitor",
+    "name": "小红书竞品分析",
+    "description": "分析竞品博主内容策略、互动数据、爆款标题规律",
+    "type": "script",
+    "script": "skill_xhs_competitor.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_content_calendar_gen",
+    "name": "内容日历生成",
+    "description": "基于知识库和数据，自动生成多平台内容发布计划",
+    "type": "script",
+    "script": "skill_content_calendar.py",
+    "timeout": 30
+  },
+  {
+    "id": "luna_douyin_trending",
+    "name": "抖音热点追踪",
+    "description": "抓取抖音热搜榜，分析热点话题和趋势方向",
+    "type": "script",
+    "script": "skill_douyin_trending.py",
+    "timeout": 60
+  },
+  {
+    "id": "luna_draft_generator",
+    "name": "内容草稿生成",
+    "description": "生成适配小红书/抖音的内容草稿（标题+正文/脚本），安全模式不自动发布",
+    "type": "script",
+    "script": "skill_draft_generator.py",
+    "timeout": 30
+  },
+  {
+    "id": "luna_douyin_video_analysis",
+    "name": "抖音视频数据分析",
+    "description": "分析抖音搜索结果中的视频数据（播放量/互动/评论），提取爆款模式和内容策略",
+    "type": "script",
+    "script": "skill_douyin_video_analysis.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_douyin_comment_analysis",
+    "name": "抖音热评情感分析",
+    "description": "抓取抖音视频评论区数据，做情感分析/高频词/用户洞察",
+    "type": "script",
+    "script": "skill_douyin_comment_analysis.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_xhs_note_analysis",
+    "name": "小红书笔记深度分析",
+    "description": "分析爆款笔记标题公式、封面风格、互动率规律，输出可复制模板",
+    "type": "script",
+    "script": "skill_xhs_note_analysis.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_xhs_comment_sentiment",
+    "name": "小红书评论情感分析",
+    "description": "分析笔记评论区用户情感、高频词、痛点和购买意向",
+    "type": "script",
+    "script": "skill_xhs_comment_sentiment.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_ecommerce_analysis",
+    "name": "电商竞品分析",
+    "description": "分析天猫/京东搜索结果，提取价格区间/卖点/差异化机会",
+    "type": "script",
+    "script": "skill_ecommerce_analysis.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_platform_ops_dashboard",
+    "name": "跨平台运营看板",
+    "description": "汇总各平台分析报告，生成运营全景看板和行动建议",
+    "type": "script",
+    "script": "skill_platform_ops_dashboard.py",
+    "timeout": 30
+  },
+  {
+    "id": "luna_industry_analysis",
+    "name": "行业趋势分析",
+    "description": "分析指定行业的市场规模/竞争格局/技术趋势/机会窗口",
+    "type": "script",
+    "script": "skill_industry_analysis.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_video_link_analyzer",
+    "name": "视频链接内容拆解",
+    "description": "给一个视频链接（抖音/B站/小红书/快手/YouTube），提取标题/文案/评论/数据，拆解内容结构和创作手法",
+    "type": "script",
+    "script": "skill_video_link_analyzer.py",
+    "timeout": 120
+  },
+  {
+    "id": "luna_content_rewriter",
+    "name": "内容二创/跨平台改写",
+    "description": "输入原始内容，自动改写为小红书/抖音/公众号/朋友圈/微博等多平台版本",
+    "type": "script",
+    "script": "skill_content_rewriter.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_style_imitator",
+    "name": "风格仿写",
+    "description": "分析参考内容的写作风格（句式/语气/结构），用相同风格写新主题",
+    "type": "script",
+    "script": "skill_style_imitator.py",
+    "timeout": 90
+  },
+  {
+    "id": "luna_auto_publisher",
+    "name": "多平台自动发布",
+    "description": "将草稿内容自动适配并发布到小红书/抖音/微信公众号/微博，支持定时发布和浏览器自动化",
+    "type": "script",
+    "script": "skill_auto_publisher.py",
+    "timeout": 120
+  },
+  {
+    "id": "luna_video_generator",
+    "name": "AI视频/数字人生成",
+    "description": "生成视频脚本、数字人口播配置、图文轮播视频方案，支持抖音/小红书/B站等平台",
+    "type": "script",
+    "script": "skill_video_generator.py",
+    "timeout": 120
   }
 ]

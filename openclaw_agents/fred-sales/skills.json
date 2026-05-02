@@ -78,5 +78,53 @@
     "type": "skill_ref",
     "ref": "skills/image-gen",
     "timeout": 60
+  },
+  {
+    "id": "fred_outreach_generator",
+    "name": "获客话术生成器",
+    "description": "根据目标客户画像生成个性化获客文案（朋友圈/私信/邮件/电话脚本）",
+    "type": "script",
+    "script": "skill_outreach_generator.py",
+    "timeout": 60
+  },
+  {
+    "id": "fred_competitor_pricing",
+    "name": "竞品定价分析",
+    "description": "分析 AI Agent 领域竞品定价策略，输出定位和套餐建议",
+    "type": "script",
+    "script": "skill_competitor_pricing.py",
+    "timeout": 60
+  },
+  {
+    "id": "fred_lead_scorer",
+    "name": "线索智能评分",
+    "description": "对销售管道中的线索做多维度评分（金额/阶段/来源），自动排序优先级",
+    "type": "script",
+    "script": "skill_lead_scorer.py",
+    "timeout": 30
+  },
+  {
+    "id": "fred_pipeline_analytics",
+    "name": "销售漏斗分析",
+    "description": "分析各阶段转化率、成交周期、客单价、渠道ROI，输出漏斗优化建议",
+    "type": "script",
+    "script": "skill_pipeline_analytics.py",
+    "timeout": 90
+  },
+  {
+    "id": "fred_ecommerce_ops",
+    "name": "电商闭环运营",
+    "description": "选品分析→上架文案→定价策略→订单跟踪，覆盖电商全流程",
+    "type": "script",
+    "script": "skill_ecommerce_ops.py",
+    "timeout": 90
+  },
+  {
+    "id": "fred_email_outreach",
+    "name": "邮件自动触达",
+    "description": "从销售管线选取线索，生成个性化获客邮件，支持自动发送",
+    "type": "script",
+    "script": "skill_email_outreach.py",
+    "timeout": 60
   }
 ]

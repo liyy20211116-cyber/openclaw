@@ -1,64 +1,103 @@
 """
 skill_acceptance_check.py — 麦格教授的技能：验收检查
-检查 ONES 需求审核项目的各环节完成度
+对照需求文档检查项目实际完成情况，输出验收报告
 """
-import json, os
+import json, os, sys, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REQ_AGENT = os.path.join(HERE, "..", "req-review-agent")
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+BACKEND_URL = "http://127.0.0.1:18782/api/llm/chat"
 
-checklist = []
+task_arg = sys.argv[1] if len(sys.argv) > 1 else ""
 
-def check(name, condition, detail=""):
-    checklist.append({"item": name, "pass": condition, "detail": detail})
 
-# 核心脚本存在性
-scripts = ["scan_and_send.py", "card_action_handler.py", "create_ones_issue.py", "ones_token_refresh.py"]
-for s in scripts:
-    exists = os.path.exists(os.path.join(REQ_AGENT, s))
-    check(f"脚本 {s}", exists, "存在" if exists else "缺失")
+def call_llm(prompt, max_tokens=1500):
+    body = json.dumps({
+        "model": "cascade",
+        "messages": [
+            {"role": "system", "content": "你是麦格教授，一人公司首席产品官(CPO)。你正在做产品验收检查，请严谨务实地评估。"},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.3,
+        "max_tokens": max_tokens,
+    }).encode("utf-8")
+    req = urllib.request.Request(BACKEND_URL, data=body, headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    except Exception as e:
+        return f"[LLM 调用失败: {e}]"
 
-# 配置完整性
-config_path = os.path.join(REQ_AGENT, "config.json")
-try:
-    cfg = json.loads(open(config_path, encoding="utf-8").read())
-    check("config.json 存在", True)
-    check("飞书配置完整", "feishu" in cfg and "bitable_app_token" in cfg.get("feishu", {}),
-          f"字段: {list(cfg.get('feishu', {}).keys())[:5]}")
-    check("ONES 配置完整", "ones" in cfg and "product_uuids" in cfg.get("ones", {}),
-          f"产品映射: {len(cfg.get('ones', {}).get('product_uuids', {}))} 个")
-except:
-    check("config.json 存在", False, "无法读取")
 
-# 卡片模板
-tpl_dir = os.path.join(REQ_AGENT, "templates")
-if os.path.isdir(tpl_dir):
-    templates = [f for f in os.listdir(tpl_dir) if f.endswith(".json")]
-    check("审核卡片模板", len(templates) > 0, f"{len(templates)} 个模板文件")
-else:
-    check("审核卡片模板", False, "templates 目录不存在")
+def collect_project_state():
+    """收集项目状态"""
+    state = {"pages": [], "api_endpoints": [], "db_tables": [], "output_files": []}
 
-# 内存/日志
-mem_dir = os.path.join(REQ_AGENT, "memory")
-if os.path.isdir(mem_dir):
-    mem_files = os.listdir(mem_dir)
-    check("memory 目录", True, f"{len(mem_files)} 个文件")
-    pending_path = os.path.join(mem_dir, "pending_reviews.json")
-    if os.path.exists(pending_path):
-        try:
-            data = json.loads(open(pending_path, encoding="utf-8").read())
-            count = len(data) if isinstance(data, list) else len(data.keys()) if isinstance(data, dict) else 0
-            check("pending_reviews 数据", True, f"{count} 条记录")
-        except:
-            check("pending_reviews 数据", False, "解析失败")
-    else:
-        check("pending_reviews 数据", False, "文件不存在（尚未运行过扫描）")
-else:
-    check("memory 目录", False, "不存在")
+    src_dir = os.path.join(PROJECT_ROOT, "jarvis-one-company-os", "src", "pages")
+    if os.path.isdir(src_dir):
+        state["pages"] = [f for f in os.listdir(src_dir) if f.endswith(".tsx")]
 
-passed = sum(1 for c in checklist if c["pass"])
-total = len(checklist)
-rate = round(passed / total * 100) if total > 0 else 0
+    schema_path = os.path.join(PROJECT_ROOT, "jarvis-one-company-os", "prisma", "schema.prisma")
+    if os.path.isfile(schema_path):
+        content = open(schema_path, encoding="utf-8").read()
+        import re
+        state["db_tables"] = re.findall(r'model\s+(\w+)', content)
 
-summary = f"验收检查: {passed}/{total} 通过 ({rate}%)"
-print(json.dumps({"ok": rate >= 80, "summary": summary, "checklist": checklist}, ensure_ascii=False))
+    output_dir = os.path.join(PROJECT_ROOT, "output")
+    if os.path.isdir(output_dir):
+        for d in os.listdir(output_dir):
+            dp = os.path.join(output_dir, d)
+            if os.path.isdir(dp):
+                count = len([f for f in os.listdir(dp) if not f.startswith(".")])
+                state["output_files"].append(f"{d}/: {count} 个文件")
+
+    agents_dir = os.path.join(PROJECT_ROOT, "openclaw_agents")
+    agent_count = 0
+    skill_count = 0
+    if os.path.isdir(agents_dir):
+        for agent in os.listdir(agents_dir):
+            sp = os.path.join(agents_dir, agent, "skills.json")
+            if os.path.isfile(sp):
+                agent_count += 1
+                try:
+                    skills = json.loads(open(sp, encoding="utf-8").read())
+                    skill_count += len(skills)
+                except:
+                    pass
+    state["agent_count"] = agent_count
+    state["skill_count"] = skill_count
+    return state
+
+
+def main():
+    state = collect_project_state()
+
+    prompt = f"""## 产品验收检查
+
+### 当前项目状态
+- 前端页面: {len(state['pages'])} 个 ({', '.join(state['pages'][:10])})
+- 数据库表: {len(state['db_tables'])} 个 ({', '.join(state['db_tables'][:10])})
+- Agent 团队: {state['agent_count']} 个角色, 共 {state['skill_count']} 个技能
+- 产出目录: {', '.join(state['output_files'][:10]) or '暂无'}
+
+### 请完成验收评估
+1. **功能完整度评分**（1-10）：基于一人公司 OS 的核心功能清单评估
+2. **缺失功能清单**：列出还没有实现但应该有的功能
+3. **质量问题**：列出已实现功能中的质量缺陷
+4. **发布就绪度**：判断当前版本是否可以交付使用
+5. **优先改进项 Top 5**：按影响力排序"""
+
+    analysis = call_llm(prompt)
+
+    result = {
+        "ok": True,
+        "summary": f"验收检查完成: {len(state['pages'])} 个页面, {len(state['db_tables'])} 张表, {state['agent_count']} 个角色, {state['skill_count']} 个技能",
+        "analysis": analysis,
+        "state_summary": state,
+    }
+    print(json.dumps(result, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()
