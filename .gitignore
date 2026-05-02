@@ -101,7 +101,7 @@ backups/
 *.exe
 jarvis-one-company-os/release/
 jarvis-one-company-os/dist-backend/
-# dist-electron/ ?????? tracked?? Batch C ?????
+jarvis-one-company-os/dist-electron/
 
 # ---------------- jarvis-one-company-os ??? ----------------
 jarvis-one-company-os/dev.db-shm
