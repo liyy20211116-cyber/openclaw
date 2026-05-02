@@ -1,25 +1,67 @@
 {
   "created": "2026-04-11T15:40:16.111920",
+  "updated": "2026-04-28T00:00:00.000000",
   "leads": [
     {
       "id": "L001",
-      "name": "示例客户A",
-      "stage": "线索",
-      "source": "社交媒体",
+      "name": "Example Customer A",
+      "stage": "lead",
+      "source": "social_media",
       "value": 5000,
       "contact": "",
-      "notes": "对 AI 自动化有兴趣",
-      "updated": "2026-04-11T15:40:16.111972"
+      "notes": "Interested in AI automation. Demo data, not counted as real revenue.",
+      "updated": "2026-04-11T15:40:16.111972",
+      "score": 35,
+      "priority": "中等"
     },
     {
       "id": "L002",
-      "name": "示例客户B",
-      "stage": "初步接触",
-      "source": "朋友推荐",
+      "name": "Example Customer B",
+      "stage": "initial_contact",
+      "source": "referral",
       "value": 10000,
       "contact": "",
-      "notes": "已发送产品介绍",
-      "updated": "2026-04-11T15:40:16.111979"
+      "notes": "Product intro sent. Demo data, not counted as real revenue.",
+      "updated": "2026-04-11T15:40:16.111979",
+      "score": 40,
+      "priority": "中等"
+    },
+    {
+      "id": "L003",
+      "name": "AI Transformation Consulting Lead",
+      "stage": "lead",
+      "source": "xiaohongshu",
+      "value": 15000,
+      "contact": "",
+      "notes": "Interested in AI one-company workflows. Contact details still required before outreach automation.",
+      "updated": "2026-04-15T17:28:48.149295",
+      "score": 40,
+      "priority": "中等"
+    },
+    {
+      "id": "L004",
+      "name": "E-commerce Operations Lead",
+      "stage": "lead",
+      "source": "wechat_moments",
+      "value": 5000,
+      "contact": "",
+      "notes": "Wants AI-assisted content operations. Contact details still required before outreach automation.",
+      "updated": "2026-04-15T17:28:48.149355",
+      "score": 35,
+      "priority": "中等"
+    },
+    {
+      "id": "L005",
+      "name": "SaaS Founder Lead",
+      "stage": "initial_contact",
+      "source": "landing_page",
+      "value": 30000,
+      "contact": "",
+      "notes": "Potential custom Agent project. Contact details still required before outreach automation.",
+      "updated": "2026-04-15T17:28:48.149362",
+      "score": 40,
+      "priority": "中等"
     }
-  ]
+  ],
+  "last_scored": "2026-04-28 20:48"
 }

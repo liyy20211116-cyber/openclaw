@@ -26,5 +26,33 @@
         "price": 2000
       }
     ]
+  },
+  {
+    "invoice_no": "INV-202604282041",
+    "doc_type": "报价单",
+    "client": "示例客户有限公司",
+    "total": 16000,
+    "date": "2026-04-28T20:41:59.106755",
+    "file": "D:\\FY003\\output\\报价单_INV-202604282041.html",
+    "items": [
+      {
+        "name": "AI 自动化咨询",
+        "desc": "需求分析与方案设计",
+        "qty": 1,
+        "price": 5000
+      },
+      {
+        "name": "Agent 开发",
+        "desc": "定制 AI Agent 开发部署",
+        "qty": 3,
+        "price": 3000
+      },
+      {
+        "name": "运维支持",
+        "desc": "月度运维与优化",
+        "qty": 1,
+        "price": 2000
+      }
+    ]
   }
 ]
