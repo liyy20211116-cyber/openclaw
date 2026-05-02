@@ -1,13 +1,13 @@
 # ============================================================
-# ???? OS / OpenClaw ?? .gitignore
-# ?????
-#   1. ? tracked ??????????????git ???
-#   2. ?????/Cookie/Token/??????? ignore
-#   3. ????????dev.db?release/?output/*??? ignore
-#   4. ??????????README??? .gitkeep
+# 一人公司 OS / OpenClaw 仓库 .gitignore
+# 设计原则：
+#   1. 所有 tracked 的源代码 / 配置都保留进 git 历史
+#   2. 任何包含 API 密钥 / Cookie / Token / 客户隐私的文件强制 ignore
+#   3. 运行时产物（dev.db、release/、output/* 子目录）统统 ignore
+#   4. 框架性目录保留 README 或 .gitkeep 占位
 # ============================================================
 
-# ---------------- ?? ----------------
+# ---------------- 通用 ----------------
 node_modules/
 .env
 .env.*
@@ -16,8 +16,8 @@ node_modules/
 npm-debug.log*
 *.log
 
-# ---------------- OpenClaw ?? ----------------
-# ???????????????? clone ??????
+# ---------------- OpenClaw 子模块 ----------------
+# 外部 OpenCLI 仓库克隆下来的东西（不入库）
 OpenClaw/
 
 # ---------------- IDE / Editor ----------------
@@ -32,16 +32,16 @@ __pycache__/
 .venv/
 venv/
 
-# ---------------- ?? ----------------
-??_????/
+# ---------------- 历史中文乱码目录（已废弃，避免再被新增） ----------------
+桴掓。_鍘嗗悕彶鏂囨叏。/
 
-# ---------------- ?? / ???? ----------------
+# ---------------- 密钥 / 渠道凭证 ----------------
 config/payment-info.json
 config/webhook-config.json
 config/*.jpg
 config/*.png
 
-# ?????????????/Cookie/Token/???
+# 任何 tenant 下的 integrations（飞书 / Cookie / Token / 收款码）
 config/tenant/*/integrations/*.json
 config/tenant/*/license.txt
 config/tenant/*/secrets/**
@@ -51,7 +51,7 @@ config/secrets/
 assets/qr/
 !assets/qr/README.md
 
-# ?????? / CEO ?????????/???/???/???????
+# 真实业务数据 / CEO 个人信息（手机号 / 微信号 / 邮箱 / 渠道明细）
 config/integrations.json
 config/sales-leads.json
 config/revenue-records.json
@@ -62,19 +62,19 @@ config/tenant/*/tenant.json
 config/tenant/*/integrations/ACCOUNTS-SUMMARY.md
 config/tenant/*/data/
 
-# ---------------- ???????????/?????????? ----------------
+# ---------------- 运行时产物（每天滚动 / 大量碎片文件） ----------------
 output/landing/payment-block.*
 output/ops/
 output/publish/
 output/publish_log/
 
-# ??/????
+# 视频 / 内容素材
 output/posters/
 output/video/
 output/daily_hot/
 output/competitor/
 
-# ???? OS ?????
+# 一人公司 OS 业务运行时
 output/coo_ops/
 output/daily_standup/
 output/downloads/
@@ -83,6 +83,7 @@ output/finance/
 output/hr/
 output/licenses/
 output/onboarding/
+output/outreach/
 output/performance/
 output/product/
 output/reports/
@@ -97,9 +98,9 @@ output/content_calendar_*.json
 output/video_analysis_*.json
 output/video_analysis_*.png
 output/performance_review_*.json
-output/???_*.html
+output/报价单_*.html
 
-# ---------------- ???? & ?? ----------------
+# ---------------- 临时文件 & 备份 ----------------
 *.tmp
 .DS_Store
 backup_chat_*/
@@ -107,14 +108,15 @@ chat_backup.json
 extracted_chat_data.json
 backups/
 
-# ---------------- ??? & ???? ----------------
+# ---------------- 编译产物 & 大文件 ----------------
 *.zip
 *.exe
 jarvis-one-company-os/release/
 jarvis-one-company-os/dist-backend/
 jarvis-one-company-os/dist-electron/
 
-# ---------------- jarvis-one-company-os ??? ----------------
+# ---------------- jarvis-one-company-os 运行时 ----------------
+jarvis-one-company-os/dev.db
 jarvis-one-company-os/dev.db-shm
 jarvis-one-company-os/dev.db-wal
 jarvis-one-company-os/tmp-llm-chat-test.json
@@ -122,14 +124,13 @@ jarvis-one-company-os/vite-daily-run-log.log
 jarvis-one-company-os/vite-daily-run-log.err.log
 jarvis-one-company-os/scheduler-state.json
 
-# ---------------- ?????????? setup_toolchain.ps1 ???????? ----------------
+# ---------------- 外部工具链（由 setup_toolchain.ps1 拉下来的二进制） ----------------
 tools/videocut/
 tools/openclip/
 tools/Clip2Post/
 tools/OpenCLI/
 tools/cliproxyapi/
 
-# ---------------- ???????? / profile ----------------
-# ??? cookie???????
+# ---------------- 浏览器自动化缓存 / profile（含登录 cookie，绝不能入库） ----------------
 .browser-profiles/
 .playwright-mcp/
