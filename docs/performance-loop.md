@@ -213,6 +213,45 @@ Grade 阈值：S ≥ 90 / A ≥ 75 / B ≥ 60 / C ≥ 40 / D < 40。
 - `npx tsc --noEmit -p tsconfig.node.json`
 - `npx eslint src/pages/DashboardPage.tsx src/pages/ProfitabilityPage.tsx src/services/profitabilityService.ts scripts/export-profitability-weekly.ts scripts/test-profitability-step-c.ts desktop/electron/schedulerService.ts`
 
+### 北极星 Step D 已交付（2026-05-02）：买家版商业化就绪报告（CLI + 单测）
+
+> 方向：把 5 维 + 盈利边界 + 商业化里程碑合成一份**可直接发给潜在买家或投资人**的 Markdown 一页纸，作为对外口径锚点。
+
+#### 交付内容
+
+- `src/services/commercialReadinessReportService.ts`（新增，纯函数）
+  - `buildCommercialReadinessSummary(snapshot, config, businessLines, referenceDate)` —— 汇总 5 维团队均分、盈利边界、付费用户数与 M0–M4 里程碑判定
+  - `renderCommercialReadinessMarkdown(summary)` —— 渲染中文 Markdown 一页纸（含「对齐北极星」checklist）
+  - `buildCommercialReadinessReport(...)` —— 上述两步组合
+- `scripts/export-commercial-readiness.ts`（新增 CLI）
+  - 从 Prisma + `config/app-config.json` 读取真实数据
+  - 输出 `docs/commercial-readiness-YYYY-MM-DD.md`
+  - 同时打印综合分、Grade、Top performer、达成的里程碑摘要
+- `package.json`
+  - 新增 `npm run report:commercial-readiness`
+  - `npm test` 增加 `test-commercial-readiness-export.ts`
+- `scripts/test-commercial-readiness-export.ts`（新增单测）
+  - 覆盖：5 维团队均分、盈亏平衡 best-pick、付费用户识别、M1 里程碑判定、空账本兜底（输出"ledger / revenues 表为空"提示）
+
+#### Markdown 报告结构
+
+1. Header：公司名 / CEO / 团队规模 / 综合就绪分（带颜色图标）+ 北极星锚点链接
+2. 一、北极星 5 维团队均分（含状态色 + 头号选手 + 重点改进维度）
+3. 二、盈利边界（累计收入/开销/净利、月烧钱、最易盈亏平衡业务线）
+4. 三、商业化里程碑（M0–M4 状态表，每条附判定理由）
+5. 四、对外口径建议（按 Grade 自动给出可签 / 可演示 / 暂缓签单的口径）
+6. 五、对齐北极星 Checklist（5 维逐项打钩）
+
+#### 验证
+
+- `npx tsx scripts/test-commercial-readiness-export.ts`：单测通过
+- `npm test`：30 项全部通过（含本次新增）
+- `npm run build`：tsc + vite 通过
+
+#### 已知限制
+
+- `npm run report:commercial-readiness` 直接跑 CLI 时，会和 `npm run report:profitability-weekly` 一样依赖 `buildAppSnapshot` 能正常拉 Prisma；当前本机 dev.db 中存在历史 `taskType: 'coo_ops'` 与新 enum 不匹配的脏数据（pre-existing），需要先 `prisma migrate dev` 或清洗该字段。报告生成逻辑本身已被单测覆盖，不依赖具体 enum。
+
 ### 北极星 Step B 已交付（2026-04-23）：5 维商业就绪评分前端版
 
 #### 交付内容
