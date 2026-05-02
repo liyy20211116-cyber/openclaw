@@ -1,0 +1,49 @@
+{
+  "_note": "首次批量入库：公众号 1 篇、小红书 3 篇图文草稿。全部草稿模式，等 CEO 在后台确认后点发布。",
+  "jobs": [
+    {
+      "platform": "wechat-official",
+      "action": "draft",
+      "title": "我给9个AI员工发工资：Token工资单首次曝光",
+      "md": "output/publish/wechat-official/2026-04-22-token-salary.md",
+      "cover": "output/publish/wechat-official/salary_poster_2026-04.png",
+      "dry_run": false
+    },
+    {
+      "platform": "xiaohongshu",
+      "action": "draft",
+      "title": "我给9个AI员工发工资",
+      "content_file": "output/drafts/2026-04-22/xhs-01-token-salary.md",
+      "images": [
+        "output/posters/salary_poster_2026-04.png"
+      ],
+      "tags": ["AI创业", "一人公司", "副业", "AIAgent"],
+      "publish": false,
+      "dry_run": false
+    },
+    {
+      "platform": "xiaohongshu",
+      "action": "draft",
+      "title": "程序员写5万行代码造AI公司",
+      "content_file": "output/drafts/2026-04-22/xhs-02-5w-lines.md",
+      "images": [
+        "output/posters/salary_poster_2026-04.png"
+      ],
+      "tags": ["独立开发者", "程序员创业", "AIAgent"],
+      "publish": false,
+      "dry_run": false
+    },
+    {
+      "platform": "xiaohongshu",
+      "action": "draft",
+      "title": "AI抓AI摸鱼实录",
+      "content_file": "output/drafts/2026-04-22/xhs-04-audit-catch.md",
+      "images": [
+        "output/posters/salary_poster_2026-04.png"
+      ],
+      "tags": ["AI审计", "一人公司", "AI管理"],
+      "publish": false,
+      "dry_run": false
+    }
+  ]
+}

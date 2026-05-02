@@ -1,0 +1,29 @@
+{
+  "_note": "重试前两条失败的小红书图文（页面加载慢导致 tab 没找到）。",
+  "jobs": [
+    {
+      "platform": "xiaohongshu",
+      "action": "draft",
+      "title": "我给9个AI员工发工资",
+      "content_file": "output/drafts/2026-04-22/xhs-01-token-salary.md",
+      "images": [
+        "output/posters/salary_poster_2026-04.png"
+      ],
+      "tags": ["AI创业", "一人公司", "副业", "AIAgent"],
+      "publish": false,
+      "dry_run": false
+    },
+    {
+      "platform": "xiaohongshu",
+      "action": "draft",
+      "title": "程序员写5万行代码造AI公司",
+      "content_file": "output/drafts/2026-04-22/xhs-02-5w-lines.md",
+      "images": [
+        "output/posters/salary_poster_2026-04.png"
+      ],
+      "tags": ["独立开发者", "程序员创业", "AIAgent"],
+      "publish": false,
+      "dry_run": false
+    }
+  ]
+}

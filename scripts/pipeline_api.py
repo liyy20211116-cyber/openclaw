@@ -17,7 +17,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
-ROOT = r"D:\FY003"
+ROOT = "D:\\FY003"
 PORT = 18781
 
 _lock = threading.Lock()
