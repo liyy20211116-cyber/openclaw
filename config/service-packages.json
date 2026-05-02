@@ -1,0 +1,118 @@
+{
+  "agency_name": "OpenClaw AI Agency",
+  "tagline": "一人公司 AI 自动化服务 — 让 AI 团队为你工作",
+  "packages": [
+    {
+      "id": "starter",
+      "name": "启航套餐",
+      "price_monthly": 999,
+      "price_annual": 9990,
+      "currency": "CNY",
+      "description": "适合个人创业者和小微企业入门 AI 自动化",
+      "features": [
+        "3 个 AI Agent（COO + 技术 + 增长）",
+        "日报/周报自动生成",
+        "内容草稿辅助（小红书/抖音）",
+        "基础 LLM 额度 10万 Token/月",
+        "邮件支持"
+      ],
+      "agents": ["jarvis-coo", "hermione-tech", "luna-growth"],
+      "token_quota": 100000,
+      "workflows": ["daily_ops"]
+    },
+    {
+      "id": "growth",
+      "name": "增长套餐",
+      "price_monthly": 2999,
+      "price_annual": 29990,
+      "currency": "CNY",
+      "description": "适合成长期企业的全方位 AI 运营",
+      "features": [
+        "6 个 AI Agent（全部门覆盖）",
+        "内容全管道（调研→创作→发布→统计）",
+        "销售线索评分与触达方案",
+        "财务报表与 ROI 分析",
+        "LLM 额度 50万 Token/月",
+        "优先响应 + 周会复盘"
+      ],
+      "agents": ["jarvis-coo", "hermione-tech", "luna-growth", "fred-sales", "percy-finance", "mcgonagall-product"],
+      "token_quota": 500000,
+      "workflows": ["daily_ops", "content_pipeline", "sales_qualification"]
+    },
+    {
+      "id": "enterprise",
+      "name": "旗舰套餐",
+      "price_monthly": 9999,
+      "price_annual": 99990,
+      "currency": "CNY",
+      "description": "全 9 Agent 覆盖 + 定制化工作流 + 专属运营",
+      "features": [
+        "全部 9 个 AI Agent",
+        "无限自定义工作流",
+        "代码审查 + 安全审计 + 合规检查",
+        "客户健康管理 + 满意度追踪",
+        "LLM 额度 200万 Token/月",
+        "1对1 专属运营顾问",
+        "7×12 响应 + 季度战略复盘"
+      ],
+      "agents": ["jarvis-coo", "hermione-tech", "luna-growth", "fred-sales", "percy-finance", "mcgonagall-product", "snape-audit", "dobby-customer", "neville-hr"],
+      "token_quota": 2000000,
+      "workflows": ["daily_ops", "full_audit", "content_pipeline", "sales_qualification", "customer_health_check", "product_launch_check"]
+    },
+    {
+      "id": "custom_dev",
+      "name": "定制开发",
+      "price_monthly": null,
+      "price_annual": null,
+      "currency": "CNY",
+      "description": "按需定制 AI Agent 和工作流",
+      "features": [
+        "定制 Agent 角色和技能",
+        "定制 DAG 工作流",
+        "API 对接（CRM/ERP/自有系统）",
+        "私有化部署支持",
+        "按项目报价"
+      ],
+      "pricing_model": "project_based",
+      "min_budget": 30000
+    }
+  ],
+  "case_studies": [
+    {
+      "title": "电商内容自动化",
+      "industry": "电商",
+      "problem": "每周需要产出 20+ 篇小红书笔记和 5+ 条抖音脚本，人力成本高",
+      "solution": "部署 Luna（增长）+ McGonagall（产品）Agent，搭建内容管道工作流",
+      "results": {
+        "content_output_increase": "300%",
+        "cost_reduction": "60%",
+        "time_to_publish": "从3天缩短到2小时"
+      },
+      "package": "growth"
+    },
+    {
+      "title": "SaaS 公司销售自动化",
+      "industry": "SaaS",
+      "problem": "销售线索跟进不及时，转化率低",
+      "solution": "部署 Fred（销售）+ Percy（财务）Agent，自动评分+触达+ROI测算",
+      "results": {
+        "lead_response_time": "从24h缩短到10min",
+        "conversion_rate_increase": "45%",
+        "sales_pipeline_visibility": "100%"
+      },
+      "package": "growth"
+    },
+    {
+      "title": "技术咨询公司运营自动化",
+      "industry": "咨询",
+      "problem": "公司运营全靠创始人，无法规模化",
+      "solution": "部署全 9 Agent，实现从获客到交付的全流程自动化",
+      "results": {
+        "founder_time_saved": "每周节省30小时",
+        "operational_tasks_automated": "85%",
+        "client_satisfaction": "4.8/5.0"
+      },
+      "package": "enterprise"
+    }
+  ]
+}

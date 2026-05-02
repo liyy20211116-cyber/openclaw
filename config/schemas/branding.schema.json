@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JarvisBranding",
+  "type": "object",
+  "required": ["product_name", "primary_color"],
+  "properties": {
+    "product_name":     { "type": "string" },
+    "product_slogan":   { "type": "string" },
+    "company_name":     { "type": "string" },
+    "logo_path":        { "type": "string" },
+    "primary_color":    { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "secondary_color":  { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "background_color": { "type": "string" },
+    "text_color":       { "type": "string" },
+    "dark_mode_default": { "type": "boolean" },
+    "agents": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9_-]+$": {
+          "type": "object",
+          "properties": {
+            "display_name": { "type": "string" },
+            "emoji":        { "type": "string" },
+            "title":        { "type": "string" }
+          }
+        }
+      }
+    },
+    "footer_copyright": { "type": "string" }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-04-29",
+  "principle": "内容先建立信任，用户主动咨询后再进入产品承接；不使用评论、点赞、收藏、关注作为领取条件。",
+  "offers": [
+    {
+      "id": "FREE-001",
+      "name": "一人公司最小经营闭环清单",
+      "price_cny": 0,
+      "stage": "public_trust",
+      "trigger": "公开内容自然展示，不以互动作为领取条件",
+      "deliverables": [
+        "一页经营闭环清单",
+        "内容-线索-承接-交付-收款-复盘流程图",
+        "适合/不适合人群说明"
+      ],
+      "owner": "luna-growth",
+      "boundary": "公开发布或用户主动询问后发送，不要求评论关键词"
+    },
+    {
+      "id": "DIAG-099",
+      "name": "一人公司 99 元快速体检",
+      "price_cny": 99,
+      "stage": "low_risk_paid",
+      "trigger": "用户主动问自己适不适合做一人公司",
+      "deliverables": [
+        "3 个诊断问题",
+        "1 页可行性判断",
+        "一个最小经营动作建议"
+      ],
+      "owner": "fred-sales",
+      "boundary": "不承诺赚钱，只判断是否适合继续投入"
+    },
+    {
+      "id": "CONSULT-399",
+      "name": "一人公司 60 分钟诊断咨询",
+      "price_cny": 399,
+      "stage": "consulting",
+      "trigger": "用户有明确业务、账号或产品，但不知道怎么启动",
+      "deliverables": [
+        "60 分钟语音/会议诊断",
+        "业务闭环草图",
+        "7 天行动计划",
+        "是否适合 Jarvis OS 的判断"
+      ],
+      "owner": "mcgonagall-product",
+      "boundary": "咨询交付的是判断和计划，不包含系统交付"
+    },
+    {
+      "id": "BOOT-999",
+      "name": "999 元最小经营闭环启动包",
+      "price_cny": 999,
+      "stage": "implementation_starter",
+      "trigger": "用户愿意实际跑第一条内容和第一套承接流程",
+      "deliverables": [
+        "1 个产品/服务定位",
+        "1 条平台内容草稿",
+        "1 套评论/私信待审回复库",
+        "1 个收款说明区块",
+        "1 张 7 天执行表"
+      ],
+      "owner": "jarvis-coo",
+      "boundary": "不保证流量和成交，只交付可执行闭环资产"
+    },
+    {
+      "id": "PACK-2999",
+      "name": "2999 元行业 Agent 启动包",
+      "price_cny": 2999,
+      "stage": "industry_pack",
+      "trigger": "用户已有行业方向，需要把一人公司流程按行业改造",
+      "deliverables": [
+        "行业角色配置",
+        "3 条内容选题",
+        "销售/客服话术库",
+        "财务和审计边界",
+        "30 天运营计划"
+      ],
+      "owner": "mcgonagall-product",
+      "boundary": "行业包是配置和 SOP，不等同私有化开发"
+    },
+    {
+      "id": "OS-999-2999-9999",
+      "name": "Jarvis One Company OS",
+      "price_cny": "999/2999/9999",
+      "stage": "system_product",
+      "trigger": "用户看过过程、理解能力边界，并希望自己使用系统",
+      "deliverables": [
+        "系统许可证",
+        "基础配置",
+        "上手指引",
+        "按版本提供行业包/白标/部署支持"
+      ],
+      "owner": "dobby-customer",
+      "boundary": "系统是工具，不承诺自动盈利"
+    },
+    {
+      "id": "RET-399",
+      "name": "399 元/月运营陪跑",
+      "price_cny": 399,
+      "stage": "retainer",
+      "trigger": "客户已购买启动包或 OS，希望持续复盘",
+      "deliverables": [
+        "每周一次复盘",
+        "内容和线索数据检查",
+        "角色任务调整建议",
+        "风险提醒"
+      ],
+      "owner": "jarvis-coo",
+      "boundary": "陪跑提供复盘和建议，不代替客户做最终发布和承诺"
+    }
+  ]
+}

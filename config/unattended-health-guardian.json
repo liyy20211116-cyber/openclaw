@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-04-29",
+  "mode": "watchdog_readonly",
+  "python_executable": "C:\\Users\\Lenovo\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+  "safety": {
+    "allow_publish": false,
+    "allow_comment_reply": false,
+    "allow_private_message": false,
+    "allow_revenue_write_without_payment": false,
+    "allow_readonly_metric_catchup": true,
+    "allow_autonomous_internal_execution": true
+  },
+  "jobs": [
+    {
+      "id": "xhs_post2_monitor",
+      "platform": "xiaohongshu",
+      "title": "我给9个AI员工发工资",
+      "scheduled_tasks": [
+        "JarvisXhsMonitor-T8h",
+        "JarvisXhsMonitor-T24h"
+      ],
+      "events_file": "output/coo_ops/xhs-monitor-events-2026-04-29.jsonl",
+      "monitor_csv": "output/coo_ops/7day-xhs-growth-monitor-2026-04-29.csv",
+      "expected_events": [
+        "post_t8h_engagement_scan",
+        "post_t24h_review"
+      ],
+      "catchup_command": "scripts/xhs_post_monitor.py --title \"我给9个AI员工发工资\" --event {event}_catchup --port 9222",
+      "max_minutes_after_due": 10,
+      "owner_agent": "agent_hermione",
+      "escalation_agent": "agent_jarvis"
+    },
+    {
+      "id": "xhs_post3_monitor",
+      "platform": "xiaohongshu",
+      "title": "第一条被下架，第二条活下来了",
+      "scheduled_tasks": [
+        "JarvisXhsMonitor-T8h",
+        "JarvisXhsMonitor-T24h"
+      ],
+      "events_file": "output/coo_ops/xhs-monitor-events-2026-04-29.jsonl",
+      "monitor_csv": "output/coo_ops/7day-xhs-growth-monitor-2026-04-29.csv",
+      "expected_events": [
+        "post_t8h_engagement_scan",
+        "post_t24h_review"
+      ],
+      "catchup_command": "scripts/xhs_post_monitor.py --title \"第一条被下架，第二条活下来了\" --event {event}_catchup --port 9222",
+      "max_minutes_after_due": 10,
+      "owner_agent": "agent_hermione",
+      "escalation_agent": "agent_jarvis"
+    },
+    {
+      "id": "xhs_hr_learning_monitor",
+      "platform": "xiaohongshu",
+      "title": "我让HR去小红书学习爆款，不是为了抄",
+      "scheduled_tasks": [
+        "JarvisXhsMonitor-HRStudy-T24h"
+      ],
+      "events_file": "output/coo_ops/xhs-monitor-events-2026-04-29.jsonl",
+      "monitor_csv": "output/coo_ops/7day-xhs-growth-monitor-2026-04-29.csv",
+      "expected_events": [
+        "post_hr_learning_t24h_review"
+      ],
+      "catchup_command": "scripts/xhs_post_monitor.py --title \"我让HR去小红书学习爆款，不是为了抄\" --event {event}_catchup --port 9222",
+      "max_minutes_after_due": 10,
+      "owner_agent": "agent_hermione",
+      "escalation_agent": "agent_jarvis"
+    },
+    {
+      "id": "autonomous_revenue_loop",
+      "platform": "internal",
+      "title": "30 day 10000 CNY autonomous revenue loop",
+      "scheduled_tasks": [
+        "JarvisAutonomousRevenueLoop-Daily"
+      ],
+      "events_file": "output/coo_ops/autonomous-revenue-loop-events.jsonl",
+      "monitor_csv": "",
+      "expected_events": [
+        "revenue_goal_daily_loop"
+      ],
+      "catchup_command": "scripts/revenue_goal_loop.py --target-cny 10000 --days 30",
+      "max_minutes_after_due": 30,
+      "owner_agent": "agent_jarvis",
+      "escalation_agent": "agent_jarvis"
+    }
+  ],
+  "report": {
+    "latest_path": "output/coo_ops/unattended-health-latest.md",
+    "history_dir": "output/coo_ops/health"
+  }
+}

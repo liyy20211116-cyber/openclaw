@@ -1,0 +1,59 @@
+{
+  "templates": [
+    {
+      "id": "ai_automation_service_provider",
+      "name": "AI 自动化服务商",
+      "description": "面向自动化服务、AI 咨询和数字化项目交付的一人公司配置。",
+      "targetUsers": "AI 服务商、自动化顾问、数字化自由职业者",
+      "recommendedModules": ["opportunity", "offers", "sales", "workflows", "revenue", "daily_run", "action_boundary", "runtime", "audit"],
+      "defaultBusinessGoal": "自动寻找企业自动化项目并交付 MVP",
+      "recommendedAgentTemplateId": "enterprise_automation_advisor_team",
+      "recommendedOfferCatalogId": "default_offer_catalog",
+      "defaultDailyRunCadence": "daily"
+    },
+    {
+      "id": "knowledge_creator",
+      "name": "知识付费博主",
+      "description": "面向内容生产、线索收集、咨询和课程转化的轻量配置。",
+      "targetUsers": "课程博主、自媒体、内容创业者",
+      "recommendedModules": ["opportunity", "offers", "sales", "revenue", "daily_run", "action_boundary", "runtime", "audit"],
+      "defaultBusinessGoal": "自动生产内容、收集线索、转化咨询和课程",
+      "recommendedAgentTemplateId": "content_growth_team",
+      "recommendedOfferCatalogId": "default_offer_catalog",
+      "defaultDailyRunCadence": "daily"
+    },
+    {
+      "id": "consulting_advisor",
+      "name": "咨询顾问",
+      "description": "面向客户诊断、方案生成、销售推进和交付管理的顾问配置。",
+      "targetUsers": "管理顾问、战略顾问、企业教练",
+      "recommendedModules": ["opportunity", "offers", "sales", "workflows", "revenue", "daily_run", "action_boundary", "audit"],
+      "defaultBusinessGoal": "自动做客户诊断、方案生成和交付管理",
+      "recommendedAgentTemplateId": "sales_delivery_team",
+      "recommendedOfferCatalogId": "default_offer_catalog",
+      "defaultDailyRunCadence": "daily"
+    },
+    {
+      "id": "small_ecommerce",
+      "name": "小型电商",
+      "description": "面向商品、客户反馈、内容和销售机会监控的经营配置。",
+      "targetUsers": "小电商团队、私域商家、品牌操盘手",
+      "recommendedModules": ["opportunity", "offers", "sales", "revenue", "daily_run", "action_boundary", "runtime", "audit"],
+      "defaultBusinessGoal": "自动监控商品、客户反馈、内容和销售机会",
+      "recommendedAgentTemplateId": "content_growth_team",
+      "recommendedOfferCatalogId": "default_offer_catalog",
+      "defaultDailyRunCadence": "daily"
+    },
+    {
+      "id": "enterprise_digital_team",
+      "name": "企业数字化团队",
+      "description": "面向企业内部自动化机会发现、项目推进和收益追踪的团队配置。",
+      "targetUsers": "企业数字化、精益、运营、IT、BI 团队",
+      "recommendedModules": ["opportunity", "offers", "sales", "workflows", "revenue", "daily_run", "action_boundary", "runtime", "audit"],
+      "defaultBusinessGoal": "发现内部自动化机会、推进项目和追踪收益",
+      "recommendedAgentTemplateId": "enterprise_automation_advisor_team",
+      "recommendedOfferCatalogId": "default_offer_catalog",
+      "defaultDailyRunCadence": "workday"
+    }
+  ]
+}

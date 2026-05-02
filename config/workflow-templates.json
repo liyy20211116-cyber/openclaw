@@ -1,0 +1,183 @@
+{
+  "version": "2.0.0",
+  "updated_at": "2026-05-01",
+  "templates": [
+    {
+      "id": "wf_daily_opportunity_scan",
+      "name": "每日项目机会扫描",
+      "description": "每天由 Agent 团队扫描外部机会、评估价值并生成今日机会清单",
+      "trigger": "scheduled",
+      "steps": [
+        {
+          "id": "daily_scan_luna_research",
+          "label": "Luna 搜集公开需求和内容机会",
+          "agentId": "luna",
+          "skillId": "luna_opportunity_scan",
+          "description": "搜集公开内容、评论、招聘和社群中的项目机会信号",
+          "requiresApproval": false,
+          "expectedOutput": "今日公开机会候选清单"
+        },
+        {
+          "id": "daily_scan_fred_value",
+          "label": "Fred 评估项目商业价值",
+          "agentId": "fred",
+          "skillId": "fred_opportunity_value_score",
+          "description": "评估预算、成交可能性和销售优先级",
+          "requiresApproval": false,
+          "expectedOutput": "机会价值评分"
+        },
+        {
+          "id": "daily_scan_mcgonagall_offer_fit",
+          "label": "McGonagall 判断可销售产品匹配度",
+          "agentId": "mcgonagall",
+          "skillId": "mcgonagall_offer_fit",
+          "description": "判断机会是否能匹配当前 Offer Catalog",
+          "requiresApproval": false,
+          "expectedOutput": "推荐产品和匹配理由"
+        },
+        {
+          "id": "daily_scan_snape_risk",
+          "label": "Snape 审核风险",
+          "agentId": "snape",
+          "skillId": "snape_opportunity_risk_review",
+          "description": "识别私信、报价、承诺、合同和平台合规风险",
+          "requiresApproval": true,
+          "expectedOutput": "风险标记与 CEO 审批提醒"
+        },
+        {
+          "id": "daily_scan_jarvis_summary",
+          "label": "Jarvis 汇总今日机会清单",
+          "agentId": "jarvis",
+          "skillId": "jarvis_daily_opportunity_digest",
+          "description": "汇总今日机会、推荐优先级和下一步内部动作",
+          "requiresApproval": false,
+          "expectedOutput": "今日机会清单"
+        }
+      ]
+    },
+    {
+      "id": "wf_lead_qualification",
+      "name": "线索资格评估",
+      "description": "对销售线索进行预算、痛点、成交可能性和风险评估",
+      "trigger": "lead_qualified",
+      "steps": [
+        {
+          "id": "lead_qualification_fred_budget",
+          "label": "Fred 判断预算和成交可能性",
+          "agentId": "fred",
+          "skillId": "fred_budget_close_probability",
+          "description": "评估客户预算、购买意愿和推进优先级",
+          "requiresApproval": false,
+          "expectedOutput": "预算与成交可能性判断"
+        },
+        {
+          "id": "lead_qualification_mcgonagall_pain",
+          "label": "McGonagall 分析客户真实痛点",
+          "agentId": "mcgonagall",
+          "skillId": "mcgonagall_customer_pain_analysis",
+          "description": "提炼客户真正要解决的问题和需求边界",
+          "requiresApproval": false,
+          "expectedOutput": "客户痛点分析"
+        },
+        {
+          "id": "lead_qualification_percy_profit",
+          "label": "Percy 估算成本与利润空间",
+          "agentId": "percy",
+          "skillId": "percy_delivery_profit_estimate",
+          "description": "估算交付成本、毛利和资源占用",
+          "requiresApproval": false,
+          "expectedOutput": "成本与利润测算"
+        },
+        {
+          "id": "lead_qualification_snape_risk",
+          "label": "Snape 标记风险",
+          "agentId": "snape",
+          "skillId": "snape_sales_risk_review",
+          "description": "识别报价、合同、退款、承诺和交付风险",
+          "requiresApproval": true,
+          "expectedOutput": "销售风险清单"
+        },
+        {
+          "id": "lead_qualification_jarvis_next",
+          "label": "Jarvis 生成下一步建议",
+          "agentId": "jarvis",
+          "skillId": "jarvis_sales_next_action",
+          "description": "根据评估结果生成内部下一步建议",
+          "requiresApproval": false,
+          "expectedOutput": "下一步销售动作建议"
+        }
+      ]
+    },
+    {
+      "id": "wf_ai_automation_diagnosis",
+      "name": "AI 自动化诊断报告",
+      "description": "为已付款客户生成企业 AI 自动化诊断报告",
+      "trigger": "payment_confirmed",
+      "steps": [
+        {
+          "id": "diagnosis_mcgonagall_process",
+          "label": "McGonagall 分析业务流程",
+          "agentId": "mcgonagall",
+          "skillId": "mcgonagall_process_diagnosis",
+          "description": "梳理客户业务流程、角色、数据和关键瓶颈",
+          "requiresApproval": false,
+          "expectedOutput": "业务流程诊断"
+        },
+        {
+          "id": "diagnosis_hermione_tech_path",
+          "label": "Hermione 判断技术实现路径",
+          "agentId": "hermione",
+          "skillId": "hermione_automation_tech_path",
+          "description": "判断自动化可行性、系统边界和实现路径",
+          "requiresApproval": false,
+          "expectedOutput": "技术实现路径"
+        },
+        {
+          "id": "diagnosis_fred_scope",
+          "label": "Fred 设计交付范围",
+          "agentId": "fred",
+          "skillId": "fred_delivery_scope_design",
+          "description": "把诊断结果整理成可销售、可交付的范围",
+          "requiresApproval": true,
+          "expectedOutput": "交付范围草案"
+        },
+        {
+          "id": "diagnosis_percy_roi",
+          "label": "Percy 估算 ROI 和成本",
+          "agentId": "percy",
+          "skillId": "percy_roi_cost_estimate",
+          "description": "估算客户 ROI、交付成本和资源消耗",
+          "requiresApproval": false,
+          "expectedOutput": "ROI 与成本估算"
+        },
+        {
+          "id": "diagnosis_luna_readable",
+          "label": "Luna 整理客户可读版本",
+          "agentId": "luna",
+          "skillId": "luna_customer_readable_report",
+          "description": "把技术和流程分析整理为客户可读版本",
+          "requiresApproval": false,
+          "expectedOutput": "客户可读报告草稿"
+        },
+        {
+          "id": "diagnosis_snape_risk",
+          "label": "Snape 审核风险",
+          "agentId": "snape",
+          "skillId": "snape_delivery_risk_review",
+          "description": "审核报告中是否存在过度承诺、合规或合同风险",
+          "requiresApproval": true,
+          "expectedOutput": "交付风险审核"
+        },
+        {
+          "id": "diagnosis_jarvis_final",
+          "label": "Jarvis 汇总最终诊断报告",
+          "agentId": "jarvis",
+          "skillId": "jarvis_final_diagnosis_report",
+          "description": "汇总各 Agent 产物形成最终诊断报告",
+          "requiresApproval": false,
+          "expectedOutput": "最终 AI 自动化诊断报告"
+        }
+      ]
+    }
+  ]
+}

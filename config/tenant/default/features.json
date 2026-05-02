@@ -1,0 +1,62 @@
+{
+  "$schema": "../../schemas/features.schema.json",
+  "plan": "enterprise",
+  "_note": "本租户（CEO 自己）享受全量功能。其他租户的 features.json 会按套餐动态生成。",
+
+  "agents": {
+    "jarvis-coo":           true,
+    "hermione-tech":        true,
+    "mcgonagall-product":   true,
+    "luna-growth":          true,
+    "fred-sales":           true,
+    "percy-finance":        true,
+    "snape-audit":          true,
+    "dobby-customer":       true,
+    "neville-hr":           true,
+    "req-review-agent":     true,
+    "mofashi-workspace":    true,
+    "haimian-workspace":    true
+  },
+
+  "packs": {
+    "pack-content-factory": true,
+    "pack-ecommerce":       false,
+    "pack-overseas":        false,
+    "pack-saas":            false
+  },
+
+  "skills": {
+    "wechat-bot":           true,
+    "video-edit-cli":       true,
+    "opencli-bridge":       true,
+    "feishu-messaging":     true,
+    "feishu-workflow-doc":  true,
+    "feishu-workflow-bitable": true,
+    "content-pipeline":     true,
+    "image-gen":            true,
+    "browser-automation":   true,
+    "web-search":           true,
+    "excel-data":           true,
+    "git-ops":              true,
+    "skill-installer":      true,
+    "local-file-ops":       true,
+    "libreoffice-safe-export": true
+  },
+
+  "advanced": {
+    "skill_auto_distill":   true,
+    "dag_editor":           true,
+    "multi_tenant":         true,
+    "white_label":          true,
+    "license_issue":        true,
+    "saas_backend":         false
+  },
+
+  "quotas": {
+    "agent_count_limit":    999,
+    "skill_count_limit":    999,
+    "monthly_llm_rmb":      -1,
+    "monthly_tts_seconds":  -1,
+    "tenants_max":          -1
+  }
+}

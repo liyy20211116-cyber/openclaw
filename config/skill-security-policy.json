@@ -1,0 +1,56 @@
+{
+  "version": "2026-04-28",
+  "default_action": "review_only",
+  "rules": [
+    {
+      "id": "no-direct-install",
+      "description": "Do not install or execute third-party GitHub skills directly from search results.",
+      "required": true
+    },
+    {
+      "id": "static-review",
+      "description": "Review scripts for network calls, shell execution, file writes, credential access, browser profile access, and persistence hooks before allowlisting.",
+      "required": true
+    },
+    {
+      "id": "sandbox-first",
+      "description": "Run new skills only in a disposable workspace with no production secrets or logged-in browser profile.",
+      "required": true
+    },
+    {
+      "id": "least-privilege",
+      "description": "Grant each role only the tool permissions required for its responsibility.",
+      "required": true
+    },
+    {
+      "id": "human-approval",
+      "description": "Publishing, external replies, payment registration, and credential changes require CEO approval.",
+      "required": true
+    }
+  ],
+  "allowlist_statuses": ["candidate", "approved", "rejected"],
+  "approved_sources": [],
+  "candidate_sources": [
+    {
+      "name": "galpt/you",
+      "url": "https://github.com/galpt/you",
+      "useful_for": "multi-agent delegation, state tracking, real-time orchestration",
+      "status": "candidate",
+      "import_policy": "study-patterns-only"
+    },
+    {
+      "name": "GitHub Agent Skills documentation",
+      "url": "https://docs.github.com/en/copilot/concepts/agents/about-agent-skills",
+      "useful_for": "skill packaging and instruction boundaries",
+      "status": "candidate",
+      "import_policy": "documentation-reference-only"
+    },
+    {
+      "name": "awesome-agentOS",
+      "url": "https://github.com/Egv2/awesome-agentOS",
+      "useful_for": "project discovery list",
+      "status": "candidate",
+      "import_policy": "index-only-no-execution"
+    }
+  ]
+}

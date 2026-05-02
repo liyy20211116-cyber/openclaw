@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JarvisTenant",
+  "type": "object",
+  "required": ["tenant_id", "tenant_name", "plan"],
+  "properties": {
+    "tenant_id":   { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+    "tenant_name": { "type": "string", "minLength": 1 },
+    "owner": {
+      "type": "object",
+      "properties": {
+        "name":  { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" }
+      }
+    },
+    "plan":        { "enum": ["starter", "pro", "enterprise", "internal"] },
+    "created_at":  { "type": "string" },
+    "timezone":    { "type": "string" },
+    "language":    { "type": "string" },
+    "data_dir":    { "type": "string" },
+    "notes":       { "type": "string" }
+  }
+}

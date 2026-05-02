@@ -1,0 +1,24 @@
+{
+  "tenantId": "tenant_default",
+  "tenantName": "Jarvis One Company OS",
+  "ownerName": "CEO",
+  "industry": "AI 自动化服务商",
+  "businessGoal": "自动寻找企业自动化项目并交付 MVP",
+  "defaultCurrency": "CNY",
+  "enabledModules": [
+    "opportunity",
+    "offers",
+    "sales",
+    "workflows",
+    "revenue",
+    "daily_run",
+    "action_boundary",
+    "runtime",
+    "audit"
+  ],
+  "agentTemplateId": "default_one_company_team",
+  "offerCatalogId": "default_offer_catalog",
+  "dailyRunCadence": "daily",
+  "createdAt": "2026-05-02",
+  "updatedAt": "2026-05-02"
+}

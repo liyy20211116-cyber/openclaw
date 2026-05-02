@@ -1,0 +1,121 @@
+{
+  "_doc": "大小模型智能路由配置 — 根据任务类型自动选择最优模型，降本增效",
+  "version": "1.0.0",
+  "updated_at": "2026-04-15",
+
+  "routing_rules": [
+    {
+      "task_type": "simple_reply",
+      "description": "简单回复/确认/格式化输出",
+      "model_tier": "light",
+      "preferred_models": ["qwen-2.5-7b", "glm-4-flash", "deepseek-chat"],
+      "max_tokens": 500,
+      "temperature": 0.3,
+      "estimated_cost_per_call": 0.001
+    },
+    {
+      "task_type": "content_generation",
+      "description": "内容创作/文案/社媒帖子",
+      "model_tier": "standard",
+      "preferred_models": ["deepseek-chat", "qwen-plus", "glm-4"],
+      "max_tokens": 2000,
+      "temperature": 0.7,
+      "estimated_cost_per_call": 0.01
+    },
+    {
+      "task_type": "data_analysis",
+      "description": "数据分析/报表/统计",
+      "model_tier": "standard",
+      "preferred_models": ["deepseek-chat", "qwen-plus"],
+      "max_tokens": 1500,
+      "temperature": 0.3,
+      "estimated_cost_per_call": 0.01
+    },
+    {
+      "task_type": "strategic_decision",
+      "description": "战略决策/复杂推理/任务分解",
+      "model_tier": "premium",
+      "preferred_models": ["gpt-5-4", "claude-sonnet-4", "deepseek-r1"],
+      "max_tokens": 4000,
+      "temperature": 0.5,
+      "estimated_cost_per_call": 0.05
+    },
+    {
+      "task_type": "code_review",
+      "description": "代码审查/技术分析/架构设计",
+      "model_tier": "premium",
+      "preferred_models": ["claude-sonnet-4", "gpt-5-4", "deepseek-coder"],
+      "max_tokens": 4000,
+      "temperature": 0.2,
+      "estimated_cost_per_call": 0.05
+    },
+    {
+      "task_type": "customer_service",
+      "description": "客服回复/FAQ/意图识别",
+      "model_tier": "light",
+      "preferred_models": ["qwen-2.5-7b", "glm-4-flash", "deepseek-chat"],
+      "max_tokens": 600,
+      "temperature": 0.5,
+      "estimated_cost_per_call": 0.002
+    },
+    {
+      "task_type": "translation",
+      "description": "翻译/多语言内容",
+      "model_tier": "light",
+      "preferred_models": ["qwen-2.5-7b", "deepseek-chat"],
+      "max_tokens": 1000,
+      "temperature": 0.2,
+      "estimated_cost_per_call": 0.002
+    },
+    {
+      "task_type": "creative_writing",
+      "description": "创意写作/脚本/故事",
+      "model_tier": "premium",
+      "preferred_models": ["claude-sonnet-4", "gpt-5-4"],
+      "max_tokens": 3000,
+      "temperature": 0.8,
+      "estimated_cost_per_call": 0.04
+    }
+  ],
+
+  "model_tiers": {
+    "light": {
+      "description": "轻量模型 — 高速低成本，适合简单任务",
+      "avg_cost_per_1k_tokens": 0.0005,
+      "avg_latency_ms": 500,
+      "models": ["qwen-2.5-7b", "glm-4-flash", "deepseek-chat"]
+    },
+    "standard": {
+      "description": "标准模型 — 性价比均衡",
+      "avg_cost_per_1k_tokens": 0.005,
+      "avg_latency_ms": 2000,
+      "models": ["deepseek-chat", "qwen-plus", "glm-4"]
+    },
+    "premium": {
+      "description": "顶级模型 — 深度推理，仅用于复杂任务",
+      "avg_cost_per_1k_tokens": 0.03,
+      "avg_latency_ms": 5000,
+      "models": ["gpt-5-4", "claude-sonnet-4", "deepseek-r1"]
+    }
+  },
+
+  "agent_default_tiers": {
+    "jarvis-coo": "premium",
+    "hermione-tech": "premium",
+    "mcgonagall-product": "standard",
+    "luna-growth": "standard",
+    "fred-sales": "standard",
+    "percy-finance": "light",
+    "snape-audit": "standard",
+    "dobby-customer": "light",
+    "neville-hr": "light"
+  },
+
+  "cost_optimization": {
+    "monthly_budget_tokens_usd": 50,
+    "alert_threshold_percent": 80,
+    "auto_downgrade_on_budget_exceed": true,
+    "cache_identical_prompts": true,
+    "batch_similar_requests": true
+  }
+}

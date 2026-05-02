@@ -1,0 +1,89 @@
+{
+  "framework": {
+    "name": "OpenClaw One Company OS",
+    "version": "0.1.0",
+    "description": "AI-powered one-person company operating system with multi-agent orchestration",
+    "license": "MIT"
+  },
+  "modes": {
+    "desktop": {
+      "description": "Electron desktop app for single-user local deployment",
+      "database": "sqlite",
+      "llm": "configurable (OpenAI / DeepSeek / Moonshot / local Ollama)",
+      "auth": "none (local only)"
+    },
+    "saas": {
+      "description": "Cloud-hosted multi-tenant SaaS version",
+      "database": "postgresql",
+      "llm": "managed API gateway with per-tenant keys",
+      "auth": "OAuth2 + JWT",
+      "billing": "stripe / lemon-squeezy"
+    }
+  },
+  "core_modules": {
+    "agent_framework": {
+      "path": "src/services/agentBrainService.ts",
+      "description": "Multi-agent orchestration with persona loading, memory, and task decomposition"
+    },
+    "workflow_engine": {
+      "path": "src/services/workflowEngine.ts",
+      "description": "DAG-based workflow engine with parallel execution, retry, and conditional branching"
+    },
+    "memory_system": {
+      "path": "src/services/memoryService.ts",
+      "description": "Agent memory with keyword-based semantic search and importance decay"
+    },
+    "llm_service": {
+      "path": "src/services/llmService.ts",
+      "description": "Multi-provider LLM gateway with fallback chain, cost tracking, and streaming"
+    },
+    "skill_runtime": {
+      "path": "openclaw_agents/_shared/output.py",
+      "description": "Standardized Python skill output framework"
+    },
+    "scheduler": {
+      "path": "desktop/electron/schedulerService.ts",
+      "description": "Cron-based task scheduler with workflow triggers and anomaly detection"
+    },
+    "token_economy": {
+      "path": "prisma/schema.prisma",
+      "description": "Internal token budgeting, salary, audit, and treasury system"
+    }
+  },
+  "extractable_packages": [
+    {
+      "name": "@openclaw/agent-core",
+      "modules": ["agent_framework", "memory_system"],
+      "description": "Core agent persona and memory management"
+    },
+    {
+      "name": "@openclaw/workflow-engine",
+      "modules": ["workflow_engine"],
+      "description": "Standalone DAG workflow engine"
+    },
+    {
+      "name": "@openclaw/llm-gateway",
+      "modules": ["llm_service"],
+      "description": "Multi-provider LLM routing with cost tracking"
+    },
+    {
+      "name": "@openclaw/skill-sdk",
+      "modules": ["skill_runtime"],
+      "description": "Python SDK for building agent skills"
+    }
+  ],
+  "saas_roadmap": {
+    "phase1": {
+      "features": ["Multi-tenant auth", "PostgreSQL migration", "API rate limiting"],
+      "target": "2026-Q3"
+    },
+    "phase2": {
+      "features": ["Stripe billing", "Team workspaces", "Custom agent marketplace"],
+      "target": "2026-Q4"
+    },
+    "phase3": {
+      "features": ["Enterprise SSO", "Audit logs", "SLA monitoring"],
+      "target": "2027-Q1"
+    }
+  }
+}

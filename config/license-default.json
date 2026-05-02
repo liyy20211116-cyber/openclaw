@@ -1,0 +1,22 @@
+{
+  "licenseId": "license_trial_default",
+  "plan": "pro",
+  "status": "trial",
+  "maxAgents": 12,
+  "maxOpportunities": 200,
+  "maxSalesLeads": 100,
+  "maxWorkflowRuns": 80,
+  "maxRevenueRecords": 120,
+  "expiresAt": "2026-12-31",
+  "features": [
+    "opportunity_engine",
+    "offer_catalog",
+    "sales_pipeline",
+    "workflow_delivery",
+    "revenue_confirmation",
+    "daily_company_run",
+    "ceo_action_boundary",
+    "demo_mode"
+  ],
+  "createdAt": "2026-05-02"
+}

@@ -1,0 +1,105 @@
+{
+  "version": "1.0.0",
+  "name": "one_company_operating_policy",
+  "updated_at": "2026-04-29",
+  "default_autonomy_level": "A1+A2",
+  "guardrails": {
+    "allow_internal_write": true,
+    "allow_platform_read": true,
+    "allow_draft_upload": true,
+    "allow_auto_publish": false,
+    "allow_auto_private_message": false,
+    "allow_auto_quote": false,
+    "allow_auto_revenue_booking": false,
+    "requires_ceo_confirmation": [
+      "publish",
+      "send_comment_reply",
+      "send_private_message",
+      "quote_price",
+      "confirm_payment",
+      "issue_refund",
+      "handle_complaint"
+    ]
+  },
+  "cadence": [
+    {
+      "id": "post_t30m_status_check",
+      "trigger": "after_publish:30m",
+      "owner": "hermione-tech",
+      "reviewer": "jarvis-coo",
+      "output": "审核状态和链接记录"
+    },
+    {
+      "id": "post_t2h_initial_metrics",
+      "trigger": "after_publish:2h",
+      "owner": "luna-growth",
+      "reviewer": "jarvis-coo",
+      "output": "初始曝光和互动记录"
+    },
+    {
+      "id": "post_t8h_engagement_scan",
+      "trigger": "after_publish:8h",
+      "owner": "fred-sales",
+      "reviewer": "snape-audit",
+      "output": "评论私信线索分级"
+    },
+    {
+      "id": "post_t24h_review",
+      "trigger": "after_publish:24h",
+      "owner": "jarvis-coo",
+      "reviewer": "ceo",
+      "output": "首轮复盘和次日任务"
+    },
+    {
+      "id": "daily_standup",
+      "trigger": "cron:0 9 * * *",
+      "owner": "jarvis-coo",
+      "reviewer": "ceo",
+      "output": "日站会"
+    },
+    {
+      "id": "weekly_review",
+      "trigger": "cron:0 10 * * 0",
+      "owner": "jarvis-coo",
+      "reviewer": "ceo",
+      "output": "周复盘"
+    }
+  ],
+  "lead_levels": {
+    "L0": {
+      "signal": "点赞、收藏、浏览",
+      "action": "记录内容兴趣，不触达",
+      "owner": "luna-growth"
+    },
+    "L1": {
+      "signal": "评论闭环、想看、清单",
+      "action": "生成公开回复建议，等待 CEO 审核",
+      "owner": "dobby-customer"
+    },
+    "L2": {
+      "signal": "询问怎么做、是否适合自己",
+      "action": "生成诊断问题清单，私信发送需确认",
+      "owner": "fred-sales"
+    },
+    "L3": {
+      "signal": "询问价格、交付、购买",
+      "action": "建立销售线索，报价必须 CEO 确认",
+      "owner": "fred-sales"
+    },
+    "L4": {
+      "signal": "付款、退款、投诉",
+      "action": "财务和审计介入，人工处理",
+      "owner": "percy-finance"
+    }
+  },
+  "required_daily_artifacts": [
+    "content_or_draft",
+    "monitoring_row",
+    "lead_classification_or_zero_report",
+    "reply_suggestions_if_needed",
+    "risk_audit",
+    "product_hypothesis",
+    "agent_performance_record",
+    "jarvis_standup"
+  ]
+}

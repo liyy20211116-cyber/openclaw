@@ -1,0 +1,31 @@
+{
+  "$schema": "../../schemas/token-economy.schema.json",
+  "month_cycle": "YYYY-MM",
+  "currency": "RMB",
+  "total_monthly_budget": 3000,
+
+  "agents": [
+    { "name": "jarvis-coo",         "display": "贾维斯",   "monthly_budget": 500, "kpi_weights": {"ceo_satisfaction": 0.6, "task_success_rate": 0.4} },
+    { "name": "hermione-tech",      "display": "赫敏",     "monthly_budget": 400, "kpi_weights": {"code_coverage": 0.4, "bug_fix_rate": 0.3, "delivery": 0.3} },
+    { "name": "mcgonagall-product", "display": "麦格",     "monthly_budget": 300, "kpi_weights": {"research_depth": 0.5, "roadmap_accuracy": 0.5} },
+    { "name": "luna-growth",        "display": "卢娜",     "monthly_budget": 600, "kpi_weights": {"followers_gain": 0.4, "content_published": 0.3, "view_rate": 0.3} },
+    { "name": "fred-sales",         "display": "弗雷德",   "monthly_budget": 350, "kpi_weights": {"leads": 0.4, "conversion": 0.4, "pipeline_value": 0.2} },
+    { "name": "percy-finance",      "display": "珀西",     "monthly_budget": 200, "kpi_weights": {"accuracy": 0.6, "on_time_close": 0.4} },
+    { "name": "snape-audit",        "display": "斯内普",   "monthly_budget": 250, "kpi_weights": {"issues_found": 0.5, "false_positive": -0.3, "audit_coverage": 0.8} },
+    { "name": "dobby-customer",     "display": "多比",     "monthly_budget": 400, "kpi_weights": {"response_time": 0.4, "csat": 0.6} }
+  ],
+
+  "audit_rules": {
+    "overrun_warn_pct": 90,
+    "overrun_fail_pct": 120,
+    "zero_output_limit": 3,
+    "recurring_failure_limit": 2
+  },
+
+  "monthly_poster": {
+    "auto_generate": true,
+    "day_of_month": 1,
+    "hour": 10,
+    "push_to": ["feishu_default_group", "wechat_work_group"]
+  }
+}

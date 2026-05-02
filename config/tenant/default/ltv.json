@@ -1,0 +1,36 @@
+{
+  "_note": "客户 LTV 模型参数。Fred-sales 用这份做客户分层。调整任意字段不用改代码。",
+  "plan_price": {
+    "starter":    999,
+    "pro":       2999,
+    "enterprise": 9999
+  },
+  "plan_is_yearly": {
+    "starter":    false,
+    "pro":        true,
+    "enterprise": false
+  },
+  "renew_rate": {
+    "starter":    0.10,
+    "pro":        0.65,
+    "enterprise": 0.40
+  },
+  "avg_renew_years": {
+    "starter":    1.0,
+    "pro":        2.5,
+    "enterprise": 1.5
+  },
+  "cross_sell_expect": {
+    "_note": "Pack 附加包、增值服务、年度陪跑等预期交叉销售值（¥）",
+    "starter":    120,
+    "pro":        800,
+    "enterprise": 3000
+  },
+  "referral_coef": 0.1,
+  "team_multiplier": 1.25,
+  "nps_impact": {
+    "low":    0.85,
+    "mid":    1.00,
+    "high":   1.35
+  }
+}

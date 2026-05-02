@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JarvisCommerce",
+  "type": "object",
+  "required": ["enabled", "skus"],
+  "properties": {
+    "enabled": { "type": "boolean" },
+    "personal_qr": {
+      "type": "object",
+      "properties": {
+        "alipay_qr_path": { "type": "string" },
+        "wechat_qr_path": { "type": "string" },
+        "receiver_name":  { "type": "string" }
+      }
+    },
+    "bank_account": {
+      "type": "object",
+      "properties": {
+        "company_name":   { "type": "string" },
+        "account_number": { "type": "string" },
+        "bank_name":      { "type": "string" },
+        "bank_branch":    { "type": "string" },
+        "tax_id":         { "type": "string" }
+      }
+    },
+    "invoice": {
+      "type": "object",
+      "properties": {
+        "provider":          { "type": "string" },
+        "provider_api_key":  { "type": "string" },
+        "default_tax_rate":  { "type": "number" },
+        "invoice_template":  { "type": "string" }
+      }
+    },
+    "skus": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "price", "type", "features_plan"],
+        "properties": {
+          "id":    { "type": "string" },
+          "name":  { "type": "string" },
+          "price": { "type": "number", "minimum": 0 },
+          "type":  { "enum": ["one_time", "subscription_monthly", "subscription_yearly"] },
+          "features_plan": { "enum": ["starter", "pro", "enterprise"] },
+          "description":   { "type": "string" },
+          "min_deposit":   { "type": "number" }
+        }
+      }
+    },
+    "payment_flow": {
+      "type": "object",
+      "properties": {
+        "thank_you_page": { "type": "string" },
+        "license_delivery_email_template": { "type": "string" },
+        "refund_policy_days": { "type": "integer" }
+      }
+    }
+  }
+}

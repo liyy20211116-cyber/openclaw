@@ -1,0 +1,56 @@
+{
+  "templates": [
+    {
+      "id": "default_one_company_team",
+      "name": "默认一人公司团队",
+      "description": "覆盖机会、销售、技术、交付、财务、风控和执行的默认团队。",
+      "agents": [
+        { "agentId": "jarvis", "name": "Jarvis", "role": "经营总控", "responsibility": "汇总经营状态、生成每日站会和 CEO 决策建议", "defaultSkills": ["daily_report", "decision_summary", "company_ops"] },
+        { "agentId": "luna", "name": "Luna", "role": "机会与内容", "responsibility": "发现内容线索、外部需求和公开机会", "defaultSkills": ["opportunity_scan", "content_draft", "trend_research"] },
+        { "agentId": "fred", "name": "Fred", "role": "销售增长", "responsibility": "评估商业价值、推进销售管道和下一步动作", "defaultSkills": ["lead_score", "sales_pipeline", "offer_match"] },
+        { "agentId": "hermione", "name": "Hermione", "role": "技术实现", "responsibility": "判断自动化实现路径和 MVP 技术方案", "defaultSkills": ["technical_design", "automation_mvp", "system_analysis"] },
+        { "agentId": "mcgonagall", "name": "McGonagall", "role": "产品与诊断", "responsibility": "分析客户痛点、匹配产品和设计诊断框架", "defaultSkills": ["painpoint_analysis", "product_strategy", "diagnosis"] },
+        { "agentId": "percy", "name": "Percy", "role": "财务与 ROI", "responsibility": "估算预算、成本、利润和收入确认口径", "defaultSkills": ["roi_estimation", "cost_control", "revenue_confirmation"] },
+        { "agentId": "snape", "name": "Snape", "role": "风控与审批", "responsibility": "审查对外承诺、财务动作和交付风险", "defaultSkills": ["risk_audit", "ceo_boundary", "approval_review"] },
+        { "agentId": "dobby", "name": "Dobby", "role": "执行助理", "responsibility": "整理任务、跟进提醒和运营产物", "defaultSkills": ["task_ops", "follow_up", "artifact_tracking"] }
+      ]
+    },
+    {
+      "id": "content_growth_team",
+      "name": "内容获客团队",
+      "description": "聚焦内容生产、机会发现、销售转化和发布风控。",
+      "agents": [
+        { "agentId": "luna", "name": "Luna", "role": "内容与趋势", "responsibility": "生成内容选题、草稿和机会观察", "defaultSkills": ["content_draft", "trend_research", "opportunity_scan"] },
+        { "agentId": "fred", "name": "Fred", "role": "增长转化", "responsibility": "把互动和线索转入销售管道", "defaultSkills": ["lead_score", "sales_pipeline", "offer_match"] },
+        { "agentId": "jarvis", "name": "Jarvis", "role": "运营总控", "responsibility": "汇总内容、线索和 CEO 审批事项", "defaultSkills": ["daily_report", "decision_summary"] },
+        { "agentId": "snape", "name": "Snape", "role": "内容风控", "responsibility": "审查发布、私信、报价和客户承诺边界", "defaultSkills": ["risk_audit", "ceo_boundary"] }
+      ]
+    },
+    {
+      "id": "sales_delivery_team",
+      "name": "销售交付团队",
+      "description": "聚焦线索诊断、方案生成、交付创建和收入确认。",
+      "agents": [
+        { "agentId": "fred", "name": "Fred", "role": "销售推进", "responsibility": "推进报价、待收款和成交前动作", "defaultSkills": ["sales_pipeline", "quote_draft", "follow_up"] },
+        { "agentId": "mcgonagall", "name": "McGonagall", "role": "客户诊断", "responsibility": "梳理痛点、交付范围和产品匹配", "defaultSkills": ["diagnosis", "product_strategy", "painpoint_analysis"] },
+        { "agentId": "hermione", "name": "Hermione", "role": "技术交付", "responsibility": "设计可交付的技术路径和 MVP", "defaultSkills": ["technical_design", "automation_mvp"] },
+        { "agentId": "percy", "name": "Percy", "role": "财务 ROI", "responsibility": "测算成本、利润和收入确认状态", "defaultSkills": ["roi_estimation", "revenue_confirmation"] },
+        { "agentId": "jarvis", "name": "Jarvis", "role": "交付总控", "responsibility": "创建工作流、汇总进度和风险", "defaultSkills": ["workflow_summary", "daily_report"] },
+        { "agentId": "snape", "name": "Snape", "role": "审批风控", "responsibility": "阻断未经 CEO 审批的报价、收款和承诺", "defaultSkills": ["ceo_boundary", "risk_audit"] }
+      ]
+    },
+    {
+      "id": "enterprise_automation_advisor_team",
+      "name": "企业自动化顾问团队",
+      "description": "聚焦企业流程诊断、技术可行性、ROI 和风控。",
+      "agents": [
+        { "agentId": "mcgonagall", "name": "McGonagall", "role": "流程诊断", "responsibility": "识别企业流程痛点和自动化机会", "defaultSkills": ["business_diagnosis", "painpoint_analysis"] },
+        { "agentId": "hermione", "name": "Hermione", "role": "技术架构", "responsibility": "设计 AI 自动化实现路径和系统边界", "defaultSkills": ["technical_design", "automation_mvp"] },
+        { "agentId": "percy", "name": "Percy", "role": "ROI 测算", "responsibility": "测算收益、成本和交付利润", "defaultSkills": ["roi_estimation", "cost_control"] },
+        { "agentId": "fred", "name": "Fred", "role": "商业价值", "responsibility": "判断预算、成交可能性和推进动作", "defaultSkills": ["lead_score", "sales_pipeline"] },
+        { "agentId": "jarvis", "name": "Jarvis", "role": "项目总控", "responsibility": "汇总诊断、推进工作流和 CEO 决策", "defaultSkills": ["decision_summary", "workflow_summary"] },
+        { "agentId": "snape", "name": "Snape", "role": "合规风控", "responsibility": "审查企业承诺、合同、报价和收入边界", "defaultSkills": ["risk_audit", "ceo_boundary"] }
+      ]
+    }
+  ]
+}

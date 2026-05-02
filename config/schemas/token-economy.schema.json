@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JarvisTokenEconomy",
+  "type": "object",
+  "required": ["total_monthly_budget", "agents"],
+  "properties": {
+    "month_cycle": { "type": "string" },
+    "currency":    { "type": "string" },
+    "total_monthly_budget": { "type": "number", "minimum": 0 },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "monthly_budget"],
+        "properties": {
+          "name":           { "type": "string" },
+          "display":        { "type": "string" },
+          "monthly_budget": { "type": "number" },
+          "kpi_weights":    { "type": "object" }
+        }
+      }
+    },
+    "audit_rules": {
+      "type": "object",
+      "properties": {
+        "overrun_warn_pct":       { "type": "number" },
+        "overrun_fail_pct":       { "type": "number" },
+        "zero_output_limit":      { "type": "integer" },
+        "recurring_failure_limit":{ "type": "integer" }
+      }
+    },
+    "monthly_poster": {
+      "type": "object",
+      "properties": {
+        "auto_generate": { "type": "boolean" },
+        "day_of_month":  { "type": "integer" },
+        "hour":          { "type": "integer" },
+        "push_to":       { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

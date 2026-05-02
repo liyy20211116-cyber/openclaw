@@ -1,0 +1,62 @@
+{
+  "updated_at": "2026-04-30",
+  "owner": "neville-hr",
+  "sources": [
+    {
+      "platform": "douyin",
+      "title": "Douyin short-video operations references, April 2026",
+      "url": "https://www.01mvp.com/docs/growth/china-douyin",
+      "note": "Use as current external reference for short-video format, metrics, and viral testing ideas."
+    },
+    {
+      "platform": "bilibili",
+      "title": "Bilibili tech-area content best practices, February 2026",
+      "url": "https://www.huasheng.ai/insights/bilibili-video-best-practices/",
+      "note": "Use as external reference for Bilibili long-form technical content structure."
+    },
+    {
+      "platform": "wechat_official",
+      "title": "WeChat Official Account headline/open-rate operations reference",
+      "url": "https://www.yunyingpai.com/media/660503.html",
+      "note": "Use as external reference for article title and open-rate oriented writing."
+    }
+  ],
+  "patterns": [
+    {
+      "platform": "douyin",
+      "platform_name": "抖音",
+      "observed_tactic": "Use a 3-second contradiction and a visible dashboard/process proof.",
+      "why_it_may_work": "Short-video recommendation rewards early retention, completion, interaction, and clear user signals.",
+      "when_to_use": "When the company has a visible operating change, such as HR learning viral patterns or a monitor recovering.",
+      "when_not_to_use": "When the point needs long background, private data, or unverified income claims.",
+      "compliance_risk": "Do not exaggerate automation, do not imply guaranteed results, do not expose account/customer data.",
+      "reusable_template": "我让 {agent} 学 {platform} 爆款，不是为了抄，而是把它变成公司的 SOP：问题 -> 学习 -> 规则 -> 下一条内容。",
+      "next_experiment": "Record a 20-30s screen video: Neville extracts three rules from platform playbooks and assigns Luna/Fred/Snape follow-up work.",
+      "owner_agent": "luna-growth"
+    },
+    {
+      "platform": "bilibili",
+      "platform_name": "B站",
+      "observed_tactic": "Turn the learning process into a build log with method, evidence, limits, and next version.",
+      "why_it_may_work": "Bilibili is stronger for trust-building, long explanations, and technical/product depth.",
+      "when_to_use": "When explaining how the one-company OS makes agents learn and then produce assets.",
+      "when_not_to_use": "When there is no real artifact, no demo, or only a marketing claim.",
+      "compliance_risk": "Avoid naming competitors as targets without evidence; avoid showing secrets, cookies, dashboards with private identifiers.",
+      "reusable_template": "我怎么让一人公司提前学习一个新平台：资料源 -> 规则拆解 -> Agent 分工 -> 内容草稿 -> 数据复盘。",
+      "next_experiment": "Produce a 5-8 minute build log about Neville learning Douyin/Bilibili/公众号 before publishing there.",
+      "owner_agent": "hermione-tech"
+    },
+    {
+      "platform": "wechat_official",
+      "platform_name": "公众号",
+      "observed_tactic": "Use an operating memo title that promises a decision, not a diary summary.",
+      "why_it_may_work": "Official-account readers need durable trust content, buyer-ready explanation, and clear trade-offs.",
+      "when_to_use": "When the lesson can become a long-form decision memo or service explainer.",
+      "when_not_to_use": "When the idea is only a short update or lacks a clear takeaway.",
+      "compliance_risk": "No guaranteed revenue wording; separate observations, assumptions, and results.",
+      "reusable_template": "我提前让 HR 学三个平台爆款：不是追热点，而是给一人公司建立内容训练系统。",
+      "next_experiment": "Write one article with sections: why learn first, what HR learned, how agents use it, next publishing gate.",
+      "owner_agent": "mcgonagall-product"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-05-02",
+  "runs": [
+    {
+      "id": "daily_run_example",
+      "date": "2026-05-01",
+      "status": "incomplete",
+      "artifacts": [
+        {
+          "key": "content_or_draft",
+          "label": "内容或草稿",
+          "ownerAgentId": "luna",
+          "status": "completed",
+          "description": "今日至少产出一条内容草稿或发布候选。",
+          "sourceModule": "content",
+          "completedAt": "2026-05-01",
+          "evidence": "本地示例：今日内容草稿已整理"
+        },
+        {
+          "key": "monitoring_row",
+          "label": "监控记录",
+          "ownerAgentId": "hermione",
+          "status": "draft",
+          "description": "记录内容、机会或运行状态监控。",
+          "sourceModule": "runtime",
+          "completedAt": "",
+          "evidence": "等待运行中心快照"
+        },
+        {
+          "key": "lead_classification_or_zero_report",
+          "label": "线索分级或零报告",
+          "ownerAgentId": "fred",
+          "status": "missing",
+          "description": "今日必须给出线索分级，若无线索则给出零报告。",
+          "sourceModule": "sales",
+          "completedAt": "",
+          "evidence": ""
+        },
+        {
+          "key": "risk_audit",
+          "label": "风险审计",
+          "ownerAgentId": "snape",
+          "status": "blocked",
+          "description": "检查报价、收款、交付承诺和发布风险。",
+          "sourceModule": "audit",
+          "completedAt": "",
+          "evidence": "存在 CEO 审批项，等待处理"
+        },
+        {
+          "key": "jarvis_standup",
+          "label": "Jarvis 站会日报",
+          "ownerAgentId": "jarvis",
+          "status": "completed",
+          "description": "汇总今日公司运行状态和 CEO 优先事项。",
+          "sourceModule": "runtime",
+          "completedAt": "2026-05-01",
+          "evidence": "示例日报已生成"
+        }
+      ],
+      "agentReports": [
+        {
+          "agentId": "jarvis",
+          "agentName": "Jarvis",
+          "role": "COO",
+          "todayFocus": "汇总每日运营闭环",
+          "completedItems": ["生成今日站会摘要"],
+          "blockedItems": ["等待 CEO 处理审批项"],
+          "suggestedNextActions": ["优先处理报价和收款审批"],
+          "riskNotes": ["不得自动发布、报价、确认收款或退款"]
+        },
+        {
+          "agentId": "fred",
+          "agentName": "Fred",
+          "role": "Sales",
+          "todayFocus": "推进销售管道",
+          "completedItems": ["整理待收款线索"],
+          "blockedItems": ["报价审批未完成"],
+          "suggestedNextActions": ["准备诊断问题和跟进任务"],
+          "riskNotes": ["正式报价前必须 CEO 审批"]
+        }
+      ],
+      "opportunitySummary": {
+        "totalOpportunities": 0,
+        "todayNewOpportunities": 0,
+        "highFitOpportunities": 0,
+        "needsCeoDecision": 0
+      },
+      "salesSummary": {
+        "totalLeads": 0,
+        "quoteReviewCount": 0,
+        "paymentPendingCount": 0,
+        "wonCount": 0,
+        "lostCount": 0,
+        "pipelineValue": 0
+      },
+      "workflowSummary": {
+        "totalRuns": 0,
+        "runningRuns": 0,
+        "waitingApprovalRuns": 0,
+        "completedRuns": 0,
+        "failedRuns": 0
+      },
+      "revenueSummary": {
+        "expectedRevenue": 0,
+        "pendingPayment": 0,
+        "confirmedCash": 0,
+        "recognizedRevenue": 0,
+        "refundedRevenue": 0,
+        "needsCeoApproval": 0
+      },
+      "riskSummary": {
+        "totalRisks": 1,
+        "blockingRisks": 1,
+        "ceoApprovalRequiredCount": 1,
+        "riskNotes": ["示例：存在未处理 CEO 审批项"]
+      },
+      "jarvisStandup": "今日运营闭环尚未完成。需要优先处理 CEO 审批和缺失产物。",
+      "completionRate": 40,
+      "createdAt": "2026-05-01",
+      "updatedAt": "2026-05-01"
+    }
+  ]
+}
