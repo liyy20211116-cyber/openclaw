@@ -1,0 +1,41 @@
+{
+  "$schema": "skill-manifest-v1",
+  "spec_version": "1.0.0",
+  "description": "OpenClaw Skill Manifest Specification — every skill folder MUST contain a manifest following this schema",
+  "fields": {
+    "id": { "type": "string", "required": true, "description": "Unique skill ID (snake_case)" },
+    "name": { "type": "string", "required": true, "description": "Human-readable skill name" },
+    "version": { "type": "string", "required": true, "description": "SemVer version" },
+    "description": { "type": "string", "required": true, "description": "What does this skill do (1-2 sentences)" },
+    "author": { "type": "string", "required": true, "description": "Author name or GitHub handle" },
+    "agent_type": { "type": "string[]", "required": true, "description": "Compatible agent types: tech, growth, sales, finance, audit, product, customer, hr, coo" },
+    "entry_point": { "type": "string", "required": true, "description": "Python script filename (relative to skill folder)" },
+    "timeout_seconds": { "type": "number", "default": 120, "description": "Max execution time" },
+    "dependencies": { "type": "string[]", "default": [], "description": "pip package requirements" },
+    "inputs": { "type": "object", "description": "Expected input parameters schema" },
+    "outputs": { "type": "object", "description": "StandardSkillOutput data fields schema" },
+    "tags": { "type": "string[]", "default": [], "description": "Searchable tags for marketplace" },
+    "license": { "type": "string", "default": "MIT" }
+  },
+  "example": {
+    "id": "xhs_research",
+    "name": "小红书话题研究",
+    "version": "1.0.0",
+    "description": "通过关键词搜索小红书热门笔记，分析话题趋势和高互动内容",
+    "author": "openclaw-team",
+    "agent_type": ["growth"],
+    "entry_point": "skill_xhs_research.py",
+    "timeout_seconds": 180,
+    "dependencies": [],
+    "inputs": {
+      "keyword": { "type": "string", "required": true, "description": "搜索关键词" },
+      "limit": { "type": "number", "default": 20, "description": "返回数量上限" }
+    },
+    "outputs": {
+      "notes": { "type": "array", "description": "搜索到的笔记列表" },
+      "trending_topics": { "type": "array", "description": "热门话题关键词" }
+    },
+    "tags": ["小红书", "社交媒体", "内容研究", "话题分析"],
+    "license": "MIT"
+  }
+}

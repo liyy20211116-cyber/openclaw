@@ -1,0 +1,77 @@
+{
+  "pack": "pack-content-factory",
+  "version": "0.1",
+  "description": "自媒体内容工厂 · 5 虾阵 DAG 工作流",
+  "schedule": {
+    "daily_topic_scan": "0 9 * * *",
+    "daily_publish":    "0 19 * * *",
+    "daily_stats":      "0 10 * * *"
+  },
+  "nodes": [
+    {
+      "id": "n1-hot",
+      "title": "热点聚合",
+      "skill": "opencli-bridge/hot_aggregator",
+      "inputs": [],
+      "outputs": ["output/daily_hot/hot_{{date}}.md"]
+    },
+    {
+      "id": "n2-competitor",
+      "title": "对标账号追踪",
+      "skill": "opencli-bridge/competitor_monitor",
+      "inputs": [],
+      "outputs": ["output/competitor/daily_report_{{date}}.md"]
+    },
+    {
+      "id": "n3-select",
+      "title": "选题虾 · 生成 Top10",
+      "agent": "selection-agent",
+      "inputs": ["n1-hot", "n2-competitor"],
+      "outputs": ["packs/pack-content-factory/shared/topic-pool.json"]
+    },
+    {
+      "id": "n4-write",
+      "title": "写作虾 · 4 平台适配",
+      "agent": "writing-agent",
+      "inputs": ["n3-select"],
+      "outputs": ["output/drafts/{{date}}/**"],
+      "parallel": true
+    },
+    {
+      "id": "n5-review",
+      "title": "审核虾 · 合规+口误",
+      "agent": "review-agent",
+      "inputs": ["n4-write"],
+      "outputs": ["output/drafts/{{date}}/**/review_*.json"],
+      "requireApproval": "reject"
+    },
+    {
+      "id": "n6-produce",
+      "title": "生产虾 · 成片",
+      "agent": "production-agent",
+      "inputs": ["n5-review"],
+      "outputs": ["output/video/{{date}}/**"]
+    },
+    {
+      "id": "n7-distribute",
+      "title": "分发虾 · 多平台发布",
+      "agent": "distribution-agent",
+      "inputs": ["n6-produce"],
+      "outputs": ["output/publish_log_{{date}}.json"]
+    },
+    {
+      "id": "n8-stats",
+      "title": "数据回收",
+      "skill": "scripts/distribute_stats",
+      "inputs": ["n7-distribute"],
+      "outputs": ["memory/learnings.md"],
+      "schedule": "next_day_10am"
+    }
+  ],
+  "kpi": {
+    "daily_production": 5,
+    "daily_publish": 5,
+    "weekly_followers_new": 500,
+    "first_week_best_view": 10000
+  }
+}
