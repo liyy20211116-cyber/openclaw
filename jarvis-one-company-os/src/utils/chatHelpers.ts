@@ -101,8 +101,17 @@ export function summarizeLlmError(error: unknown): string {
   if (text.includes('aborted') || text.includes('timeout')) {
     return `模型响应超时，建议稍后再试。${suffix}`
   }
+  if (text.includes('llm stream returned empty')) {
+    return `流式接口未收到任何正文（上游可能拒绝了模型名或返回了空 completion）。请在运行「npm run db:writeback-api」的终端里看报错，或到 CEO 对话页顶部模型选择器换一个提供商/模型。${suffix}`
+  }
+  if (text.includes('llm stream error:')) {
+    return `流式上游报错：${raw.slice(0, 200)}。请核对 jarvis-one-company-os/.env 中的 OPENAI_API_KEY / OPENAI_BASE_URL，以及中转是否支持当前模型。${suffix}`
+  }
+  if (text.includes('stream api error')) {
+    return `流式 HTTP 状态异常（${raw}）。若同时连不上 /health，多半是本机写回 API 未启动：请在项目根执行 npm run dev（会拉起 18782）或另开终端 npm run db:writeback-api。${suffix}`
+  }
   if (text.includes('aggregateerror') || text.includes('failed to fetch') || text.includes('networkerror') || text.includes('econnrefused') || text.includes('connect')) {
-    return `暂时连不上模型服务，请检查本地后端、代理或网络连接。${suffix}`
+    return `暂时连不上模型服务。开发模式下请确认写回 API 已监听 127.0.0.1:18782（npm run dev 或 npm run db:writeback-api），不要只跑 npm run dev:ui。${suffix}`
   }
   return `模型调用失败${suffix}，请稍后重试或切换其他模型。`
 }

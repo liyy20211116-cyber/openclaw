@@ -90,6 +90,8 @@ export function CeoChatPage() {
   const [activeActions, setActiveActions] = useState<ActiveAction[]>([])
   const [, setProposals] = useState<CompanyProposal[]>([])
   const [quotedMessage, setQuotedMessage] = useState<QuotedMessage | null>(null)
+  /** 开发模式下 Vite 会把 /health 代理到 18782；用于区分「后端没起」与「模型上游报错」 */
+  const [writebackBackendDown, setWritebackBackendDown] = useState<boolean | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const defaultModelLabel = getDefaultModelLabel()
 
@@ -108,6 +110,28 @@ export function CeoChatPage() {
     getLlmInfo().then(setLlmModel)
     const interval = setInterval(() => { checkOpenClawStatus().then(setOpenclawOnline) }, 30000)
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function pingWriteback() {
+      try {
+        const ctrl = new AbortController()
+        const t = window.setTimeout(() => ctrl.abort(), 3000)
+        const res = await fetch('/health', { signal: ctrl.signal })
+        window.clearTimeout(t)
+        if (cancelled) return
+        setWritebackBackendDown(!res.ok)
+      } catch {
+        if (!cancelled) setWritebackBackendDown(true)
+      }
+    }
+    pingWriteback()
+    const id = window.setInterval(pingWriteback, 20_000)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+    }
   }, [])
 
   useEffect(() => {
@@ -813,7 +837,39 @@ ${resultsSummary}
   }
 
   return (
-    <section className="ceo-chat-layout">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'calc(100vh - 52px)',
+        overflow: 'hidden',
+      }}
+    >
+      {writebackBackendDown === true && (
+        <div
+          role="status"
+          style={{
+            flexShrink: 0,
+            margin: '0 12px 8px',
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: 'rgba(251, 191, 36, 0.12)',
+            border: '1px solid rgba(251, 191, 36, 0.45)',
+            color: '#fcd34d',
+            fontSize: 13,
+            lineHeight: 1.55,
+          }}
+        >
+          <strong>本地写回 API 未就绪</strong>
+          ：浏览器连不上 <code style={{ color: '#fde68a' }}>127.0.0.1:18782</code>
+          （CEO 对话依赖该端口转发 LLM）。请在 <code style={{ color: '#fde68a' }}>jarvis-one-company-os</code> 目录执行{' '}
+          <code style={{ color: '#fde68a' }}>npm run dev</code>
+          （会同时启动写回 API + 前端），或另开终端执行{' '}
+          <code style={{ color: '#fde68a' }}>npm run db:writeback-api</code>
+          后再刷新本页。仅运行 <code style={{ color: '#fde68a' }}>npm run dev:ui</code> 时不会出现该后端。
+        </div>
+      )}
+      <section className="ceo-chat-layout" style={{ flex: 1, minHeight: 0, height: 'auto' }}>
       {/* === 话题侧边栏 === */}
       <aside className={`topic-sidebar ${topicSidebarOpen ? '' : 'collapsed'}`}>
         <div className="topic-sidebar-header">
@@ -1170,6 +1226,7 @@ ${resultsSummary}
             onClearQuote={() => setQuotedMessage(null)}
           />
         </div>
-    </section>
+      </section>
+    </div>
   )
 }
