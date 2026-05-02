@@ -1004,6 +1004,26 @@ const server = createServer(async (request, response) => {
       return
     }
 
+    if (request.url === '/api/company/runtime-status' && request.method === 'POST') {
+      const candidates = [
+        path.resolve(dataRoot, 'output', 'coo_ops', 'runtime-status.json'),
+        path.resolve(projectRoot, '..', 'output', 'coo_ops', 'runtime-status.json'),
+      ]
+      const statusPath = candidates.find((candidate) => fs.existsSync(candidate))
+      if (!statusPath) {
+        sendJson(response, 404, { ok: false, error: 'runtime-status.json not found' } as unknown as JsonRecord)
+        return
+      }
+
+      try {
+        const snapshot = JSON.parse(fs.readFileSync(statusPath, 'utf-8')) as JsonRecord
+        sendJson(response, 200, { ok: true, snapshot, path: path.relative(dataRoot, statusPath) } as unknown as JsonRecord)
+      } catch (err) {
+        sendJson(response, 500, { ok: false, error: String(err) } as unknown as JsonRecord)
+      }
+      return
+    }
+
     if (request.url === '/api/company/app-config/update' && request.method === 'POST') {
       const configPath = path.resolve(dataRoot, 'config', 'app-config.json')
       try {
@@ -1161,8 +1181,8 @@ const server = createServer(async (request, response) => {
         const pendingPath = path.join(reqDir, 'memory', 'pending_reviews.json')
         const processedPath = path.join(reqDir, 'memory', 'processed_log.json')
         let pendingCount = 0, processedCount = 0
-        try { const d = JSON.parse(fs.readFileSync(pendingPath, 'utf-8')); pendingCount = Array.isArray(d) ? d.length : Object.keys(d).length } catch {}
-        try { const d = JSON.parse(fs.readFileSync(processedPath, 'utf-8')); processedCount = Array.isArray(d) ? d.length : 0 } catch {}
+        try { const d = JSON.parse(fs.readFileSync(pendingPath, 'utf-8')); pendingCount = Array.isArray(d) ? d.length : Object.keys(d).length } catch { /* status endpoint tolerates missing ONES memory files */ }
+        try { const d = JSON.parse(fs.readFileSync(processedPath, 'utf-8')); processedCount = Array.isArray(d) ? d.length : 0 } catch { /* status endpoint tolerates missing ONES memory files */ }
 
         let tokenStatus = '未知'
         try {
@@ -1171,7 +1191,7 @@ const server = createServer(async (request, response) => {
             const decoded = JSON.parse(Buffer.from(cache.ones_lt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString())
             tokenStatus = (decoded.exp ?? 0) * 1000 > Date.now() ? '有效' : '已过期'
           }
-        } catch {}
+        } catch { /* token cache is optional for local status checks */ }
 
         sendJson(response, 200, { ok: true, result: { summary: `待审批: ${pendingCount} | 已处理: ${processedCount} | Token: ${tokenStatus}`, pending_reviews: pendingCount, processed_log: processedCount, token_status: tokenStatus } } as unknown as JsonRecord)
         return
@@ -1198,7 +1218,7 @@ const server = createServer(async (request, response) => {
         c.on('close', (code) => {
           const output = (sout + '\n' + serr).trim()
           let parsed: unknown = null
-          try { const jl = output.split('\n').filter(l => l.trim().startsWith('{')); if (jl.length) parsed = JSON.parse(jl[jl.length - 1]) } catch {}
+          try { const jl = output.split('\n').filter(l => l.trim().startsWith('{')); if (jl.length) parsed = JSON.parse(jl[jl.length - 1]) } catch { /* Python skills may emit non-JSON logs */ }
           sendJson(response, 200, { ok: code === 0, result: { exitCode: code, output: output.slice(-2000), parsed, message: code === 0 ? '执行成功' : `失败 (${code})`, summary: (parsed as Record<string, string>)?.summary ?? (code === 0 ? '扫描完成' : '执行失败') } } as unknown as JsonRecord)
         })
         c.on('error', (err) => { sendJson(response, 200, { ok: false, result: { message: `启动失败: ${err.message}` } } as unknown as JsonRecord) })
@@ -1218,7 +1238,7 @@ const server = createServer(async (request, response) => {
           const skills = JSON.parse(fs.readFileSync(sp, 'utf-8')) as { id: string; script?: string; timeout?: number; type?: string }[]
           const match = skills.find(s => s.id === skillId)
           if (match) { foundAgent = agentName; foundScript = match.script ?? ''; foundTimeout = match.timeout ?? 60; foundType = match.type ?? 'script'; return true }
-        } catch {}
+        } catch { /* malformed skill manifests are ignored during discovery */ }
         return false
       }
 
@@ -1255,7 +1275,7 @@ const server = createServer(async (request, response) => {
       child.on('close', (code, signal) => {
         const output = (stdout + '\n' + stderr).trim()
         let parsed: Record<string, unknown> | null = null
-        try { const jl = output.split('\n').filter(l => l.trim().startsWith('{')); if (jl.length) parsed = JSON.parse(jl[jl.length - 1]) as Record<string, unknown> } catch {}
+        try { const jl = output.split('\n').filter(l => l.trim().startsWith('{')); if (jl.length) parsed = JSON.parse(jl[jl.length - 1]) as Record<string, unknown> } catch { /* Python skills may emit non-JSON logs */ }
         let summary: string
         if (code === null && signal) {
           summary = `执行超时被终止 (signal: ${signal}, timeout: ${foundTimeout}s)`
@@ -1479,7 +1499,7 @@ const server = createServer(async (request, response) => {
         })
 
         sendJson(response, 200, { ok: true, ...result } as unknown as JsonRecord)
-      } catch (e) {
+      } catch {
         sendJson(response, 200, { ok: false, title: body.url, summary: '无法获取页面内容' } as unknown as JsonRecord)
       }
       return

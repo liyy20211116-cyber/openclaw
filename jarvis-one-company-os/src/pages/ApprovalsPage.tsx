@@ -3,9 +3,12 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { statusLabelMap } from '../app/status'
 import { useSnapshot } from '../hooks/useSnapshot'
 import { refreshSnapshot } from '../lib/snapshotStore'
+import { approvalBridgeService } from '../services/approvalBridgeService'
 import { approvalService } from '../services/approvalService'
+import { ceoActionBoundaryService } from '../services/ceoActionBoundaryService'
 import { taskService } from '../services/taskService'
 import { writebackService } from '../services/writebackService'
+import type { UnifiedApproval } from '../types'
 
 type ApprovalsPageState = {
   successMessage?: string
@@ -31,6 +34,8 @@ export function ApprovalsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const approvals = approvalService.getAll()
+  const [bridgeVersion, setBridgeVersion] = useState(0)
+  const unifiedApprovals = useMemo(() => approvalBridgeService.listUnifiedApprovals(), [bridgeVersion])
   const tasks = taskService.getAll()
   const highlightedTaskId = searchParams.get('highlightTaskId') ?? ''
   const [processingId, setProcessingId] = useState('')
@@ -169,6 +174,33 @@ export function ApprovalsPage() {
     }
   }
 
+  function handleUnifiedDecision(approval: UnifiedApproval, status: 'approved' | 'rejected' | 'cancelled') {
+    if (approval.legacyApprovalId && status !== 'cancelled') {
+      void handleDecision(approval.legacyApprovalId, status)
+      return
+    }
+
+    setProcessingId(approval.id)
+    const updated = status === 'approved'
+      ? approvalBridgeService.approveUnifiedApproval(approval.id, 'ceo')
+      : status === 'rejected'
+        ? approvalBridgeService.rejectUnifiedApproval(approval.id, 'ceo', 'CEO 在审批中心驳回。')
+        : approvalBridgeService.cancelUnifiedApproval(approval.id)
+
+    setFeedback((current) => ({
+      ...current,
+      [approval.id]: updated
+        ? status === 'approved'
+          ? '审批已通过；当前版本不会自动执行真实外部动作。'
+          : status === 'rejected'
+            ? '审批已拒绝；相关动作不会执行。'
+            : '审批已取消；相关动作不会执行。'
+        : '审批更新失败',
+    }))
+    setBridgeVersion(current => current + 1)
+    setProcessingId('')
+  }
+
   function clearHighlight() {
     setSearchParams({}, { replace: true })
     setCreatedTaskTitle('')
@@ -181,7 +213,7 @@ export function ApprovalsPage() {
         <div>
           <p className="eyebrow">审批中心</p>
           <h2>待决策事项</h2>
-          <p className="muted">审批通过或驳回后，会立即写回 SQLite，并刷新当前页面数据。</p>
+          <p className="muted">旧任务审批仍走原 writeback；Action Boundary 审批只更新本地审批状态，不执行真实外部动作。</p>
         </div>
         <div className="metric-inline">待处理 {approvalService.getPendingCount()}</div>
       </div>
@@ -189,36 +221,45 @@ export function ApprovalsPage() {
       {pageMessage && <div className="feedback-banner success page-banner">{pageMessage}</div>}
 
       <div className="stack-list">
-        {approvals.map((item) => {
+        {unifiedApprovals.map((item) => {
           const isPending = item.status === 'pending'
           const isProcessing = processingId === item.id
-          const isHighlighted = item.id === highlightedApprovalId
+          const isHighlighted = item.id === highlightedApprovalId || item.legacyApprovalId === highlightedApprovalId
           const message = feedback[item.id]
+          const isBoundaryApproval = item.actionType !== 'legacy_approval'
 
           return (
             <div key={item.id} className={isHighlighted ? 'stack-item approval-card highlighted-card' : 'stack-item approval-card'}>
               <div className="approval-card-header">
                 <div>
-                  <strong>{item.targetTitle}</strong>
+                  <strong>{item.title}</strong>
                   <p>
-                    {item.requester} · {item.amount} Token · {item.createdAt}
+                    {item.requestedByAgentId} · {item.amount.toLocaleString()} {isBoundaryApproval ? 'CNY' : 'Token'} · {item.createdAt}
                   </p>
                   {isHighlighted && <span className="inline-note">这是刚刚由任务创建流带来的审批事项</span>}
-                  {item.resubmissionCount ? <p className="history-note">对应任务已重提 {item.resubmissionCount} 次</p> : null}
-                  {item.latestRejectionNote ? <p className="history-note">最近驳回原因：{item.latestRejectionNote}</p> : null}
+                  {isBoundaryApproval && (
+                    <div className="sales-card-metrics">
+                      <span className="metric-inline">{item.sourceModule}/{item.sourceId}</span>
+                      <span className="metric-inline">{item.actionType === 'legacy_approval' ? '旧审批' : ceoActionBoundaryService.getActionTypeLabel(item.actionType)}</span>
+                      <span className="metric-inline">{item.actionLevel === 'LEGACY' ? 'LEGACY' : ceoActionBoundaryService.getActionLevelLabel(item.actionLevel)}</span>
+                      <span className="metric-inline">{item.customerName || '无客户'}</span>
+                    </div>
+                  )}
+                  {item.rejectedReason ? <p className="history-note">最近驳回原因：{item.rejectedReason}</p> : null}
                 </div>
-                <span className={`status-pill ${item.status}`}>{statusLabelMap[item.status]}</span>
+                <span className={`status-pill ${item.status}`}>{statusLabelMap[item.status as keyof typeof statusLabelMap] ?? item.status}</span>
               </div>
 
-              <p>{item.reason}</p>
-              {item.latestDecisionNote && item.status !== 'pending' ? <p className="history-note">最近审批备注：{item.latestDecisionNote}</p> : null}
+              <p>{item.description}</p>
+              {item.riskHint && isBoundaryApproval ? <div className="feedback-banner error">{item.riskHint}</div> : null}
+              {item.decisionNote && item.status !== 'pending' ? <p className="history-note">最近审批备注：{item.decisionNote}</p> : null}
 
               <div className="approval-actions">
                 <button
                   type="button"
                   className="approve-button"
                   disabled={!isPending || isProcessing}
-                  onClick={() => handleDecision(item.id, 'approved')}
+                  onClick={() => handleUnifiedDecision(item, 'approved')}
                 >
                   {isProcessing ? '处理中...' : '批准'}
                 </button>
@@ -226,10 +267,20 @@ export function ApprovalsPage() {
                   type="button"
                   className="reject-button"
                   disabled={!isPending || isProcessing}
-                  onClick={() => handleDecision(item.id, 'rejected')}
+                  onClick={() => handleUnifiedDecision(item, 'rejected')}
                 >
                   {isProcessing ? '处理中...' : '驳回'}
                 </button>
+                {isBoundaryApproval && (
+                  <button
+                    type="button"
+                    className="link-button"
+                    disabled={!isPending || isProcessing}
+                    onClick={() => handleUnifiedDecision(item, 'cancelled')}
+                  >
+                    取消
+                  </button>
+                )}
                 {highlightedApprovalId && (
                   <button type="button" className="link-button" onClick={clearHighlight}>
                     清除高亮

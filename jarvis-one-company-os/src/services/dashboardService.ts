@@ -5,6 +5,26 @@ import { ledgerService } from './ledgerService'
 import { revenueService } from './revenueService'
 import { taskService } from './taskService'
 import { treasuryService } from './treasuryService'
+import { getCachedConfig } from './configService'
+import type { LlmUsageSummary } from '../types'
+
+export async function fetchLlmUsageSummary(): Promise<LlmUsageSummary> {
+  try {
+    const res = await fetch('/api/llm/usage-stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    })
+    if (!res.ok) throw new Error('fetch failed')
+    return (await res.json()) as LlmUsageSummary
+  } catch {
+    return {
+      todayCost: 0, todayTokens: 0, todayCalls: 0,
+      weeklyCost: 0, weeklyTokens: 0, weeklyCalls: 0,
+      costByAgent: [], recentLogs: [],
+    }
+  }
+}
 
 export const dashboardService = {
   getOverview() {
@@ -29,7 +49,7 @@ export const dashboardService = {
       roiPercent: profitSummary.roiPercent,
       activeBusinessLines: activeBusinessLines.length,
       totalBusinessLines: businessLineService.getAll().length,
-      reinvestableAmount: Math.max(0, profitSummary.netProfit * 0.6),
+      reinvestableAmount: Math.max(0, profitSummary.netProfit * ((getCachedConfig()?.token_economy?.profit_distribution?.token_infrastructure_percent ?? 60) / 100)),
     }
   },
 }

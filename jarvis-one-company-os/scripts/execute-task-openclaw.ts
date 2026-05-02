@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import { parseCliInput } from './lib/cliInput'
 import { exportSnapshot } from './lib/exportSnapshot'
 import { createPrismaClient } from './lib/prismaClient'
@@ -35,6 +36,17 @@ type OpenClawConfig = {
 function loadOpenClawConfig(): OpenClawConfig {
   const configPath = path.resolve(__dirname, '..', 'config', 'openclaw-agents.json')
   return JSON.parse(fs.readFileSync(configPath, 'utf-8')) as OpenClawConfig
+}
+
+function findOpenClawCli(): string {
+  const candidates = [
+    path.join(process.env.APPDATA ?? '', 'npm', 'openclaw.cmd'),
+    path.join(process.env.APPDATA ?? '', 'npm', 'openclaw'),
+  ]
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c
+  }
+  return 'openclaw'
 }
 
 function buildTaskPrompt(task: {
@@ -74,49 +86,52 @@ function buildTaskPrompt(task: {
   ].join('\n')
 }
 
-async function spawnOpenClawSession(
-  apiBase: string,
-  agentConfig: AgentConfig,
-  taskPrompt: string,
+function runOpenClawAgent(
+  cliPath: string,
+  agentId: string,
+  message: string,
   timeoutSeconds: number,
-): Promise<{ sessionId: string; status: string; result?: string }> {
-  const spawnPayload = {
-    agentId: agentConfig.openclawId,
-    label: agentConfig.label,
-    task: taskPrompt,
-    runTimeoutSeconds: timeoutSeconds,
-    cleanup: 'delete',
-  }
+): { status: string; result?: string; sessionId?: string } {
+  const sessionId = `jarvis-task-${randomUUID().slice(0, 8)}`
+  try {
+    const stdout = execFileSync(cliPath, [
+      'agent',
+      '--agent', agentId,
+      '--session-id', sessionId,
+      '--message', message,
+      '--timeout', String(timeoutSeconds),
+      '--json',
+    ], {
+      timeout: (timeoutSeconds + 30) * 1000,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      windowsHide: true,
+    })
 
-  const spawnResponse = await fetch(`${apiBase}/api/sessions/spawn`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(spawnPayload),
-  })
-
-  if (!spawnResponse.ok) {
-    const text = await spawnResponse.text()
-    throw new Error(`OpenClaw spawn failed (${spawnResponse.status}): ${text}`)
-  }
-
-  const spawnData = await spawnResponse.json() as { sessionId: string; status: string }
-
-  const pollInterval = 5000
-  const maxPolls = Math.ceil((timeoutSeconds * 1000) / pollInterval)
-
-  for (let i = 0; i < maxPolls; i++) {
-    await new Promise((resolve) => setTimeout(resolve, pollInterval))
-
-    const statusResponse = await fetch(`${apiBase}/api/sessions/${spawnData.sessionId}/status`)
-    if (!statusResponse.ok) continue
-
-    const statusData = await statusResponse.json() as { status: string; result?: string }
-    if (statusData.status === 'completed' || statusData.status === 'error') {
-      return { sessionId: spawnData.sessionId, ...statusData }
+    let parsed: Record<string, unknown> | null = null
+    for (const line of stdout.split('\n').reverse()) {
+      const trimmed = line.trim()
+      if (trimmed.startsWith('{')) {
+        try { parsed = JSON.parse(trimmed); break } catch { /* skip non-json lines */ }
+      }
     }
-  }
 
-  return { sessionId: spawnData.sessionId, status: 'timeout' }
+    if (parsed) {
+      return {
+        status: 'completed',
+        result: JSON.stringify(parsed),
+        sessionId,
+      }
+    }
+
+    return { status: 'completed', result: stdout.trim(), sessionId }
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    if (msg.includes('ETIMEDOUT') || msg.includes('timed out')) {
+      return { status: 'timeout', sessionId }
+    }
+    throw error
+  }
 }
 
 async function main() {
@@ -133,6 +148,7 @@ async function main() {
   }
 
   const config = loadOpenClawConfig()
+  const cliPath = findOpenClawCli()
 
   const taskTypeToAgentKey: Record<string, string> = {
     tech: 'agent_hermione',
@@ -197,12 +213,12 @@ async function main() {
     ])
   }
 
-  let sessionResult: { sessionId: string; status: string; result?: string }
+  let sessionResult: { status: string; result?: string; sessionId?: string }
 
   try {
-    sessionResult = await spawnOpenClawSession(
-      config.openclawApiBase,
-      agentConfig,
+    sessionResult = runOpenClawAgent(
+      cliPath,
+      agentConfig.openclawId,
       taskPrompt,
       config.defaultTimeoutSeconds,
     )

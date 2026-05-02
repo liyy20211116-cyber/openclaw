@@ -1,6 +1,10 @@
 # Jarvis One Company OS
 
-一个面向“一人公司”场景的本地业务操作台，当前包含 CEO 模板发起、任务写回、审批流转、资金与收益面板，以及面向桌面端收口的本地启动骨架。
+> **北极星**：一人公司 = 自主运行 + 自主盈利 + 聪明大脑 + 灵活手脚 → 可商业化产品
+> 详细定义、评分口径与禁区：[`../docs/NORTH-STAR.md`](../docs/NORTH-STAR.md)
+> **所有新增功能必须回答"这让它更接近北极星了吗"**，不能回答"是"就不要做。
+
+一个面向"一人公司"场景的本地业务操作台，当前包含 CEO 模板发起、任务写回、审批流转、资金与收益面板，以及面向桌面端收口的本地启动骨架。
 
 ## 当前能力
 
@@ -18,6 +22,9 @@
 - 已提供一个最小 Electron 联调入口用于后续桌面化收口。
 - Electron 现在带有开发/生产加载切换、窗口状态持久化和加载失败兜底页。
 - 已补可分发化的第一步准备：Electron 编译产物目录、打包脚本入口、Windows NSIS 配置和桌面图标资源。
+- Dashboard 已切到北极星 v2「商业就绪均分」团队卡。
+- AgentsPage 已并列展示 v1 历史绩效与 v2 商业就绪评分/雷达图。
+- 盈利边界页支持 What-If 模拟器，周报可导出为 Markdown。
 
 ## 本地启动
 
@@ -39,6 +46,7 @@ Windows 下也可以直接双击 `Start_Jarvis_One_Company_OS.bat`。
 - `npm run desktop:build`：构建前端产物与 Electron 主进程产物，供桌面生产态加载。
 - `npm run desktop:prod`：以生产态资源启动 Electron。
 - `npm run desktop:package`：执行桌面打包流程，目标为 Windows NSIS 安装包。
+- `npm run report:profitability-weekly`：导出本周盈利边界周报到 `../docs/`。
 
 ## 桌面端收口骨架
 

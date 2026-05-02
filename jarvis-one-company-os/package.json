@@ -12,14 +12,17 @@
     "desktop:dev": "npx tsx scripts/desktop-dev.ts",
     "desktop:build": "npm run build && npx tsc -p tsconfig.electron.json",
     "desktop:prod": "npx tsx scripts/desktop-prod.ts",
+    "backend:bundle": "npx tsx scripts/bundle-backend.ts",
     "desktop:package": "npx tsx scripts/desktop-package.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "npx tsx scripts/test-opportunity-service.ts && npx tsx scripts/test-opportunity-intake-service.ts && npx tsx scripts/test-offer-catalog-service.ts && npx tsx scripts/test-sales-pipeline-service.ts && npx tsx scripts/test-workflow-service.ts && npx tsx scripts/test-revenue-confirmation-service.ts && npx tsx scripts/test-daily-run-service.ts && npx tsx scripts/test-daily-run-log-service.ts && npx tsx scripts/test-ceo-action-boundary-service.ts && npx tsx scripts/test-approval-bridge-service.ts && npx tsx scripts/test-saas-readiness-service.ts && npx tsx scripts/test-local-persistence-service.ts && npx tsx scripts/test-commercial-readiness-config.ts && npx tsx scripts/test-commercial-readiness-evidence.ts && npx tsx scripts/test-performance-v2-service.ts && npx tsx scripts/test-profitability-step-c.ts && python ../scripts/test_jarvis_coo_ops.py && python ../scripts/test_xhs_leadgen_content.py && python ../scripts/test_xhs_compliance_guard.py && python ../scripts/test_xhs_day2_reflection.py && python ../scripts/test_xhs_salary_story.py && python ../scripts/test_xhs_post2_operation.py && python ../scripts/test_unattended_health_guardian.py && python ../scripts/test_runtime_status.py && python ../scripts/test_runtime_status_app.py && python ../scripts/test_lead_offer_ladder.py && python ../scripts/test_xhs_post_monitor.py && python ../scripts/test_self_operating_loop.py && python ../scripts/test_desktop_user_config_sync.py",
     "preview": "vite preview",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:export": "npx tsx scripts/export-app-data.ts",
+    "report:profitability-weekly": "npx tsx scripts/export-profitability-weekly.ts",
     "db:create-task": "npx tsx scripts/create-task.ts",
     "db:decide-approval": "npx tsx scripts/decide-approval.ts",
     "db:writeback-api": "npx tsx scripts/writeback-api.ts",
@@ -36,29 +39,84 @@
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
-      "desktop/electron/package.json"
+      "dist-backend/**/*",
+      "desktop/electron/package.json",
+      "prisma/**/*",
+      "dev.db"
+    ],
+    "asarUnpack": [
+      "dist-backend/**/*",
+      "prisma/**/*",
+      "dev.db",
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/bindings/**/*",
+      "node_modules/file-uri-to-path/**/*",
+      "node_modules/@prisma/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../openclaw_agents",
+        "to": "openclaw_agents",
+        "filter": [
+          "**/*.md",
+          "**/*.json",
+          "**/*.py",
+          "**/*.sh",
+          "**/*.ps1",
+          "!**/node_modules/**",
+          "!**/__pycache__/**",
+          "!**/.venv/**"
+        ]
+      },
+      {
+        "from": "../config",
+        "to": "config",
+        "filter": [
+          "**/*.md",
+          "**/*.json",
+          "**/*.yaml",
+          "**/*.yml"
+        ]
+      },
+      {
+        "from": "../tools/cliproxyapi/cli-proxy-api.exe",
+        "to": "cliproxyapi/cli-proxy-api.exe"
+      },
+      {
+        "from": "../tools/cliproxyapi/config.yaml",
+        "to": "cliproxyapi/config.yaml"
+      }
     ],
     "extraMetadata": {
       "main": "dist-electron/main.js"
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ],
-      "icon": "build/icon.svg"
+      "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-Portable.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Jarvis One Company OS"
+      "shortcutName": "Jarvis One Company OS",
+      "installerSidebar": null,
+      "deleteAppDataOnUninstall": false
     }
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "better-sqlite3": "^12.8.0",
+    "dotenv": "^17.4.2",
+    "node-cron": "^4.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "^7.14.0",
@@ -66,16 +124,23 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.12.2",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "classic-level": "^3.0.0",
     "electron": "^41.2.0",
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.28.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
     "prisma": "^7.7.0",
+    "sharp": "^0.34.5",
+    "to-ico": "^1.1.5",
     "tsx": "^4.21.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",

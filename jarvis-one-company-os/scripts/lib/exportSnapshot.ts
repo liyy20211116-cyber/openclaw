@@ -48,7 +48,7 @@ function humanizeAction(actionType: string) {
   return map[actionType] ?? actionType
 }
 
-export async function exportSnapshot(prisma: PrismaClient) {
+export async function buildAppSnapshot(prisma: PrismaClient) {
   const [agents, tasks, approvals, ledger, revenues, auditEvents, taskLogs, storeItems, storeOrders, treasuryRecord, performance] = await Promise.all([
     prisma.agent.findMany({ orderBy: { createdAt: 'asc' } }),
     prisma.task.findMany({ include: { owner: true }, orderBy: { createdAt: 'asc' } }),
@@ -81,7 +81,7 @@ export async function exportSnapshot(prisma: PrismaClient) {
     return acc
   }, {})
 
-  const snapshot = {
+  return {
     agents: agents.map((agent) => {
       const perf = performanceByCode.get(agent.code)
       return {
@@ -272,6 +272,10 @@ export async function exportSnapshot(prisma: PrismaClient) {
         }
       : undefined,
   }
+}
+
+export async function exportSnapshot(prisma: PrismaClient) {
+  const snapshot = await buildAppSnapshot(prisma)
 
   const content = `import type { AppSnapshot } from '../types'\n\nexport const appSnapshot: AppSnapshot = ${JSON.stringify(snapshot, null, 2)}\n`
   const snapshotJson = `${JSON.stringify(snapshot, null, 2)}\n`

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { LlmModelInfo } from '../services/llmService'
-import { fetchAvailableModels, setSelectedProvider, getSelectedProvider, getLastUsedModel } from '../services/llmService'
+import { fetchAvailableModels, setSelectedProvider, getSelectedProvider, getLastUsedModel, getDefaultProvider } from '../services/llmService'
 
 interface Props {
   onModelChange?: (providerId: string, modelName: string) => void
@@ -8,17 +8,23 @@ interface Props {
 
 const PROVIDER_ICONS: Record<string, string> = {
   cascade: '🔄',
-  'fandai-nn4.6': '🧠',
-  'fandai-gemini3.1': '💎',
-  'fandai-gpt5.4': '🤖',
-  'fandai-nshen5.4-med': '⚡',
-  'fandai-nshen-mini': '🐇',
+  'fandai-nn-46': '🧠',
+  'fandai-gemini-31': '💎',
+  'fandai-glm-5': '🧪',
   openai: '🟢',
   deepseek: '🐋',
   moonshot: '🌙',
   siliconflow: '🌊',
   'ollama-local': '🏠',
   configured: '⚙️',
+}
+
+function getProviderIcon(id: string): string {
+  if (PROVIDER_ICONS[id]) return PROVIDER_ICONS[id]
+  if (id.startsWith('chatgpt-plus-')) return '💬'
+  if (id.startsWith('openai-direct-')) return '🟢'
+  if (id.startsWith('openai-compat-')) return '🟢'
+  return '🤖'
 }
 
 export function ModelSelector({ onModelChange }: Props) {
@@ -56,7 +62,9 @@ export function ModelSelector({ onModelChange }: Props) {
   }
 
   const current = models.find(m => m.id === selected) ?? { id: 'cascade', name: '自动级联', provider: 'auto' }
-  const icon = PROVIDER_ICONS[current.id] ?? '🤖'
+  const defaultProvider = getDefaultProvider()
+  const isFallbackActive = selected === defaultProvider && lastModel && !lastModel.includes(current.name)
+  const icon = getProviderIcon(current.id)
 
   return (
     <div ref={ref} className="model-selector">
@@ -71,6 +79,9 @@ export function ModelSelector({ onModelChange }: Props) {
         {lastModel && selected === 'cascade' && (
           <span className="model-actual">({lastModel})</span>
         )}
+        {isFallbackActive && (
+          <span className="model-actual">(实际: {lastModel})</span>
+        )}
         <span className="model-arrow">{open ? '▲' : '▼'}</span>
       </button>
 
@@ -84,7 +95,7 @@ export function ModelSelector({ onModelChange }: Props) {
               className={`model-option${m.id === selected ? ' active' : ''}`}
               onClick={() => handleSelect(m)}
             >
-              <span className="model-option-icon">{PROVIDER_ICONS[m.id] ?? '🤖'}</span>
+              <span className="model-option-icon">{getProviderIcon(m.id)}</span>
               <div className="model-option-info">
                 <span className="model-option-name">{m.name}</span>
                 <span className="model-option-desc">{m.description}</span>

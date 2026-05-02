@@ -19,8 +19,9 @@ if (!fs.existsSync(electronBuilderCli)) {
 }
 
 const buildSteps: Step[] = [
-  { command: 'npm', args: ['run', 'build'] },
-  { command: 'npx', args: ['tsc', '-p', 'tsconfig.electron.json'] },
+  { command: 'npx', args: ['vite', 'build'] },
+  { command: 'npx', args: ['tsc', '-p', 'tsconfig.electron.json', '--skipLibCheck'] },
+  { command: 'npm', args: ['run', 'backend:bundle'] },
 ]
 
 for (const step of buildSteps) {
@@ -35,10 +36,16 @@ for (const step of buildSteps) {
   }
 }
 
-const packageResult = spawnSync(process.execPath, [electronBuilderCli, '--win', 'nsis'], {
+const targets = process.argv.includes('--portable-only')
+  ? ['portable']
+  : process.argv.includes('--nsis-only')
+    ? ['nsis']
+    : ['nsis', 'portable']
+
+const packageResult = spawnSync(process.execPath, [electronBuilderCli, '--win', ...targets], {
   cwd: projectRoot,
   stdio: 'inherit',
-  shell: process.platform === 'win32',
+  shell: false,
 })
 
 process.exit(packageResult.status ?? 0)

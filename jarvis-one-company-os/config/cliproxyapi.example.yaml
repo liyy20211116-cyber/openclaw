@@ -1,0 +1,26 @@
+# CLIProxyAPI minimal example for Jarvis One Company OS
+host: "127.0.0.1"
+port: 8317
+
+# Client keys used by local apps that call CLIProxyAPI.
+# If you do not want local auth, you can remove this section and leave OPENAI_API_KEY empty in .env.
+api-keys:
+  - "replace-with-your-local-client-key"
+
+# Example: route OpenAI-compatible requests to your provider(s).
+# Replace base-url / api-key / models with your actual upstream.
+openai-compatibility:
+  - name: "my-openai-proxy"
+    base-url: "https://your-upstream-openai-compatible-endpoint/v1"
+    api-key-entries:
+      - api-key: "replace-with-your-upstream-api-key"
+    models:
+      - name: "gpt-5"
+        alias: "gpt-5"
+      - name: "gpt-5-mini"
+        alias: "gpt-5-mini"
+      - name: "gpt-5-codex"
+        alias: "gpt-5-codex"
+
+# If you prefer OAuth/CLI-based providers, configure them here according to CLIProxyAPI docs.
+# See: https://help.router-for.me/configuration/basic

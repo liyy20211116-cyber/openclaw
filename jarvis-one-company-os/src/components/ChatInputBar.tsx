@@ -71,6 +71,31 @@ interface FileSearchResult {
   preview: string
 }
 
+interface SpeechRecognitionResultItem {
+  transcript: string
+}
+
+interface SpeechRecognitionResultLike {
+  [index: number]: SpeechRecognitionResultItem
+}
+
+interface SpeechRecognitionEventLike {
+  results: ArrayLike<SpeechRecognitionResultLike>
+}
+
+interface SpeechRecognitionLike {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  start: () => void
+  stop: () => void
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike
+
 export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, onClearQuote }: Props) {
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState<ChatAttachment[]>([])
@@ -91,7 +116,7 @@ export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, o
   const imageInputRef = useRef<HTMLInputElement>(null)
   const mentionPickerRef = useRef<HTMLDivElement>(null)
   const slashMenuRef = useRef<HTMLDivElement>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const fileSearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const filteredAgents = AGENTS.filter(a =>
@@ -117,7 +142,6 @@ export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, o
 
   useEffect(() => {
     if (!showFileSearch || !fileSearchQuery.trim()) {
-      setFileSearchResults([])
       return
     }
     if (fileSearchTimeoutRef.current) clearTimeout(fileSearchTimeoutRef.current)
@@ -133,7 +157,7 @@ export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, o
           const data = await res.json() as { results?: FileSearchResult[] }
           setFileSearchResults(data.results ?? [])
         }
-      } catch { /* silent */ }
+      } catch (e) { console.warn('[ChatInputBar] file search failed:', e) }
       setFileSearching(false)
     }, 300)
   }, [fileSearchQuery, showFileSearch])
@@ -249,7 +273,7 @@ export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, o
               }])
             }
           }
-        } catch { /* silent */ }
+        } catch (e) { console.warn('[ChatInputBar] file read failed:', e) }
       }
     }
   }, [])
@@ -309,7 +333,7 @@ export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, o
           size: result.size,
         }])
       }
-    } catch { /* silent */ }
+    } catch (e) { console.warn('[ChatInputBar] selectFile failed:', e) }
     setShowFileSearch(false)
     setFileSearchQuery('')
   }, [])
@@ -325,14 +349,14 @@ export function ChatInputBar({ onSubmit, disabled, placeholder, quotedMessage, o
       return
     }
 
-    const recognition = new (SR as new () => SpeechRecognition)()
+    const recognition = new (SR as SpeechRecognitionConstructor)()
     recognition.lang = 'zh-CN'
     recognition.continuous = false
     recognition.interimResults = true
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: SpeechRecognitionEventLike) => {
       const transcript = Array.from(event.results)
-        .map(r => r[0].transcript)
+        .map((result) => result[0].transcript)
         .join('')
       setText(prev => prev + transcript)
     }

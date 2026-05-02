@@ -36,7 +36,7 @@ const taskTypeOptions = [
   { label: '客户', value: 'customer' },
 ] as const
 
-const timelineTypeLabelMap: Record<TaskTimelineEvent['type'], string> = {
+const timelineTypeLabelMap: Partial<Record<TaskTimelineEvent['type'], string>> = {
   created: '首次提交',
   resubmitted: '再次提交',
   approval_requested: '发起审批',

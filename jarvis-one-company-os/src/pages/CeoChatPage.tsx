@@ -1,266 +1,80 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import type { ChatMessage, GoalTaskDraft, TeamDiscussionMessage, ChatAttachment, QuotedMessage } from '../types'
+import type { ChatMessage, GoalTaskDraft, TeamDiscussionMessage, QuotedMessage } from '../types'
 import { useSnapshot } from '../hooks/useSnapshot'
-import { chatHistoryService } from '../services/chatHistoryService'
-import { jarvisChat, shouldStartPlanning, runTeamDiscussion, checkOpenClawStatus, getLlmInfo, runCompanyHeartbeat, distillConversation, runSkill, matchSkillFromReply, matchSkillWithAgent, matchAgentDefaultSkill } from '../services/agentBrainService'
+import { chatTopicService } from '../services/chatTopicService'
+import type { ChatTopic } from '../services/chatTopicService'
+import { jarvisChat, shouldStartPlanning, runTeamDiscussion, checkOpenClawStatus, getLlmInfo, distillConversation, runSkill, matchSkillFromReply, matchSkillWithAgent, matchAgentDefaultSkill } from '../services/agentBrainService'
 import type { TeamMessage, CompanyProposal, SkillResult } from '../services/agentBrainService'
 import { writebackService } from '../services/writebackService'
 import { ChatInputBar } from '../components/ChatInputBar'
 import type { ChatInputSubmission } from '../components/ChatInputBar'
 import { ModelSelector } from '../components/ModelSelector'
+import { getDefaultModelLabel, getLastUsedModel, chatCompletionStream } from '../services/llmService'
 
-interface WorkStatus {
-  phase: string
-  detail: string
-  startTime: number
-  icon: string
-}
+import { StickyWorkBar } from '../components/StickyWorkBar'
+import type { WorkStatus, ActiveAction } from '../components/StickyWorkBar'
+import { ActionTrackerPanel } from '../components/ActionTrackerPanel'
+import { detectAction, summarizeLlmError, QUICK_GOALS, TYPE_COLORS } from '../utils/chatHelpers'
 
-function WorkIndicator({ status }: { status: WorkStatus | null }) {
-  const [elapsed, setElapsed] = useState(0)
 
-  useEffect(() => {
-    if (!status) { setElapsed(0); return }
-    setElapsed(0)
-    const t = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - status.startTime) / 1000))
-    }, 1000)
-    return () => clearInterval(t)
-  }, [status])
+const quickGoals = QUICK_GOALS
+const typeColors = TYPE_COLORS
 
-  if (!status) return null
+/* detectAction, summarizeLlmError, etc. moved to ../utils/chatHelpers.ts */
 
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '10px 16px',
-      borderRadius: 12,
-      background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(139, 92, 246, 0.08))',
-      border: '1px solid rgba(56, 189, 248, 0.2)',
-      animation: 'fadeIn 0.3s ease-in',
-    }}>
-      <span style={{
-        width: 10, height: 10, borderRadius: '50%',
-        background: '#38bdf8',
-        display: 'inline-block',
-        animation: 'pulse 1.2s ease-in-out infinite',
-        boxShadow: '0 0 8px rgba(56, 189, 248, 0.6)',
-        flexShrink: 0,
-      }} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 14 }}>{status.icon}</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#38bdf8' }}>
-            {status.phase}
-          </span>
-          <span style={{ fontSize: 11, color: '#64748b', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>
-            {elapsed}s
-          </span>
-        </div>
-        {status.detail && (
-          <p style={{ margin: '2px 0 0', fontSize: 11, color: '#94a3b8' }}>{status.detail}</p>
-        )}
-      </div>
-    </div>
-  )
-}
 
-interface ActiveAction {
-  id: string
-  summary: string
-  assignee: string
-  status: 'working' | 'waiting' | 'done' | 'failed'
-  steps: { label: string; done: boolean }[]
-  startedAt: number
-  updatedAt: number
-  skillId?: string
-  skillResult?: string
-}
 
-const ACTION_SIGNALS = [
-  '我来盯', '我来安排', '马上安排', '立刻启动', '我来协调',
-  '我来调度', '交给', '我来跟', '我去安排', '我来推',
-  '马上执行', '立刻安排', '我来处理', '我盯着', '我来跑',
-  '我来测', '跑通', '我来验', '安排赫敏', '安排麦格',
-]
-
-const AGENT_NAMES_MAP: Record<string, { agentId: string; emoji: string }> = {
-  '赫敏': { agentId: 'hermione-tech', emoji: '📚' },
-  '赫敏·格兰杰': { agentId: 'hermione-tech', emoji: '📚' },
-  '麦格': { agentId: 'mcgonagall-product', emoji: '🐱' },
-  '麦格教授': { agentId: 'mcgonagall-product', emoji: '🐱' },
-  '卢娜': { agentId: 'luna-growth', emoji: '🌙' },
-  '弗雷德': { agentId: 'fred-sales', emoji: '🎪' },
-  '珀西': { agentId: 'percy-finance', emoji: '📊' },
-  '斯内普': { agentId: 'snape-audit', emoji: '🦇' },
-  '多比': { agentId: 'dobby-customer', emoji: '🧦' },
-  '纳威': { agentId: 'neville-hr', emoji: '🌱' },
-  '纳威·隆巴顿': { agentId: 'neville-hr', emoji: '🌱' },
-  '贾维斯': { agentId: 'jarvis-coo', emoji: '🎯' },
-}
-
-interface DetectedDelegation {
-  detected: boolean
-  summary: string
-  steps: string[]
-  delegatedAgents: { name: string; agentId: string; emoji: string; task: string }[]
-}
-
-function detectAction(jarvisReply: string): DetectedDelegation {
-  const hasSignal = ACTION_SIGNALS.some(s => jarvisReply.includes(s))
-  if (!hasSignal) return { detected: false, summary: '', steps: [], delegatedAgents: [] }
-
-  const lines = jarvisReply.split('\n').filter(l => l.trim())
-  const summary = lines[0]?.replace(/^[^，。：]+[，。：]/, '').trim().slice(0, 60) || '执行中'
-
-  const stepPatterns = [/^\d+[\.\、\)]/,  /^[-•▸]/,  /^\*\*/]
-  const steps = lines
-    .filter(l => stepPatterns.some(p => p.test(l.trim())))
-    .map(l => l.trim().replace(/^\d+[\.\、\)]|\*\*|^[-•▸]\s*/, '').replace(/\*\*/g, '').trim())
-    .filter(s => s.length > 3 && s.length < 80)
-    .slice(0, 5)
-
-  const delegatedAgents: DetectedDelegation['delegatedAgents'] = []
-  const fullText = jarvisReply
-  for (const [name, info] of Object.entries(AGENT_NAMES_MAP)) {
-    if (name === '贾维斯') continue
-    if (fullText.includes(name)) {
-      const taskLine = lines.find(l => l.includes(name)) ?? ''
-      const task = taskLine.replace(new RegExp(`.*${name}[^，。：]*[，。：]?\\s*`), '').trim().slice(0, 50) || '执行分配任务'
-      if (!delegatedAgents.some(a => a.agentId === info.agentId)) {
-        delegatedAgents.push({ name, agentId: info.agentId, emoji: info.emoji, task })
-      }
-    }
-  }
-
-  return { detected: true, summary, steps: steps.length > 0 ? steps : ['准备执行...'], delegatedAgents }
-}
-
-function ActionTrackerCard({ action, onDismiss }: { action: ActiveAction; onDismiss: () => void }) {
-  const [elapsed, setElapsed] = useState(0)
-
-  useEffect(() => {
-    if (action.status === 'done' || action.status === 'failed') return
-    const t = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - action.startedAt) / 1000))
-    }, 1000)
-    return () => clearInterval(t)
-  }, [action.startedAt, action.status])
-
-  const isActive = action.status === 'working' || action.status === 'waiting'
-  const statusConfig = {
-    working: { color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.08)', border: 'rgba(56, 189, 248, 0.25)', label: '执行中', icon: '⚡' },
-    waiting: { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.25)', label: '等待中', icon: '⏳' },
-    done:    { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.25)', label: '已完成', icon: '✅' },
-    failed:  { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.25)', label: '异常', icon: '❌' },
-  }
-  const cfg = statusConfig[action.status]
-
-  const formatTime = (s: number) => {
-    if (s < 60) return `${s}s`
-    const m = Math.floor(s / 60)
-    return `${m}m ${s % 60}s`
-  }
-
-  return (
-    <div style={{
-      padding: '14px 16px',
-      borderRadius: 14,
-      background: cfg.bg,
-      border: `1px solid ${cfg.border}`,
-      animation: 'fadeIn 0.3s ease-in',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {isActive && (
-            <span style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: cfg.color,
-              display: 'inline-block',
-              animation: 'pulse 1.5s ease-in-out infinite',
-              boxShadow: `0 0 8px ${cfg.color}60`,
-            }} />
-          )}
-          <span style={{ fontSize: 13, fontWeight: 700, color: cfg.color }}>
-            {cfg.icon} {action.assignee || '贾维斯'} · {cfg.label}
-          </span>
-          {isActive && (
-            <span style={{ fontSize: 11, color: '#64748b', fontVariantNumeric: 'tabular-nums' }}>
-              {formatTime(elapsed)}
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onDismiss}
-          style={{
-            background: 'none', border: 'none', color: '#64748b',
-            cursor: 'pointer', fontSize: 14, padding: '2px 6px', borderRadius: 4,
-          }}
-          title={isActive ? '标记完成' : '关闭'}
-        >
-          {isActive ? '✓ 完成' : '×'}
-        </button>
-      </div>
-
-      <p style={{ margin: '0 0 8px', fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
-        {action.summary}
-      </p>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {action.steps.map((step, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-            <span style={{
-              width: 16, height: 16, borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 700, flexShrink: 0,
-              background: step.done ? 'rgba(34, 197, 94, 0.2)' : 'rgba(148, 163, 184, 0.1)',
-              color: step.done ? '#22c55e' : '#64748b',
-              border: `1px solid ${step.done ? 'rgba(34, 197, 94, 0.3)' : 'rgba(148, 163, 184, 0.15)'}`,
-            }}>
-              {step.done ? '✓' : i + 1}
-            </span>
-            <span style={{
-              color: step.done ? '#94a3b8' : '#cbd5e1',
-              textDecoration: step.done ? 'line-through' : 'none',
-            }}>
-              {step.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {action.skillResult && (
-        <div style={{
-          marginTop: 10, padding: '8px 12px', borderRadius: 8,
-          background: action.status === 'done' ? 'rgba(34, 197, 94, 0.06)' : 'rgba(239, 68, 68, 0.06)',
-          border: `1px solid ${action.status === 'done' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'}`,
-          fontSize: 12, color: '#94a3b8', whiteSpace: 'pre-wrap', lineHeight: 1.6,
-        }}>
-          {action.skillResult}
-        </div>
-      )}
-    </div>
-  )
-}
-
-const quickGoals = [
-  'ONES 需求审核自动化项目还有缺口没闭环，安排相关部门协作把它做完。',
-  '我们要做一个 AI 自动化搭建服务，先完成产品定义、报价方案和获客内容。',
-  '接下来 7 天要连续产出增长内容和转化素材，优先提高首单成交率。',
-]
-
-const typeColors: Record<string, string> = {
-  thinking: 'rgba(148, 163, 184, 0.5)',
-  speaking: 'rgba(56, 189, 248, 0.15)',
-  task_plan: 'rgba(34, 197, 94, 0.15)',
-}
 
 export function CeoChatPage() {
   useSnapshot()
-  const [messages, setMessages] = useState<ChatMessage[]>(() => chatHistoryService.getAll())
+
+  const [topics, setTopics] = useState<ChatTopic[]>([])
+  const [activeTopicId, setActiveTopicId] = useState<string>(() => {
+    return chatTopicService.getActiveTopicId() ?? ''
+  })
+  const [topicSidebarOpen, setTopicSidebarOpen] = useState(true)
+  const [renamingId, setRenamingId] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [chatReady, setChatReady] = useState(false)
+
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    async function init() {
+      try {
+        let allTopics = await chatTopicService.getTopics()
+        if (cancelled) return
+
+        const saved = chatTopicService.getActiveTopicId()
+        let tid = ''
+        if (saved && allTopics.find(t => t.id === saved)) {
+          tid = saved
+        } else if (allTopics.length > 0) {
+          tid = allTopics[0].id
+        } else {
+          const first = await chatTopicService.createTopic('新对话')
+          allTopics = [first]
+          tid = first.id
+        }
+
+        if (cancelled) return
+        setTopics(allTopics)
+        setActiveTopicId(tid)
+        chatTopicService.setActiveTopicId(tid)
+
+        const msgs = await chatTopicService.getMessages(tid)
+        if (cancelled) return
+        setMessages(msgs)
+        setChatReady(true)
+      } catch (e) {
+        console.error('[CeoChatPage] init failed:', e)
+        if (!cancelled) setChatReady(true)
+      }
+    }
+    init()
+    return () => { cancelled = true }
+  }, [])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [liveMessages, setLiveMessages] = useState<TeamDiscussionMessage[]>([])
@@ -270,16 +84,19 @@ export function CeoChatPage() {
   const [isExecuting, setIsExecuting] = useState(false)
   const [executionStatus, setExecutionStatus] = useState<string>('')
   const [openclawOnline, setOpenclawOnline] = useState<boolean | null>(null)
-  const [llmModel, setLlmModel] = useState<string>('检测中...')
-  const [proposals, setProposals] = useState<CompanyProposal[]>([])
-  const [isHeartbeating, setIsHeartbeating] = useState(false)
+  const [, setLlmModel] = useState<string>('检测中...')
+  const [actualLlmModel, setActualLlmModel] = useState<string>('')
   const [workStatus, setWorkStatus] = useState<WorkStatus | null>(null)
   const [activeActions, setActiveActions] = useState<ActiveAction[]>([])
+  const [, setProposals] = useState<CompanyProposal[]>([])
   const [quotedMessage, setQuotedMessage] = useState<QuotedMessage | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const defaultModelLabel = getDefaultModelLabel()
 
-  const updateWork = useCallback((phase: string, detail: string, icon: string) => {
-    setWorkStatus({ phase, detail, startTime: Date.now(), icon })
+  const workStartRef = useRef<number>(0)
+  const updateWork = useCallback((phase: string, detail: string, icon: string, step?: number, totalSteps?: number) => {
+    if (step === 0 || step === 1) workStartRef.current = Date.now()
+    setWorkStatus({ phase, detail, startTime: workStartRef.current || Date.now(), icon, step, totalSteps })
   }, [])
 
   useEffect(() => {
@@ -290,6 +107,17 @@ export function CeoChatPage() {
     checkOpenClawStatus().then(setOpenclawOnline)
     getLlmInfo().then(setLlmModel)
     const interval = setInterval(() => { checkOpenClawStatus().then(setOpenclawOnline) }, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const syncActualModel = () => {
+      const model = getLastUsedModel()
+      setActualLlmModel(prev => (model === prev ? prev : model))
+    }
+
+    syncActualModel()
+    const interval = setInterval(syncActualModel, 1500)
     return () => clearInterval(interval)
   }, [])
 
@@ -380,7 +208,7 @@ export function CeoChatPage() {
         content: `📋 **技能执行报告** (${skillId})\n\n${resultText}${r.output ? '\n\n```\n' + r.output.slice(-800) + '\n```' : ''}`,
         createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
-      chatHistoryService.append(resultMsg)
+      chatTopicService.appendMessage(activeTopicId, resultMsg)
       setMessages(prev => [...prev, resultMsg])
 
       updateAction({
@@ -407,7 +235,7 @@ export function CeoChatPage() {
 
   async function dispatchMultiAgent(
     agents: { name: string; agentId: string; emoji: string; task: string }[],
-    goal: string,
+    _goal: string,
   ) {
     const actionCards: ActiveAction[] = agents.map((a, i) => ({
       id: `dispatch_${Date.now()}_${i}_${a.agentId}`,
@@ -474,8 +302,10 @@ export function CeoChatPage() {
         content: `📊 **各部门执行报告** (${okCount}/${allResults.length} 成功)\n\n${lines.join('\n')}`,
         createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
-      chatHistoryService.append(reportMsg)
+      chatTopicService.appendMessage(activeTopicId, reportMsg)
       setMessages(prev => [...prev, reportMsg])
+
+      await generateFollowUp(_goal, allResults.map(r => ({ owner: r.name, ok: r.ok, summary: r.summary })))
     }
   }
 
@@ -492,7 +322,7 @@ export function CeoChatPage() {
   }
 
   async function autoExecuteTasks(tasks: GoalTaskDraft[], goal: string) {
-    const results: { owner: string; skillId: string; ok: boolean; summary: string }[] = []
+    const results: { owner: string; task: string; ok: boolean; summary: string }[] = []
 
     for (const task of tasks) {
       const ownerName = task.ownerName ?? ''
@@ -502,7 +332,7 @@ export function CeoChatPage() {
       const defaultSkill = matchAgentDefaultSkill(agentId)
       const skillMatch = matchSkillWithAgent(task.title + ' ' + task.description)
       const matchedIsOwnSkill = skillMatch && skillMatch.agentId === agentId
-      const skillId = matchedIsOwnSkill ? skillMatch.skillId : (defaultSkill ?? skillMatch?.skillId)
+      const skillId = matchedIsOwnSkill ? skillMatch.skillId : defaultSkill
       if (!skillId) continue
 
       const actionId = `auto_${Date.now()}_${agentId}`
@@ -541,7 +371,7 @@ export function CeoChatPage() {
           updatedAt: Date.now(),
         } : a))
 
-        results.push({ owner: ownerName, skillId, ok: result?.ok ?? false, summary })
+        results.push({ owner: ownerName, task: task.title, ok: result?.ok ?? false, summary })
       } catch (e) {
         setActiveActions(prev => prev.map(a => a.id === actionId ? {
           ...a,
@@ -549,23 +379,64 @@ export function CeoChatPage() {
           skillResult: `执行异常: ${e}`,
           updatedAt: Date.now(),
         } : a))
-        results.push({ owner: ownerName, skillId, ok: false, summary: `异常: ${e}` })
+        results.push({ owner: ownerName, task: task.title, ok: false, summary: `异常: ${e}` })
       }
     }
 
     if (results.length > 0) {
       const okCount = results.filter(r => r.ok).length
       const reportLines = results.map(r =>
-        `${r.ok ? '✅' : '❌'} **${r.owner}** (${r.skillId}): ${r.summary}`
+        `${r.ok ? '✅' : '❌'} **${r.owner}**（${r.task}）: ${r.summary}`
       )
       const reportMsg: ChatMessage = {
         id: `msg_${Date.now()}_exec_report`,
         role: 'jarvis',
-        content: `📊 **全员执行报告** (${okCount}/${results.length} 成功)\n\n${reportLines.join('\n')}`,
+        content: `📊 **各部门执行报告** (${okCount}/${results.length} 成功)\n\n${reportLines.join('\n')}`,
         createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
-      chatHistoryService.append(reportMsg)
+      chatTopicService.appendMessage(activeTopicId, reportMsg)
       setMessages(prev => [...prev, reportMsg])
+
+      await generateFollowUp(goal, results)
+    }
+  }
+
+  async function generateFollowUp(
+    goal: string,
+    results: { owner: string; task?: string; ok: boolean; summary: string }[],
+  ) {
+    try {
+      const okCount = results.filter(r => r.ok).length
+      const failCount = results.length - okCount
+      const resultsSummary = results.map(r =>
+        `${r.ok ? '成功' : '失败'} - ${r.owner}${r.task ? `(${r.task})` : ''}: ${r.summary}`
+      ).join('\n')
+
+      const followUpPrompt = `你刚刚指挥团队执行了一个目标：「${goal}」
+
+执行结果如下（${okCount} 成功 / ${failCount} 失败）：
+${resultsSummary}
+
+现在请你作为 COO，简要分析这些结果，指出关键发现，并明确告诉 CEO 下一步该做什么。
+要求：
+- 直接说结论，不要重复列举结果
+- 如果有失败项，说明原因和解决思路
+- 给出明确的下一步行动建议（1-3 条）
+- 控制在 3 段以内`
+
+      updateWork('贾维斯分析中', '正在分析执行结果，准备下一步...', '📋', 6, 7)
+      const followUp = await jarvisChat(followUpPrompt, [])
+      const followUpMsg: ChatMessage = {
+        id: `msg_${Date.now()}_followup`,
+        role: 'jarvis',
+        content: followUp,
+        llmModelUsed: getLastUsedModel() || undefined,
+        createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      }
+      chatTopicService.appendMessage(activeTopicId, followUpMsg)
+      setMessages(prev => [...prev, followUpMsg])
+    } catch {
+      // silent - don't block on follow-up failure
     }
   }
 
@@ -604,8 +475,18 @@ export function CeoChatPage() {
       quotedMessage: quoted,
       createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
     }
-    chatHistoryService.append(ceoMsg)
+    chatTopicService.appendMessage(activeTopicId, ceoMsg)
     setMessages(prev => [...prev, ceoMsg])
+
+    const currentTopic = topics.find(t => t.id === activeTopicId)
+    if (currentTopic && (currentTopic.title === '新对话' || currentTopic.title === '新建对话') && messages.length === 0) {
+      const autoTitle = goal.replace(/[\n\r]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 24) + (goal.length > 24 ? '...' : '')
+      if (autoTitle.length > 1) {
+        chatTopicService.renameTopic(activeTopicId, autoTitle).catch(() => {})
+      }
+    }
+    chatTopicService.getTopics().then(setTopics).catch(() => {})
+
     setInput('')
     setQuotedMessage(null)
     setIsThinking(true)
@@ -613,7 +494,7 @@ export function CeoChatPage() {
     setPendingTasks([])
     setCreatedTaskIds([])
     setExecutionStatus('')
-    updateWork('连接大脑', '正在加载记忆和公司制度...', '🧠')
+    updateWork('连接大脑', '正在加载记忆和公司制度...', '🧠', 1, 7)
 
     try {
       const history = messages
@@ -624,22 +505,87 @@ export function CeoChatPage() {
           content: m.content,
         }))
 
-      updateWork('贾维斯思考中', '理解你的意图，组织回复...', '💭')
-      const jarvisReply = await jarvisChat(fullGoal, history)
+      updateWork('贾维斯思考中', '理解你的意图，组织回复...', '💭', 2, 7)
+
+      const jarvisMsgId = `msg_${Date.now()}_jarvis`
+      let jarvisReply = ''
+
+      try {
+        const streamMsg: ChatMessage = {
+          id: jarvisMsgId,
+          role: 'jarvis',
+          content: '',
+          llmModelUsed: undefined,
+          createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        }
+        setMessages(prev => [...prev, streamMsg])
+
+        const streamReply = await chatCompletionStream(
+          [
+            { role: 'system', content: 'You are Jarvis, the COO assistant.' },
+            ...history,
+            { role: 'user', content: fullGoal },
+          ],
+          (delta) => {
+            jarvisReply += delta
+            setMessages(prev => prev.map(m => m.id === jarvisMsgId ? { ...m, content: m.content + delta } : m))
+          },
+          { temperature: 0.7, maxTokens: 800, callerFunction: 'jarvisChat_stream', agentId: 'jarvis-coo' },
+        )
+
+        if (!streamReply || !streamReply.trim()) {
+          throw new Error('LLM stream returned empty content')
+        }
+        jarvisReply = streamReply
+
+        setMessages(prev => prev.map(m => m.id === jarvisMsgId ? { ...m, content: jarvisReply, llmModelUsed: getLastUsedModel() || undefined } : m))
+      } catch (streamErr) {
+        console.warn('[CeoChatPage] streaming failed, falling back to non-streaming jarvisChat:', streamErr)
+        setMessages(prev => prev.filter(m => m.id !== jarvisMsgId))
+        try {
+          jarvisReply = await jarvisChat(fullGoal, history)
+        } catch (fallbackErr) {
+          console.error('[CeoChatPage] non-streaming fallback also failed:', fallbackErr)
+          jarvisReply = ''
+        }
+
+        if (!jarvisReply || !jarvisReply.trim()) {
+          const errorMsg: ChatMessage = {
+            id: jarvisMsgId,
+            role: 'jarvis',
+            content: `⚠️ Jarvis 回复失败，请检查模型接口或运行日志。\n（${summarizeLlmError(streamErr)}）`,
+            createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+          }
+          chatTopicService.appendMessage(activeTopicId, errorMsg)
+          setMessages(prev => [...prev, errorMsg])
+          setIsThinking(false)
+          setWorkStatus(null)
+          return
+        }
+
+        const fallbackMsg: ChatMessage = {
+          id: jarvisMsgId,
+          role: 'jarvis',
+          content: jarvisReply,
+          llmModelUsed: getLastUsedModel() || undefined,
+          createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        }
+        setMessages(prev => [...prev, fallbackMsg])
+      }
 
       const jarvisMsg: ChatMessage = {
-        id: `msg_${Date.now()}_jarvis`,
+        id: jarvisMsgId,
         role: 'jarvis',
         content: jarvisReply,
+        llmModelUsed: getLastUsedModel() || undefined,
         createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
-      chatHistoryService.append(jarvisMsg)
-      setMessages(prev => [...prev, jarvisMsg])
+      chatTopicService.appendMessage(activeTopicId, jarvisMsg)
 
       const actionDetect = detectAction(jarvisReply)
       if (actionDetect.detected && !shouldStartPlanning(jarvisReply)) {
         if (actionDetect.delegatedAgents.length > 0) {
-          dispatchMultiAgent(actionDetect.delegatedAgents, goal)
+          await dispatchMultiAgent(actionDetect.delegatedAgents, goal)
         } else {
           const skillId = matchSkillFromReply(jarvisReply) || matchSkillFromReply(goal) || 'ones_check_status'
           const actionId = `action_${Date.now()}`
@@ -658,11 +604,11 @@ export function CeoChatPage() {
         }
       }
 
-      updateWork('记忆沉淀', '提取对话要点，更新长期记忆...', '📝')
+      updateWork('记忆沉淀', '提取对话要点，更新长期记忆...', '📝', 6, 7)
       distillConversation([...history, { role: 'user', content: goal }, { role: 'assistant', content: jarvisReply }]).catch(() => {})
 
       if (shouldStartPlanning(jarvisReply)) {
-        updateWork('召集团队', '正在组织相关部门讨论...', '🏢')
+        updateWork('召集团队', '正在组织相关部门讨论...', '🏢', 3, 7)
         const collectedMessages: TeamDiscussionMessage[] = []
 
         const { messages: teamMsgs, parsedTasks } = await runTeamDiscussion(goal, (msg: TeamMessage) => {
@@ -672,7 +618,7 @@ export function CeoChatPage() {
           updateWork('团队讨论中', `${msg.agentName} 正在发言...`, msg.emoji ?? '💬')
         })
 
-        updateWork('整理方案', '汇总讨论结果，生成任务清单...', '📋')
+        updateWork('整理方案', '汇总讨论结果，生成任务清单...', '📋', 4, 7)
         const discussionMsg: ChatMessage = {
           id: `msg_${Date.now()}_team`,
           role: 'team_discussion',
@@ -680,26 +626,26 @@ export function CeoChatPage() {
           teamMessages: teamMsgs as TeamDiscussionMessage[],
           createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
         }
-        chatHistoryService.append(discussionMsg)
+        chatTopicService.appendMessage(activeTopicId, discussionMsg)
         setMessages(prev => [...prev, discussionMsg])
         setLiveMessages([])
 
         if (parsedTasks.length > 0) {
           setPendingTasks(parsedTasks)
 
-          updateWork('自动执行', '开始派发任务给各部门...', '🚀')
-          autoExecuteTasks(parsedTasks, goal)
+          updateWork('自动执行', '开始派发任务给各部门...', '🚀', 5, 7)
+          await autoExecuteTasks(parsedTasks, goal)
         }
       }
     } catch (err) {
-      const errorContent = err instanceof Error ? err.message : 'LLM 调用失败'
+      console.error('Jarvis chat failed after all retries', err)
       const errorMsg: ChatMessage = {
         id: `msg_${Date.now()}_error`,
         role: 'jarvis',
-        content: `⚠️ LLM API error: ${errorContent}`,
+        content: `⚠️ ${summarizeLlmError(err)}`,
         createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
-      chatHistoryService.append(errorMsg)
+      chatTopicService.appendMessage(activeTopicId, errorMsg)
       setMessages(prev => [...prev, errorMsg])
       setLiveMessages([])
     } finally {
@@ -708,25 +654,77 @@ export function CeoChatPage() {
     }
   }
 
-  async function handleRunHeartbeat() {
-    if (isHeartbeating) return
-    setIsHeartbeating(true)
-    try {
-      const results = await runCompanyHeartbeat()
-      setProposals(prev => [...results, ...prev].slice(0, 20))
-    } catch { /* silent */ }
-    setIsHeartbeating(false)
-  }
-
-  function handleProposalToChat(proposal: CompanyProposal) {
+  function _handleProposalToChat(proposal: CompanyProposal) {
     const msg = `${proposal.emoji} ${proposal.agentName}提出了一个建议：「${proposal.title}」—— ${proposal.summary}`
     handleSendGoal(msg)
   }
 
-  function handleClearHistory() {
-    chatHistoryService.clear()
+  void _handleProposalToChat
+
+  async function handleClearHistory() {
     setMessages([])
     setLiveMessages([])
+    await chatTopicService.clearMessages(activeTopicId)
+  }
+
+  async function handleNewTopic() {
+    try {
+      const t = await chatTopicService.createTopic('新对话')
+      setActiveTopicId(t.id)
+      chatTopicService.setActiveTopicId(t.id)
+      setMessages([])
+      setLiveMessages([])
+      setPendingTasks([])
+      setCreatedTaskIds([])
+      setActiveActions([])
+      setProposals([])
+      setWorkStatus(null)
+      const fresh = await chatTopicService.getTopics()
+      setTopics(fresh)
+    } catch (e) {
+      console.error('[CeoChatPage] handleNewTopic failed:', e)
+    }
+  }
+
+  async function handleSwitchTopic(id: string) {
+    if (id === activeTopicId) return
+    setActiveTopicId(id)
+    chatTopicService.setActiveTopicId(id)
+    setLiveMessages([])
+    setPendingTasks([])
+    setCreatedTaskIds([])
+    setActiveActions([])
+    setProposals([])
+    setWorkStatus(null)
+    const msgs = await chatTopicService.getMessages(id)
+    setMessages(msgs)
+  }
+
+  async function handleDeleteTopic(id: string) {
+    await chatTopicService.deleteTopic(id)
+    const remaining = await chatTopicService.getTopics()
+    setTopics(remaining)
+    if (id === activeTopicId) {
+      if (remaining.length > 0) {
+        handleSwitchTopic(remaining[0].id)
+      } else {
+        handleNewTopic()
+      }
+    }
+  }
+
+  function handleStartRename(id: string, currentTitle: string) {
+    setRenamingId(id)
+    setRenameValue(currentTitle)
+  }
+
+  async function handleFinishRename() {
+    if (renamingId && renameValue.trim()) {
+      await chatTopicService.renameTopic(renamingId, renameValue.trim())
+      chatTopicService.getTopics().then(setTopics).catch(() => {})
+    }
+    setRenamingId(null)
+    setRenameValue('')
   }
 
   function handleInputSubmit(submission: ChatInputSubmission) {
@@ -784,185 +782,124 @@ export function CeoChatPage() {
     )
   }
 
+  const activeTopic = topics.find(t => t.id === activeTopicId)
+
+  if (!chatReady) {
+    return (
+      <section className="ceo-chat-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: '#64748b' }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
+          <div style={{ fontSize: 14 }}>正在加载对话记录...</div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className="panel page-panel">
-      <div className="panel-header panel-header-top">
-        <div>
-          <p className="eyebrow">CEO 办公室</p>
-          <h2>和贾维斯对话</h2>
-          <p className="muted">先沟通想法，贾维斯会理解你的意图并安排执行。</p>
+    <section className="ceo-chat-layout">
+      {/* === 话题侧边栏 === */}
+      <aside className={`topic-sidebar ${topicSidebarOpen ? '' : 'collapsed'}`}>
+        <div className="topic-sidebar-header">
+          {topicSidebarOpen && <span className="topic-sidebar-title">项目话题</span>}
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={() => setTopicSidebarOpen(p => !p)}
+            title={topicSidebarOpen ? '收起话题栏' : '展开话题栏'}
+          >
+            {topicSidebarOpen ? '◀' : '▶'}
+          </button>
         </div>
-        <div className="panel-header-metrics" style={{ gap: 8, alignItems: 'center' }}>
-          <ModelSelector onModelChange={(id, name) => setLlmModel(`${name}`)} />
-          <div className="metric-inline">对话 {messages.length} 条</div>
-          {messages.length > 0 && (
-            <button type="button" className="link-button" onClick={handleClearHistory} style={{ fontSize: 12 }}>
-              清空历史
+        {topicSidebarOpen && (
+          <>
+            <button type="button" className="topic-new-btn" onClick={handleNewTopic}>
+              + 新建对话
             </button>
-          )}
+            <div className="topic-list">
+              {topics.map(t => (
+                <div
+                  key={t.id}
+                  className={`topic-item ${t.id === activeTopicId ? 'active' : ''}`}
+                  onClick={() => handleSwitchTopic(t.id)}
+                >
+                  {renamingId === t.id ? (
+                    <input
+                      className="topic-rename-input"
+                      value={renameValue}
+                      onChange={e => setRenameValue(e.target.value)}
+                      onBlur={handleFinishRename}
+                      onKeyDown={e => { if (e.key === 'Enter') handleFinishRename(); if (e.key === 'Escape') { setRenamingId(null); setRenameValue('') } }}
+                      onClick={e => e.stopPropagation()}
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      <div className="topic-item-text">
+                        <span className="topic-item-title">{t.title}</span>
+                        <span className="topic-item-meta">{t.messageCount} 条 · {t.updatedAt.slice(5, 10)}</span>
+                      </div>
+                      <div className="topic-item-actions" onClick={e => e.stopPropagation()}>
+                        <button type="button" onClick={() => handleStartRename(t.id, t.title)} title="重命名">✏</button>
+                        <button type="button" onClick={() => { if (confirm('确定删除此话题？')) handleDeleteTopic(t.id) }} title="删除">✕</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </aside>
+
+      {/* === 主对话区 === */}
+      <div className="chat-main">
+        {/* 顶部栏 */}
+        <div className="chat-topbar">
+          <div className="chat-topbar-left">
+            <h2 className="chat-topbar-title">{activeTopic?.title ?? '对话'}</h2>
+            <span className="chat-topbar-count">{messages.length} 条消息</span>
+          </div>
+          <div className="chat-topbar-right">
+            <ModelSelector onModelChange={(_id, name) => setLlmModel(`${name}`)} />
+            <div className={`chat-status-dot ${openclawOnline === null ? 'detecting' : openclawOnline ? 'online' : 'offline'}`} title={openclawOnline === null ? '检测中' : openclawOnline ? 'OpenClaw 已连接' : 'OpenClaw 未连接'} />
+            <span className="chat-topbar-model">{actualLlmModel ? `${actualLlmModel}` : defaultModelLabel}</span>
+            {messages.length > 0 && (
+              <button type="button" className="chat-topbar-btn" onClick={handleClearHistory}>清空</button>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="page-split-grid ceo-page-grid">
-        <div className="stack-list compact-gap">
-          <div>
-            <p className="eyebrow" style={{ marginBottom: 8 }}>快速目标</p>
-          </div>
-          {quickGoals.map((goal, index) => (
-            <button
-              key={index}
-              type="button"
-              className="template-card"
-              onClick={() => handleSendGoal(goal)}
-              disabled={isThinking}
-            >
-              <p style={{ margin: 0, fontSize: 14 }}>{goal}</p>
-            </button>
-          ))}
-
-          {workStatus && (
-            <div style={{
-              padding: 12,
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(139, 92, 246, 0.06))',
-              border: '1px solid rgba(56, 189, 248, 0.15)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: '#38bdf8',
-                  display: 'inline-block',
-                  animation: 'pulse 1.2s ease-in-out infinite',
-                  boxShadow: '0 0 6px rgba(56, 189, 248, 0.5)',
-                }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#38bdf8' }}>
-                  {workStatus.icon} {workStatus.phase}
-                </span>
-              </div>
-            </div>
-          )}
-
-          <div style={{
-            padding: 14,
-            borderRadius: 12,
-            background: 'rgba(15, 23, 42, 0.5)',
-            border: '1px solid rgba(148, 163, 184, 0.1)',
-          }}>
-            <p className="eyebrow" style={{ marginBottom: 8 }}>工作流程</p>
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#94a3b8', lineHeight: 1.8 }}>
-              <li>聊想法 → 贾维斯理解意图</li>
-              <li>确认方向 → 召集团队讨论</li>
-              <li>方案确定 → 一键创建任务</li>
-              <li>执行 → 审核 → 完成</li>
-            </ul>
-          </div>
-
-          <div style={{
-            padding: 14,
-            borderRadius: 12,
-            background: openclawOnline
-              ? 'rgba(34, 197, 94, 0.06)'
-              : 'rgba(239, 68, 68, 0.06)',
-            border: `1px solid ${openclawOnline ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: openclawOnline === null ? '#64748b' : openclawOnline ? '#22c55e' : '#ef4444',
-                  display: 'inline-block',
-                  boxShadow: openclawOnline ? '0 0 6px rgba(34, 197, 94, 0.5)' : 'none',
-                }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: openclawOnline ? '#22c55e' : '#ef4444' }}>
-                  OpenClaw {openclawOnline === null ? '检测中...' : openclawOnline ? '已连接' : '未连接'}
-                </span>
-              </div>
-              <span style={{ fontSize: 11, color: llmModel === '未连接' ? '#ef4444' : '#94a3b8' }}>
-                {llmModel !== '检测中...' && llmModel !== '未连接' ? `LLM: ${llmModel}` : ''}
-              </span>
-            </div>
-          </div>
-
-          <div style={{
-            padding: 14,
-            borderRadius: 12,
-            background: 'rgba(15, 23, 42, 0.5)',
-            border: '1px solid rgba(148, 163, 184, 0.1)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <p className="eyebrow" style={{ margin: 0 }}>公司动态</p>
-              <button
-                type="button"
-                className="link-button"
-                onClick={handleRunHeartbeat}
-                disabled={isHeartbeating}
-                style={{ fontSize: 11 }}
-              >
-                {isHeartbeating ? '思考中...' : '让团队想想'}
-              </button>
-            </div>
-            {proposals.length === 0 ? (
-              <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>
-                点击"让团队想想"，各部门会主动提出建议。
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {proposals.slice(0, 5).map((p, i) => (
+        {/* 聊天消息区 */}
+        <div className="chat-messages-area">
+          {messages.length === 0 && liveMessages.length === 0 && (
+            <div className="chat-empty-state">
+              <div className="chat-empty-icon">💬</div>
+              <h3>和贾维斯聊聊你的想法</h3>
+              <p>输入目标或选择快速启动，贾维斯会理解你的意图并安排执行。</p>
+              <div className="chat-quick-goals">
+                {quickGoals.map((goal, index) => (
                   <button
-                    key={i}
+                    key={index}
                     type="button"
-                    onClick={() => handleProposalToChat(p)}
-                    style={{
-                      display: 'block',
-                      textAlign: 'left',
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      background: p.priority === 'high' ? 'rgba(239, 68, 68, 0.06)' : 'rgba(56, 189, 248, 0.05)',
-                      border: `1px solid ${p.priority === 'high' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(148, 163, 184, 0.08)'}`,
-                      cursor: 'pointer',
-                      color: '#e2e8f0',
-                      fontSize: 12,
-                      lineHeight: 1.5,
-                      width: '100%',
-                    }}
+                    className="chat-quick-goal-btn"
+                    onClick={() => handleSendGoal(goal)}
+                    disabled={isThinking}
                   >
-                    <span>{p.emoji} {p.agentName}：</span>
-                    <span style={{ fontWeight: 500 }}>{p.title}</span>
-                    <p style={{ margin: '4px 0 0', fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-                      {p.summary.length > 60 ? p.summary.slice(0, 60) + '...' : p.summary}
-                    </p>
+                    {goal}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
 
-        <div className="stack-list compact-gap">
-          <div className="chat-area" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            minHeight: 200,
-            maxHeight: 700,
-            overflowY: 'auto',
-            padding: '0 2px',
-          }}>
-            {messages.length === 0 && liveMessages.length === 0 && (
-              <div className="empty-state-card" style={{ textAlign: 'center', padding: 32 }}>
-                <p>跟贾维斯聊聊你的想法，或直接下达目标。</p>
-                <p className="muted">贾维斯会先理解你的意图，需要时召集团队制定方案。</p>
-              </div>
-            )}
-
-            {messages.map((msg) => (
+          {messages.map((msg) => (
               <div key={msg.id}>
                 {msg.role === 'ceo' ? (
                   <div className="prompt-box" style={{ borderColor: 'rgba(56, 189, 248, 0.3)' }}>
                     <div className="msg-action-row">
                       <button type="button" className="msg-action-btn" onClick={() => handleQuoteMessage(msg)}>引用</button>
                     </div>
-                    <p className="prompt-label">👤 CEO（你）</p>
+                    <p className="prompt-label">👤 CEO（你手动输入）</p>
                     {msg.quotedMessage && (
                       <div className="msg-quote">
                         <span className="msg-quote-role">{msg.quotedMessage.role === 'ceo' ? '👤 CEO' : '🎯 贾维斯'}</span>
@@ -1030,6 +967,23 @@ export function CeoChatPage() {
                     </div>
                     <p className="prompt-label">🎯 贾维斯</p>
                     <p style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+                    {msg.llmModelUsed && (
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '4px 8px',
+                        marginTop: 8,
+                        borderRadius: 999,
+                        background: 'rgba(56, 189, 248, 0.08)',
+                        border: '1px solid rgba(56, 189, 248, 0.18)',
+                        fontSize: 11,
+                        color: '#7dd3fc',
+                      }}>
+                        <span>🧠</span>
+                        <span>本次模型：{msg.llmModelUsed}</span>
+                      </div>
+                    )}
                     <p className="history-note">{msg.createdAt}</p>
                   </div>
                 )}
@@ -1159,25 +1113,25 @@ export function CeoChatPage() {
               </div>
             )}
 
-            {activeActions.map(action => (
-              <ActionTrackerCard
-                key={action.id}
-                action={action}
-                onDismiss={() => {
-                  setActiveActions(prev =>
-                    prev.map(a => a.id === action.id
-                      ? { ...a, status: a.status === 'done' || a.status === 'failed' ? a.status : 'done' as const, updatedAt: Date.now() }
-                      : a
-                    ).filter(a => !(a.id === action.id && (a.status === 'done' || a.status === 'failed')))
-                  )
-                }}
-              />
-            ))}
+            <ActionTrackerPanel
+              actions={activeActions}
+              onDismiss={(id) => {
+                setActiveActions(prev =>
+                  prev.map(a => a.id === id
+                    ? { ...a, status: a.status === 'done' || a.status === 'failed' ? a.status : 'done' as const, updatedAt: Date.now() }
+                    : a
+                  ).filter(a => !(a.id === id && (a.status === 'done' || a.status === 'failed')))
+                )
+              }}
+            />
 
-            <WorkIndicator status={workStatus} />
             <div ref={chatEndRef} />
           </div>
 
+          {/* 固定在输入框上方的实时状态条 */}
+          <StickyWorkBar status={workStatus} activeActions={activeActions} />
+
+          {/* 输入区 */}
           <ChatInputBar
             onSubmit={handleInputSubmit}
             disabled={isThinking}
@@ -1185,7 +1139,6 @@ export function CeoChatPage() {
             onClearQuote={() => setQuotedMessage(null)}
           />
         </div>
-      </div>
     </section>
   )
 }

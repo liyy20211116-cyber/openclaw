@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useSnapshot } from '../hooks/useSnapshot'
+import { getSnapshot } from '../lib/snapshotStore'
 
 interface Notification {
   id: string
@@ -16,22 +18,104 @@ const TYPE_STYLES: Record<string, { icon: string; color: string; bg: string }> =
   error: { icon: 'x', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)' },
 }
 
-const DEFAULT_NOTIFICATIONS: Notification[] = [
-  { id: '1', type: 'success', title: 'Agent 团队就绪', message: '10 个 Agent 全部配置完成，健康度 88.2/100', time: '刚刚', read: false },
-  { id: '2', type: 'warning', title: '安全扫描发现', message: '2 处密钥泄露风险需要处理', time: '15分钟前', read: false },
-  { id: '3', type: 'info', title: '纳威入职', message: '人资部 CHRO 纳威·隆巴顿已完成入职配置', time: '30分钟前', read: false },
-  { id: '4', type: 'success', title: '绩效评估完成', message: '首次全员绩效评估：团队均分 74.3，6A4B', time: '1小时前', read: true },
-  { id: '5', type: 'info', title: '服务目录就绪', message: '4 个标准服务包已创建，年潜力 CNY 312K', time: '2小时前', read: true },
-]
+function relativeTime(iso: string | undefined): string {
+  if (!iso) return ''
+  const t = Date.parse(iso)
+  if (!Number.isFinite(t)) return iso.slice(0, 16).replace('T', ' ')
+  const diffMs = Date.now() - t
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return '刚刚'
+  if (mins < 60) return `${mins}分钟前`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}小时前`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}天前`
+  return iso.slice(0, 10)
+}
+
+function useNotifications(): Notification[] {
+  useSnapshot()
+  const snapshot = getSnapshot()
+  const perf = snapshot.performanceSummary
+  const openAudits = snapshot.auditEvents.filter((e) => e.status === 'open').length
+  const pendingApprovals = snapshot.approvals.filter((a) => a.status === 'pending').length
+
+  return useMemo(() => {
+    const items: Notification[] = []
+
+    if (perf) {
+      const gradeText = (Object.entries(perf.gradeDistribution) as [string, number][])
+        .filter(([, count]) => count > 0)
+        .map(([g, count]) => `${count}${g}`)
+        .join('')
+      items.push({
+        id: 'perf-latest',
+        type: 'success',
+        title: '绩效评估结果',
+        message: `团队均分 ${perf.avgScore}${gradeText ? ` · ${gradeText}` : ''} · 领先：${perf.topPerformer || '-'}`,
+        time: relativeTime(perf.reviewDate),
+        read: false,
+      })
+    } else {
+      items.push({
+        id: 'perf-missing',
+        type: 'info',
+        title: '尚未生成绩效评估',
+        message: '在 CEO 驾驶舱点击「刷新评分」可触发首次评估。',
+        time: '',
+        read: false,
+      })
+    }
+
+    if (openAudits > 0) {
+      items.push({
+        id: 'audit-open',
+        type: 'warning',
+        title: '审计事件待处理',
+        message: `当前 ${openAudits} 条 open 状态审计事件，需要跟进。`,
+        time: '',
+        read: false,
+      })
+    }
+
+    if (pendingApprovals > 0) {
+      items.push({
+        id: 'approvals-pending',
+        type: 'info',
+        title: '待审批事项',
+        message: `有 ${pendingApprovals} 条审批待 CEO 处理。`,
+        time: '',
+        read: false,
+      })
+    }
+
+    if (items.length === 0) {
+      items.push({
+        id: 'all-clear',
+        type: 'success',
+        title: '当前无未处理事项',
+        message: '审批、审计、绩效评估均已就绪。',
+        time: '刚刚',
+        read: true,
+      })
+    }
+
+    return items
+  }, [perf, openAudits, pendingApprovals])
+}
 
 export function NotificationPanel() {
-  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS)
+  const items = useNotifications()
+  const [reads, setReads] = useState<Record<string, boolean>>({})
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const unreadCount = notifications.filter(n => !n.read).length
+  const notifications: Notification[] = items.map((n) => ({ ...n, read: reads[n.id] ?? n.read }))
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   function markAllRead() {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    const map: Record<string, boolean> = { ...reads }
+    for (const n of notifications) map[n.id] = true
+    setReads(map)
   }
 
   const displayList = isExpanded ? notifications : notifications.slice(0, 3)

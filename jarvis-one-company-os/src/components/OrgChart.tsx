@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { loadAppConfig, type AgentConfig, getCeoName } from '../services/configService'
 
 interface OrgNode {
   id: string
@@ -10,31 +11,43 @@ interface OrgNode {
   children?: OrgNode[]
 }
 
-const ORG_DATA: OrgNode = {
-  id: 'ceo',
-  name: 'CEO (李原野)',
-  role: '创始人',
-  emoji: '👤',
-  children: [
-    {
-      id: 'jarvis',
-      name: '贾维斯',
-      role: 'COO',
-      emoji: '🎯',
+const AGENT_EMOJIS: Record<string, string> = {
+  'jarvis-coo': '🎯', 'hermione-tech': '📚', 'mcgonagall-product': '🐱',
+  'luna-growth': '🌙', 'fred-sales': '🎪', 'percy-finance': '📊',
+  'snape-audit': '🦇', 'dobby-customer': '🧦', 'neville-hr': '🌱',
+}
+
+function buildOrgData(agents: AgentConfig[], ceoName: string): OrgNode {
+  const coo = agents.find(a => a.role === 'COO') ?? agents[0]
+  const others = agents.filter(a => a.id !== coo?.id)
+
+  return {
+    id: 'ceo',
+    name: `CEO (${ceoName})`,
+    role: '创始人',
+    emoji: '👤',
+    children: coo ? [{
+      id: coo.id.split('-')[0],
+      name: coo.display_name,
+      role: coo.role,
+      emoji: AGENT_EMOJIS[coo.id] ?? '🎯',
       score: 88,
       grade: 'A',
-      children: [
-        { id: 'hermione', name: '赫敏', role: 'CTO', emoji: '📚', score: 80, grade: 'A' },
-        { id: 'mcgonagall', name: '麦格', role: 'CPO', emoji: '🐱', score: 75, grade: 'A' },
-        { id: 'luna', name: '卢娜', role: 'CGO', emoji: '🌙', score: 75, grade: 'A' },
-        { id: 'fred', name: '弗雷德', role: 'Sales', emoji: '🎪', score: 70, grade: 'B' },
-        { id: 'percy', name: '珀西', role: 'CFO', emoji: '📊', score: 75, grade: 'A' },
-        { id: 'snape', name: '斯内普', role: 'Audit', emoji: '🦇', score: 75, grade: 'A' },
-        { id: 'dobby', name: '多比', role: 'CS', emoji: '🧦', score: 70, grade: 'B' },
-        { id: 'neville', name: '纳威', role: 'CHRO', emoji: '🌱', score: 70, grade: 'B' },
-      ],
-    },
-  ],
+      children: others.filter(a => a.enabled).map(a => ({
+        id: a.id.split('-')[0],
+        name: a.display_name,
+        role: a.role,
+        emoji: AGENT_EMOJIS[a.id] ?? '🤖',
+        score: 75,
+        grade: 'A',
+      })),
+    }] : [],
+  }
+}
+
+const FALLBACK_ORG: OrgNode = {
+  id: 'ceo', name: 'CEO', role: '创始人', emoji: '👤',
+  children: [{ id: 'jarvis', name: 'Jarvis', role: 'COO', emoji: '🎯', children: [] }],
 }
 
 const GRADE_COLORS: Record<string, string> = {
@@ -78,7 +91,17 @@ function OrgNodeCard({ node, onSelect }: { node: OrgNode; onSelect: (id: string)
 
 export function OrgChart() {
   const [selected, setSelected] = useState<string>('')
-  const ceo = ORG_DATA
+  const [orgData, setOrgData] = useState<OrgNode>(FALLBACK_ORG)
+
+  useEffect(() => {
+    loadAppConfig().then(cfg => {
+      if (cfg.agents?.length) {
+        setOrgData(buildOrgData(cfg.agents, getCeoName(cfg)))
+      }
+    })
+  }, [])
+
+  const ceo = orgData
   const coo = ceo.children?.[0]
   const departments = coo?.children ?? []
 

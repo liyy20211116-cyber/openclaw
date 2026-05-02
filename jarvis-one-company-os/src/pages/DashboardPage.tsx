@@ -1,13 +1,109 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useSnapshot } from '../hooks/useSnapshot'
-import { dashboardService } from '../services/dashboardService'
+import { dashboardService, fetchLlmUsageSummary } from '../services/dashboardService'
 import { AgentPerformanceChart } from '../components/AgentPerformanceChart'
 import { NotificationPanel } from '../components/NotificationPanel'
+import { agentService } from '../services/agentService'
+import { loadAppConfig } from '../services/configService'
+import { performanceV2Service } from '../services/performanceV2Service'
+import { profitabilityService } from '../services/profitabilityService'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import type { LlmUsageSummary } from '../types'
+
+const AGENT_COLORS = ['#38bdf8', '#a78bfa', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16']
+
+function LlmCostPanel({ summary }: { summary: LlmUsageSummary }) {
+  const pieData = summary.costByAgent
+    .filter(a => a.estimatedCost > 0)
+    .map(a => ({ name: a.agentId === 'unknown' ? '系统' : a.agentId, value: Math.round(a.estimatedCost * 10000) / 10000 }))
+
+  return (
+    <div className="panel" style={{ padding: 14 }}>
+      <p className="eyebrow" style={{ marginBottom: 8 }}>LLM 成本追踪（本周）</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+        <div>
+          <span style={{ fontSize: 11, color: '#94a3b8' }}>今日成本</span>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>¥{summary.todayCost.toFixed(4)}</div>
+          <span style={{ fontSize: 11, color: '#64748b' }}>{summary.todayCalls} 次调用</span>
+        </div>
+        <div>
+          <span style={{ fontSize: 11, color: '#94a3b8' }}>本周成本</span>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>¥{summary.weeklyCost.toFixed(4)}</div>
+          <span style={{ fontSize: 11, color: '#64748b' }}>{summary.weeklyCalls} 次调用</span>
+        </div>
+        <div>
+          <span style={{ fontSize: 11, color: '#94a3b8' }}>本周 Token</span>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>{summary.weeklyTokens.toLocaleString()}</div>
+          <span style={{ fontSize: 11, color: '#64748b' }}>input+output</span>
+        </div>
+      </div>
+      {pieData.length > 0 && (
+        <div style={{ height: 160 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} innerRadius={30} paddingAngle={2} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} style={{ fontSize: 10 }}>
+                {pieData.map((_, i) => <Cell key={i} fill={AGENT_COLORS[i % AGENT_COLORS.length]} />)}
+              </Pie>
+              <Tooltip formatter={(v) => `¥${Number(v).toFixed(4)}`} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {pieData.length === 0 && <p style={{ color: '#64748b', fontSize: 12 }}>暂无调用数据</p>}
+    </div>
+  )
+}
 
 export function DashboardPage() {
   useSnapshot()
   const navigate = useNavigate()
   const o = dashboardService.getOverview()
+  const agents = agentService.getAll()
+  const [, setConfigVersion] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    loadAppConfig().finally(() => {
+      if (!cancelled) setConfigVersion((value) => value + 1)
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  const commercialReport = performanceV2Service.getReport()
+  const teamStats = (() => {
+    const count = agents.filter((agent) => agent.id !== 'ceo').length
+    const distText = (['S', 'A', 'B', 'C', 'D'] as const)
+      .filter((grade) => (commercialReport.summary.gradeDistribution[grade] ?? 0) > 0)
+      .map((grade) => `${commercialReport.summary.gradeDistribution[grade]}${grade}`)
+      .join('')
+    return {
+      count,
+      avgScore: commercialReport.summary.avgScore,
+      grade: commercialReport.summary.companyReadinessGrade,
+      distribution: distText,
+    }
+  })()
+
+  const boundary = profitabilityService.getBoundary()
+  const weeklyBurn = boundary.weeklyBurn
+  const topBreakEven = boundary.breakEven
+    .filter((b) => b.avgUnitProfit > 0 && b.ordersNeededPerMonth > 0)
+    .sort((a, b) => a.ordersNeededPerMonth - b.ordersNeededPerMonth)[0]
+  const boundaryTagline = topBreakEven
+    ? `主推「${topBreakEven.name}」≈ ${topBreakEven.ordersPerWeek} 单/周即平衡`
+    : boundary.currentNetProfit >= 0
+      ? '已覆盖成本'
+      : boundary.dailyBurn.monthlyFiatSpend === 0
+        ? '先跑出 1 条真实流水'
+        : '所有业务线单单亏损，需调整'
+
+  const [llmSummary, setLlmSummary] = useState<LlmUsageSummary | null>(null)
+  useEffect(() => {
+    fetchLlmUsageSummary().then(setLlmSummary)
+    const timer = setInterval(() => { fetchLlmUsageSummary().then(setLlmSummary) }, 60_000)
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <>
@@ -54,20 +150,36 @@ export function DashboardPage() {
       </section>
 
       <section className="metrics-grid metrics-grid-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
-        <article className="metric-card">
-          <span style={{ color: '#22c55e' }}>Agent 团队</span>
-          <strong>10 人</strong>
-          <p>9部门 · 绩效均分 74.3</p>
+        <article
+          className={boundary.currentNetProfit >= 0 ? 'metric-card' : 'metric-card warning'}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/profitability')}
+        >
+          <span style={{ color: boundary.currentNetProfit >= 0 ? '#22c55e' : '#f59e0b' }}>盈利边界</span>
+          <strong>
+            {topBreakEven
+              ? `${topBreakEven.ordersNeededPerMonth} 单/月`
+              : boundary.currentNetProfit >= 0 ? '已盈利' : '未知'}
+          </strong>
+          <p>{boundaryTagline}</p>
         </article>
         <article className="metric-card">
-          <span style={{ color: '#38bdf8' }}>自动化脚本</span>
-          <strong>40+</strong>
-          <p>8部门全覆盖</p>
+          <span style={{ color: '#22c55e' }}>商业就绪</span>
+          <strong>{teamStats.avgScore.toFixed(1)}/100</strong>
+          <p>
+            {teamStats.count > 0
+              ? `团队 ${teamStats.count} 人 · ${teamStats.grade}${teamStats.distribution ? ` · ${teamStats.distribution}` : ''}`
+              : '暂无角色数据'}
+          </p>
         </article>
         <article className="metric-card">
-          <span style={{ color: '#a78bfa' }}>服务目录</span>
-          <strong>4 项</strong>
-          <p>年潜力 CNY 312K</p>
+          <span style={{ color: '#38bdf8' }}>烧钱速率</span>
+          <strong>¥{boundary.dailyBurn.dailyFiatSpend.toFixed(2)}/日</strong>
+          <p>
+            {boundary.dailyBurn.sampleDays > 0
+              ? `本周 ¥${weeklyBurn.currentWeekFiatSpend.toFixed(0)} vs 上周 ¥${weeklyBurn.previousWeekFiatSpend.toFixed(0)}${weeklyBurn.deltaPercent != null ? ` · ${weeklyBurn.deltaPercent > 0 ? '+' : ''}${weeklyBurn.deltaPercent}%` : ''}`
+              : '尚未产生真实账本流水'}
+          </p>
         </article>
       </section>
 
@@ -110,6 +222,37 @@ export function DashboardPage() {
           <AgentPerformanceChart />
         </div>
         <NotificationPanel />
+      </section>
+
+      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {llmSummary && <LlmCostPanel summary={llmSummary} />}
+        {llmSummary && llmSummary.recentLogs.length > 0 && (
+          <div className="panel" style={{ padding: 14, overflow: 'auto', maxHeight: 320 }}>
+            <p className="eyebrow" style={{ marginBottom: 8 }}>最近 LLM 调用</p>
+            <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ color: '#94a3b8', borderBottom: '1px solid #1e293b' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 6px' }}>时间</th>
+                  <th style={{ textAlign: 'left', padding: '4px 6px' }}>调用方</th>
+                  <th style={{ textAlign: 'right', padding: '4px 6px' }}>Token</th>
+                  <th style={{ textAlign: 'right', padding: '4px 6px' }}>成本</th>
+                  <th style={{ textAlign: 'right', padding: '4px 6px' }}>耗时</th>
+                </tr>
+              </thead>
+              <tbody>
+                {llmSummary.recentLogs.slice(0, 15).map(log => (
+                  <tr key={log.id} style={{ borderBottom: '1px solid #0f172a' }}>
+                    <td style={{ padding: '3px 6px', color: '#64748b' }}>{String(log.createdAt).slice(11, 19)}</td>
+                    <td style={{ padding: '3px 6px' }}>{log.callerFunction || log.agentId || '-'}</td>
+                    <td style={{ padding: '3px 6px', textAlign: 'right' }}>{log.totalTokens.toLocaleString()}</td>
+                    <td style={{ padding: '3px 6px', textAlign: 'right', color: '#f59e0b' }}>¥{log.estimatedCost.toFixed(4)}</td>
+                    <td style={{ padding: '3px 6px', textAlign: 'right', color: '#64748b' }}>{(log.durationMs / 1000).toFixed(1)}s</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </>
   )

@@ -2,13 +2,24 @@ import { useEffect, useMemo, useState } from 'react'
 import { statusLabelMap } from '../app/status'
 import { useSnapshot } from '../hooks/useSnapshot'
 import { agentService } from '../services/agentService'
+import { loadAppConfig } from '../services/configService'
 import { ledgerService } from '../services/ledgerService'
+import { performanceV2Service } from '../services/performanceV2Service'
 import { taskService } from '../services/taskService'
+import { CommercialReadinessRadar } from '../components/CommercialReadinessRadar'
 import { OrgChart } from '../components/OrgChart'
 import { MemoryBrowser } from '../components/MemoryBrowser'
 import { PerformanceSparkline } from '../components/PerformanceSparkline'
 import { gradeColor, scoreColor, fetchPerformanceHistory } from '../services/performanceService'
-import type { PerformanceHistoryPoint } from '../types'
+import type { CommercialDimensionKey, PerformanceHistoryPoint } from '../types'
+
+const dimensionLabelMap: Record<CommercialDimensionKey, string> = {
+  autonomy: '自主运行',
+  revenue_contribution: '自主盈利',
+  intelligence: '聪明大脑',
+  execution: '灵活手脚',
+  productization: '可商业化',
+}
 
 export function AgentsPage() {
   useSnapshot()
@@ -16,10 +27,25 @@ export function AgentsPage() {
   const tasks = taskService.getAll()
   const ledger = ledgerService.getAll()
   const [selectedAgentId, setSelectedAgentId] = useState('')
+  const [, setConfigVersion] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    loadAppConfig().finally(() => {
+      if (!cancelled) setConfigVersion((value) => value + 1)
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  const commercialReport = performanceV2Service.getReport()
 
   const selectedAgent = useMemo(
     () => agents.find((a) => a.id === selectedAgentId) ?? null,
     [agents, selectedAgentId],
+  )
+  const selectedCommercial = useMemo(
+    () => commercialReport.records.find((item) => item.agentId === selectedAgentId) ?? null,
+    [commercialReport.records, selectedAgentId],
   )
 
   const agentTasks = useMemo(() => {
@@ -89,6 +115,11 @@ export function AgentsPage() {
                   <span>钱包 {agent.walletBalance}</span>
                   <span>任务 {agent.currentTasks}</span>
                   <span>合规 {agent.complianceScore}</span>
+                  {commercialReport.records.find((item) => item.agentId === agent.id) && (
+                    <span style={{ color: '#22c55e', fontWeight: 600 }}>
+                      商业就绪 {commercialReport.records.find((item) => item.agentId === agent.id)!.score} {commercialReport.records.find((item) => item.agentId === agent.id)!.grade}
+                    </span>
+                  )}
                   {agent.performance && (
                     <span style={{
                       color: scoreColor(agent.performance.score),
@@ -121,6 +152,16 @@ export function AgentsPage() {
                   <span className="label">合规分</span>
                   <strong>{selectedAgent.complianceScore}</strong>
                 </div>
+                {selectedCommercial && (
+                  <div className="timeline-summary-card" style={{
+                    borderColor: `${gradeColor(selectedCommercial.grade)}55`,
+                  }}>
+                    <span className="label">商业就绪 v2</span>
+                    <strong style={{ color: gradeColor(selectedCommercial.grade) }}>
+                      {selectedCommercial.score}/100 {selectedCommercial.grade}
+                    </strong>
+                  </div>
+                )}
                 {selectedAgent.performance && (
                   <div className="timeline-summary-card" style={{
                     borderColor: `${gradeColor(selectedAgent.performance.grade)}55`,
@@ -133,10 +174,43 @@ export function AgentsPage() {
                 )}
               </div>
 
+              {selectedCommercial && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 12 }}>
+                  <div>
+                    <p className="eyebrow" style={{ marginBottom: 8 }}>商业就绪评分 v2</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 6 }}>
+                      {Object.entries(selectedCommercial.breakdown).map(([key, value]) => (
+                        <div key={key} style={{
+                          padding: '6px 8px',
+                          borderRadius: 6,
+                          background: 'rgba(15, 23, 42, 0.4)',
+                          border: '1px solid rgba(148, 163, 184, 0.14)',
+                        }}>
+                          <div style={{ fontSize: 10, color: '#94a3b8' }}>{dimensionLabelMap[key as CommercialDimensionKey]}</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>
+                            {value}/{20}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p style={{ marginTop: 8, fontSize: 11, color: '#94a3b8' }}>{selectedCommercial.summary}</p>
+                    {selectedCommercial.improvementAreas.length > 0 && (
+                      <p style={{ marginTop: 8, fontSize: 11, color: '#f59e0b' }}>
+                        待提升：{selectedCommercial.improvementAreas.map((key) => dimensionLabelMap[key]).join(' · ')}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="eyebrow" style={{ marginBottom: 8 }}>商业就绪雷达图</p>
+                    <CommercialReadinessRadar record={selectedCommercial} />
+                  </div>
+                </div>
+              )}
+
               {selectedAgent.performance && (
                 <div>
                   <p className="eyebrow" style={{ marginBottom: 8 }}>
-                    绩效维度明细
+                    绩效维度明细 v1
                     <span style={{ marginLeft: 8, color: '#64748b', fontWeight: 400 }}>
                       评估时间 {selectedAgent.performance.reviewedAt.slice(0, 16).replace('T', ' ')} · 评估者 {selectedAgent.performance.reviewer}
                     </span>

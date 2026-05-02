@@ -3,63 +3,63 @@
   "defaultTimeoutSeconds": 300,
   "agents": {
     "agent_ceo": {
-      "openclawId": "jarvis-ceo",
+      "openclawId": "main",
       "label": "CEO 决策",
       "capabilities": ["goal_decompose", "approve", "review"],
       "maxConcurrentTasks": 1,
       "taskTypes": ["ops"]
     },
     "agent_jarvis": {
-      "openclawId": "jarvis-coordinator",
+      "openclawId": "main",
       "label": "贾维斯 COO 协调",
       "capabilities": ["task_decompose", "delegate", "coordinate", "report"],
       "maxConcurrentTasks": 3,
       "taskTypes": ["ops"]
     },
     "agent_hermione": {
-      "openclawId": "jarvis-tech",
+      "openclawId": "main",
       "label": "赫敏·格兰杰 CTO 技术执行",
       "capabilities": ["code", "architecture", "deploy", "test", "api_integration", "automation"],
       "maxConcurrentTasks": 2,
       "taskTypes": ["tech"]
     },
     "agent_mcgonagall": {
-      "openclawId": "jarvis-product",
+      "openclawId": "main",
       "label": "麦格教授 CPO 产品执行",
       "capabilities": ["prd", "requirement_analysis", "user_story", "acceptance_criteria"],
       "maxConcurrentTasks": 2,
       "taskTypes": ["product"]
     },
     "agent_luna": {
-      "openclawId": "jarvis-growth",
+      "openclawId": "main",
       "label": "卢娜 CGO 内容增长执行",
       "capabilities": ["content_create", "copywrite", "seo", "social_media", "growth_experiment"],
       "maxConcurrentTasks": 2,
       "taskTypes": ["growth"]
     },
     "agent_fred": {
-      "openclawId": "jarvis-sales",
+      "openclawId": "main",
       "label": "弗雷德 CSO 销售执行",
       "capabilities": ["pricing", "sales_script", "customer_outreach", "competitive_analysis"],
       "maxConcurrentTasks": 2,
       "taskTypes": ["sales"]
     },
     "agent_percy": {
-      "openclawId": "jarvis-finance",
+      "openclawId": "main",
       "label": "珀西 CFO 财务执行",
       "capabilities": ["budget_review", "ledger", "report", "forecast", "roi_analysis"],
       "maxConcurrentTasks": 1,
       "taskTypes": ["finance"]
     },
     "agent_snape": {
-      "openclawId": "jarvis-audit",
+      "openclawId": "main",
       "label": "斯内普 CAO 审计巡检",
       "capabilities": ["inspect", "compliance_check", "risk_assess", "freeze", "code_review"],
       "maxConcurrentTasks": 1,
       "taskTypes": ["audit"]
     },
     "agent_dobby": {
-      "openclawId": "jarvis-customer",
+      "openclawId": "main",
       "label": "多比 CCO 客户成功",
       "capabilities": ["ux_review", "customer_feedback", "satisfaction_tracking", "testing"],
       "maxConcurrentTasks": 2,

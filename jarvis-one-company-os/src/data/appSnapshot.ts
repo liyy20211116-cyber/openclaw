@@ -24,9 +24,9 @@ export const appSnapshot: AppSnapshot = {
       "role": "执行总裁",
       "department": "Executive Office",
       "persona": "冷静高效的 COO，理解 CEO 意图，拆解目标，调度各部门一号位协同推进。",
-      "status": "busy",
-      "walletBalance": 5000,
-      "currentTasks": 3,
+      "status": "idle",
+      "walletBalance": 4200,
+      "currentTasks": 5,
       "complianceScore": 98,
       "goals": [
         "拆解目标",
@@ -174,8 +174,8 @@ export const appSnapshot: AppSnapshot = {
       "department": "Sales",
       "persona": "韦氏魔法把戏坊创始人，天生的商人。幽默有感染力，懂得客户想要什么。",
       "status": "idle",
-      "walletBalance": 3000,
-      "currentTasks": 0,
+      "walletBalance": 3025,
+      "currentTasks": 1,
       "complianceScore": 98,
       "goals": [
         "客户开发与获客",
@@ -1276,6 +1276,94 @@ export const appSnapshot: AppSnapshot = {
           "createdAt": "2026-04-11 01:16"
         }
       ]
+    },
+    {
+      "id": "commercial_evidence_local_loop_001",
+      "title": "Local commercial readiness evidence loop",
+      "owner": "弗雷德·韦斯莱",
+      "ownerAgentId": "fred",
+      "description": "Local evidence row for task -> execution -> delivery -> revenue -> token ledger. This is not a real customer payment.",
+      "taskType": "sales",
+      "priority": "high",
+      "status": "completed",
+      "budgetToken": 500,
+      "spentToken": 320,
+      "dueAt": "",
+      "requiresApproval": false,
+      "resubmissionCount": 0,
+      "latestRejectionNote": "",
+      "latestRejectionAt": "",
+      "timeline": [
+        {
+          "id": "log_992a4c85c843",
+          "type": "complete",
+          "submissionIndex": 1,
+          "actor": "弗雷德·韦斯莱",
+          "note": "complete",
+          "createdAt": "2026-04-28 12:00"
+        }
+      ]
+    },
+    {
+      "id": "task_179fc22cb6dc",
+      "title": "M1商业闭环：7天内拿到1个999元启航版订单",
+      "owner": "贾维斯",
+      "ownerAgentId": "jarvis",
+      "description": "CEO指令：Jarvis统筹一人公司跑通最小盈利闭环。目标：发布可售服务包与付款入口，生成销售话术，筛选首批线索，人工确认后触达，拿到1个999元启航版订单。约束：不得伪造成交，不得自动群发；所有对外发送需要CEO确认。",
+      "taskType": "ops",
+      "priority": "urgent",
+      "status": "completed",
+      "budgetToken": 800,
+      "spentToken": 800,
+      "dueAt": "",
+      "requiresApproval": false,
+      "resubmissionCount": 0,
+      "latestRejectionNote": "",
+      "latestRejectionAt": "",
+      "timeline": [
+        {
+          "id": "log_8b4dd46aba29",
+          "type": "created",
+          "submissionIndex": 1,
+          "actor": "你",
+          "note": "首次提交任务：M1商业闭环：7天内拿到1个999元启航版订单",
+          "createdAt": "2026-04-28 12:51"
+        },
+        {
+          "id": "log_7d9d65414e2d",
+          "type": "start",
+          "submissionIndex": 1,
+          "actor": "贾维斯",
+          "note": "start",
+          "createdAt": "2026-04-28 12:51"
+        },
+        {
+          "id": "log_14b737d1f842",
+          "type": "complete",
+          "submissionIndex": 1,
+          "actor": "贾维斯",
+          "note": "complete",
+          "createdAt": "2026-04-28 12:51"
+        }
+      ]
+    },
+    {
+      "id": "self_operating_task_20260428",
+      "title": "自营经营循环：先让一人公司自己跑起来",
+      "owner": "贾维斯",
+      "ownerAgentId": "jarvis",
+      "description": "每天让Jarvis组织增长、销售、财务、客户成功形成自营获客和收款闭环；不得伪造成交，不得自动群发，真实收入只在到账后登记。",
+      "taskType": "ops",
+      "priority": "urgent",
+      "status": "completed",
+      "budgetToken": 600,
+      "spentToken": 600,
+      "dueAt": "",
+      "requiresApproval": false,
+      "resubmissionCount": 0,
+      "latestRejectionNote": "",
+      "latestRejectionAt": "",
+      "timeline": []
     }
   ],
   "approvals": [
@@ -1436,8 +1524,43 @@ export const appSnapshot: AppSnapshot = {
       "latestRejectionNote": ""
     }
   ],
-  "ledger": [],
-  "revenues": [],
+  "ledger": [
+    {
+      "id": "ledger_7c6cdf2164dd",
+      "type": "reward",
+      "actor": "fred",
+      "amount": 25,
+      "note": "local evidence revenue reward",
+      "createdAt": "2026-04-28 12:00"
+    },
+    {
+      "id": "ledger_80ebe89ffae5",
+      "type": "revenue_mapping",
+      "actor": "treasury main",
+      "amount": 75,
+      "note": "local evidence treasury share",
+      "createdAt": "2026-04-28 12:00"
+    },
+    {
+      "id": "ledger_0ea9dab9d4a9",
+      "type": "budget",
+      "actor": "task cost",
+      "amount": -800,
+      "note": "任务完成结算：M1商业闭环：7天内拿到1个999元启航版订单",
+      "createdAt": "2026-04-28 12:51"
+    }
+  ],
+  "revenues": [
+    {
+      "id": "commercial_evidence_revenue_001",
+      "title": "Local evidence revenue entry",
+      "businessLine": "AI Automation",
+      "sourceTask": "Local commercial readiness evidence loop",
+      "amount": 1,
+      "tokenMapped": 100,
+      "roi": 1
+    }
+  ],
   "auditEvents": [],
   "storeItems": [
     {
@@ -1493,9 +1616,9 @@ export const appSnapshot: AppSnapshot = {
   ],
   "storeOrders": [],
   "treasury": {
-    "totalBalance": 200000,
+    "totalBalance": 200100,
     "reservedBalance": 8600,
-    "availableBalance": 191400
+    "availableBalance": 191475
   },
   "performanceSummary": {
     "reviewDate": "2026-04-23T07:10:07.134Z",
