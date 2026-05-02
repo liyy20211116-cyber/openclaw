@@ -161,7 +161,7 @@ if (-not (Install-OpenClawIfMissing)) {
 Start-PipelineApiIfNeeded
 Start-CardActionHandlerIfNeeded
 
-$env:OPENAI_API_KEY = "sk-fandai-9e151a7a060afe8d068d4513eacfed0f2de67b0dea2d2e91"
+$env:OPENAI_API_KEY = [System.Environment]::GetEnvironmentVariable("OPENAI_API_KEY","User")
 
 Write-Host "Starting Gateway on port 18789..." -ForegroundColor Green
 Write-Host "Dashboard: $dashboardUrl" -ForegroundColor Yellow
