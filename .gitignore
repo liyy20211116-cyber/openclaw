@@ -1,27 +1,124 @@
+# ============================================================
+# ???? OS / OpenClaw ?? .gitignore
+# ?????
+#   1. ? tracked ??????????????git ???
+#   2. ?????/Cookie/Token/??????? ignore
+#   3. ????????dev.db?release/?output/*??? ignore
+#   4. ??????????README??? .gitkeep
+# ============================================================
+
+# ---------------- ?? ----------------
 node_modules/
 .env
 .env.*
+!.env.example
+!.env.testing.example
 npm-debug.log*
 *.log
 
-# OpenClaw 源码（本地运行需要，不提交）
+# ---------------- OpenClaw ?? ----------------
+# ???????????????? clone ??????
 OpenClaw/
 
-# IDE
+# ---------------- IDE / Editor ----------------
 .cursor/
 .vscode/
+.idea/
 
-# Python
+# ---------------- Python ----------------
 __pycache__/
 *.pyc
+*.pyo
+.venv/
+venv/
 
-# 归档目录
-归档_历史文档/
+# ---------------- ?? ----------------
+??_????/
 
-# 临时文件
+# ---------------- ?? / ???? ----------------
+config/payment-info.json
+config/webhook-config.json
+config/*.jpg
+config/*.png
+
+# ?????????????/Cookie/Token/???
+config/tenant/*/integrations/*.json
+config/tenant/*/license.txt
+config/tenant/*/secrets/**
+!config/tenant/*/integrations/README.md
+!config/tenant/*/integrations/*.example.json
+config/secrets/
+assets/qr/
+!assets/qr/README.md
+
+# ---------------- ???????????/?????????? ----------------
+output/landing/payment-block.*
+output/ops/
+output/publish/
+output/publish_log/
+
+# ??/????
+output/posters/
+output/video/
+output/daily_hot/
+output/competitor/
+
+# ???? OS ?????
+output/coo_ops/
+output/daily_standup/
+output/downloads/
+output/drafts/
+output/finance/
+output/hr/
+output/licenses/
+output/onboarding/
+output/performance/
+output/product/
+output/reports/
+output/revenue_goals/
+output/sales/
+output/self_operating_loop/
+output/test_*/
+output/xhs_leadgen/
+output/one-company-dm-package-*/
+output/scheduler-state.json
+output/content_calendar_*.json
+output/video_analysis_*.json
+output/video_analysis_*.png
+output/performance_review_*.json
+output/???_*.html
+
+# ---------------- ???? & ?? ----------------
 *.tmp
 .DS_Store
+backup_chat_*/
+chat_backup.json
+extracted_chat_data.json
+backups/
 
-# 大文件
+# ---------------- ??? & ???? ----------------
 *.zip
 *.exe
+jarvis-one-company-os/release/
+jarvis-one-company-os/dist-backend/
+# dist-electron/ ?????? tracked?? Batch C ?????
+
+# ---------------- jarvis-one-company-os ??? ----------------
+jarvis-one-company-os/dev.db-shm
+jarvis-one-company-os/dev.db-wal
+jarvis-one-company-os/tmp-llm-chat-test.json
+jarvis-one-company-os/vite-daily-run-log.log
+jarvis-one-company-os/vite-daily-run-log.err.log
+jarvis-one-company-os/scheduler-state.json
+
+# ---------------- ?????????? setup_toolchain.ps1 ???????? ----------------
+tools/videocut/
+tools/openclip/
+tools/Clip2Post/
+tools/OpenCLI/
+tools/cliproxyapi/
+
+# ---------------- ???????? / profile ----------------
+# ??? cookie???????
+.browser-profiles/
+.playwright-mcp/
