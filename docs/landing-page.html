@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis One Company OS — AI 一人公司操作系统</title>
+<meta name="description" content="9 个 AI Agent 组成的虚拟团队，帮一人公司自动完成技术、产品、增长、销售、财务、审计全链路运营。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e1a;--surface:#111827;--border:#1e293b;--accent:#38bdf8;--accent2:#8b5cf6;--text:#e2e8f0;--muted:#94a3b8;--green:#22c55e}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+a{color:var(--accent);text-decoration:none}
+.container{max-width:960px;margin:0 auto;padding:0 24px}
+
+header{padding:60px 0 40px;text-align:center;background:linear-gradient(135deg,rgba(56,189,248,.08),rgba(139,92,246,.08))}
+header h1{font-size:2.4em;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{margin-top:12px;font-size:1.15em;color:var(--muted);max-width:600px;margin-left:auto;margin-right:auto}
+.cta-btn{display:inline-block;margin-top:28px;padding:14px 36px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:1.05em;font-weight:700;border-radius:10px;transition:transform .2s,box-shadow .2s}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(56,189,248,.3)}
+
+section{padding:56px 0}
+section h2{font-size:1.8em;font-weight:700;margin-bottom:32px;text-align:center}
+.subtitle{text-align:center;color:var(--muted);margin-top:-24px;margin-bottom:36px;font-size:1.05em}
+
+.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.agent{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:border-color .2s}
+.agent:hover{border-color:var(--accent)}
+.agent .emoji{font-size:2em;display:block;margin-bottom:8px}
+.agent .name{font-weight:700;font-size:1.05em}
+.agent .role{font-size:.85em;color:var(--muted);margin-top:4px}
+
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.feature{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px}
+.feature h3{font-size:1.1em;margin-bottom:8px;color:var(--accent)}
+.feature p{font-size:.95em;color:var(--muted)}
+
+.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.plan{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;position:relative}
+.plan.popular{border-color:var(--accent);box-shadow:0 0 30px rgba(56,189,248,.1)}
+.plan.popular::before{content:"推荐";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:.75em;font-weight:700;padding:2px 14px;border-radius:99px}
+.plan h3{font-size:1.15em;margin-bottom:4px}
+.plan .price{font-size:2em;font-weight:800;color:var(--accent);margin:12px 0 4px}
+.plan .price span{font-size:.45em;font-weight:400;color:var(--muted)}
+.plan ul{list-style:none;text-align:left;margin:16px 0;font-size:.9em;color:var(--muted)}
+.plan ul li{padding:5px 0;border-bottom:1px solid var(--border)}
+.plan ul li::before{content:"✓ ";color:var(--green)}
+
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.case{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px}
+.case h3{font-size:1.05em;margin-bottom:8px}
+.case .metric{display:inline-block;background:rgba(34,197,94,.1);color:var(--green);font-size:.85em;padding:2px 10px;border-radius:6px;margin:2px 4px 2px 0}
+
+.contact{text-align:center;padding:56px 0;background:linear-gradient(135deg,rgba(56,189,248,.06),rgba(139,92,246,.06))}
+.contact p{color:var(--muted);margin:8px 0}
+.contact .methods{display:flex;justify-content:center;gap:24px;margin-top:20px;flex-wrap:wrap}
+.contact .method{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 24px;min-width:160px}
+.contact .method strong{display:block;margin-bottom:4px}
+
+footer{text-align:center;padding:24px;color:var(--muted);font-size:.85em;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<header>
+<div class="container">
+  <h1>Jarvis One Company OS</h1>
+  <p>9 个 AI Agent 组成的虚拟团队，帮一人公司自动完成从获客到交付的全链路运营</p>
+  <a class="cta-btn" href="#contact">免费咨询</a>
+</div>
+</header>
+
+<section>
+<div class="container">
+  <h2>你的 AI 团队</h2>
+  <p class="subtitle">每个 Agent 都有独立人设、记忆和专业技能，像真正的员工一样成长</p>
+  <div class="agents">
+    <div class="agent"><span class="emoji">🎯</span><div class="name">贾维斯</div><div class="role">COO · 统筹调度</div></div>
+    <div class="agent"><span class="emoji">📚</span><div class="name">赫敏</div><div class="role">CTO · 技术研发</div></div>
+    <div class="agent"><span class="emoji">🐱</span><div class="name">麦格教授</div><div class="role">CPO · 产品定义</div></div>
+    <div class="agent"><span class="emoji">🌙</span><div class="name">卢娜</div><div class="role">CGO · 内容增长</div></div>
+    <div class="agent"><span class="emoji">🎪</span><div class="name">弗雷德</div><div class="role">CSO · 销售商务</div></div>
+    <div class="agent"><span class="emoji">📊</span><div class="name">珀西</div><div class="role">CFO · 财务分析</div></div>
+    <div class="agent"><span class="emoji">🦇</span><div class="name">斯内普</div><div class="role">CAO · 审计风控</div></div>
+    <div class="agent"><span class="emoji">🧦</span><div class="name">多比</div><div class="role">客户成功</div></div>
+    <div class="agent"><span class="emoji">🌱</span><div class="name">纳威</div><div class="role">CHRO · 人才发展</div></div>
+  </div>
+</div>
+</section>
+
+<section style="background:var(--surface)">
+<div class="container">
+  <h2>核心能力</h2>
+  <div class="features">
+    <div class="feature"><h3>138 个 AI 技能</h3><p>覆盖内容创作、小红书/抖音运营、销售话术、竞品分析、财务审计、代码审查等全场景</p></div>
+    <div class="feature"><h3>DAG 工作流引擎</h3><p>7 条预置自动化管道，支持并行执行、条件分支、审批门控，CEO 一句话触发全流程</p></div>
+    <div class="feature"><h3>智能调度系统</h3><p>15 个定时任务自动运行：日报生成、内容管道、销售评估、异常检测、记忆沉淀</p></div>
+    <div class="feature"><h3>Agent 记忆系统</h3><p>每个 Agent 拥有独立记忆，从对话中自动学习，重要经验永不遗忘</p></div>
+    <div class="feature"><h3>LLM 成本管控</h3><p>Token 经济体系 + 预算控制 + 多模型降级链，确保 AI 运营成本可控</p></div>
+    <div class="feature"><h3>本地私有部署</h3><p>数据全程不出本机，SQLite 本地存储，API Key 自行配置，完全可控</p></div>
+  </div>
+</div>
+</section>
+
+<section>
+<div class="container">
+  <h2>服务套餐</h2>
+  <div class="pricing">
+    <div class="plan">
+      <h3>启航套餐</h3>
+      <div class="price">¥999<span>/月</span></div>
+      <ul>
+        <li>3 个 AI Agent</li>
+        <li>日报/周报自动生成</li>
+        <li>内容草稿辅助</li>
+        <li>10 万 Token/月</li>
+        <li>邮件支持</li>
+      </ul>
+    </div>
+    <div class="plan popular">
+      <h3>增长套餐</h3>
+      <div class="price">¥2,999<span>/月</span></div>
+      <ul>
+        <li>6 个 AI Agent</li>
+        <li>内容全管道自动化</li>
+        <li>销售线索评分</li>
+        <li>财务 ROI 分析</li>
+        <li>50 万 Token/月</li>
+        <li>周会复盘</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <h3>旗舰套餐</h3>
+      <div class="price">¥9,999<span>/月</span></div>
+      <ul>
+        <li>全部 9 个 Agent</li>
+        <li>无限自定义工作流</li>
+        <li>代码审查 + 合规检查</li>
+        <li>200 万 Token/月</li>
+        <li>1对1 专属顾问</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <h3>定制开发</h3>
+      <div class="price">¥30,000<span>起</span></div>
+      <ul>
+        <li>定制 Agent 角色</li>
+        <li>定制 DAG 工作流</li>
+        <li>API 对接自有系统</li>
+        <li>私有化部署</li>
+        <li>按项目报价</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<section style="background:var(--surface)">
+<div class="container">
+  <h2>客户案例</h2>
+  <div class="cases">
+    <div class="case">
+      <h3>电商内容自动化</h3>
+      <p style="color:var(--muted);font-size:.9em;margin-bottom:10px">每周自动产出 20+ 篇小红书笔记和 5+ 条抖音脚本</p>
+      <span class="metric">产出提升 300%</span><span class="metric">成本降低 60%</span><span class="metric">发布周期 3天→2小时</span>
+    </div>
+    <div class="case">
+      <h3>SaaS 销售自动化</h3>
+      <p style="color:var(--muted);font-size:.9em;margin-bottom:10px">线索自动评分+触达+ROI 测算，全流程提速</p>
+      <span class="metric">响应 24h→10min</span><span class="metric">转化率 +45%</span><span class="metric">管道可见度 100%</span>
+    </div>
+    <div class="case">
+      <h3>咨询公司全运营</h3>
+      <p style="color:var(--muted);font-size:.9em;margin-bottom:10px">9 Agent 全覆盖，从获客到交付到审计的端到端自动化</p>
+      <span class="metric">每周节省 30h</span><span class="metric">自动化 85%</span><span class="metric">满意度 4.8/5</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="contact" id="contact">
+<div class="container">
+  <h2>联系我们</h2>
+  <p>免费咨询 AI 一人公司方案，15 分钟了解你的业务如何自动化</p>
+  <div class="methods">
+    <div class="method"><strong>邮箱</strong>liyy20211116@gmail.com</div>
+    <div class="method"><strong>微信</strong>扫码添加咨询</div>
+  </div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+  <p>© 2026 OpenClaw AI Agency · Jarvis One Company OS · 让 AI 团队为你工作</p>
+</div>
+</footer>
+
+</body>
+</html>

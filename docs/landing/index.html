@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis One Company OS — 一个人 × 9 个 AI 员工 = 一家公司</title>
+<meta name="description" content="5 万行代码搭好的 AI 一人公司操作系统，9 个 AI 员工 + Token 工资制 + 跑通的营收模板。¥999 起步，让一个人拥有一家公司的全部产能。">
+<meta property="og:title" content="Jarvis One Company OS · AI 一人公司操作系统">
+<meta property="og:description" content="一个人 + 9 个 AI 员工 = 一家公司。5 万行代码，Token 工资制，跑通的营收模板。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a; --surface:#111827; --surface2:#141d31; --border:#1e293b;
+  --accent:#F7C325; --accent2:#8b5cf6; --text:#e2e8f0; --muted:#94a3b8;
+  --green:#22c55e;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+a{color:var(--accent);text-decoration:none}
+.container{max-width:1140px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:100;background:rgba(10,14,26,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 0}
+nav .container{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:1.1em;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:28px;font-size:.95em}
+.nav-links a{color:var(--muted)}
+.nav-links a:hover{color:var(--accent)}
+.btn{display:inline-block;padding:10px 22px;border-radius:8px;font-weight:700;font-size:.95em}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#fbbf24);color:#111827}
+.btn-primary:hover{opacity:.9}
+.btn-outline{border:1px solid var(--border);color:var(--text)}
+
+/* Hero */
+.hero{padding:90px 0 70px;text-align:center;background:linear-gradient(135deg,rgba(247,195,37,.08),rgba(139,92,246,.1))}
+.hero .badge{display:inline-block;padding:6px 16px;border-radius:20px;background:rgba(247,195,37,.15);color:var(--accent);font-size:.88em;font-weight:600;margin-bottom:20px}
+.hero h1{font-size:3.2em;font-weight:800;line-height:1.2;max-width:900px;margin:0 auto 18px}
+.hero h1 .hl{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.2em;color:var(--muted);max-width:720px;margin:0 auto 36px}
+.hero .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.hero .cta-row .btn{padding:14px 32px;font-size:1em}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;margin-top:60px;max-width:960px;margin-left:auto;margin-right:auto}
+.metric{padding:22px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-align:center}
+.metric .n{font-size:2em;font-weight:800;color:var(--accent)}
+.metric .l{font-size:.85em;color:var(--muted);margin-top:6px}
+
+/* Section */
+section{padding:80px 0}
+section h2{font-size:2.2em;font-weight:800;text-align:center;margin-bottom:14px}
+section h2 .hl{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.section-sub{text-align:center;color:var(--muted);font-size:1.1em;max-width:700px;margin:0 auto 50px}
+
+/* Agents */
+.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.agent-card{padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;text-align:center;transition:transform .2s}
+.agent-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.agent-card .emoji{font-size:2.6em;margin-bottom:10px}
+.agent-card .name{font-weight:700;font-size:1.15em;margin-bottom:4px}
+.agent-card .title{color:var(--accent);font-size:.9em;margin-bottom:10px}
+.agent-card .salary{color:var(--muted);font-size:.88em}
+.agent-card .kpi{margin-top:12px;padding:6px 12px;border-radius:20px;background:rgba(34,197,94,.1);color:var(--green);font-size:.82em;display:inline-block}
+
+/* How */
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.step{padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:14px;position:relative}
+.step .num{position:absolute;top:-14px;left:20px;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#fbbf24);color:#111827;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1em}
+.step h3{margin-top:10px;font-size:1.25em;margin-bottom:10px}
+.step p{color:var(--muted)}
+
+/* Proof */
+.proof-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.proof{padding:26px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.proof .qt{color:var(--muted);font-style:italic;margin-bottom:16px}
+.proof .by{color:var(--accent);font-weight:700;font-size:.95em}
+
+/* CTA Bar */
+.cta-bar{padding:70px 0;background:linear-gradient(135deg,rgba(247,195,37,.12),rgba(139,92,246,.12));text-align:center}
+.cta-bar h2{margin-bottom:14px}
+.cta-bar p{color:var(--muted);font-size:1.1em;max-width:620px;margin:0 auto 32px}
+.cta-bar .btn{padding:16px 40px;font-size:1.05em}
+
+footer{padding:40px 0 60px;border-top:1px solid var(--border);color:var(--muted);font-size:.9em;text-align:center}
+footer a{color:var(--muted)}
+footer .links{margin-bottom:14px}
+footer .links a{margin:0 12px}
+
+@media (max-width:720px){
+  .hero h1{font-size:2.2em}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="logo">🧠 Jarvis One Company OS</div>
+    <div class="nav-links">
+      <a href="#agents">9 个 AI 员工</a>
+      <a href="#how">如何工作</a>
+      <a href="#proof">真实数据</a>
+      <a href="pricing.html">定价</a>
+    </div>
+    <a class="btn btn-primary" href="pricing.html">立即开始</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="badge">🚀 中国首个一人公司操作系统 · 2026 发布</span>
+    <h1>一个人 × <span class="hl">9 个 AI 员工</span><br>= 一家公司</h1>
+    <p>5 万行代码搭好的 AI 一人公司操作系统。Token 工资制。跑通的营收模板。<br/>让你直接拥有一个可运转的超级个体。</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="pricing.html">¥999 立即启航</a>
+      <a class="btn btn-outline" href="#agents">先看看 9 个员工</a>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="n">5.2万</div><div class="l">代码行数</div></div>
+      <div class="metric"><div class="n">9</div><div class="l">AI 员工</div></div>
+      <div class="metric"><div class="n">¥2,890</div><div class="l">月度 AI 成本</div></div>
+      <div class="metric"><div class="n">11.4×</div><div class="l">产能杠杆</div></div>
+      <div class="metric"><div class="n">200+</div><div class="l">OpenClaw 技能</div></div>
+      <div class="metric"><div class="n">7 天</div><div class="l">无理由退款</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="agents">
+  <div class="container">
+    <h2>你的 <span class="hl">9 个 AI 员工</span>·全部到岗</h2>
+    <p class="section-sub">每个 Agent 都有人格、岗位、KPI、Token 月薪。像管真人一样管他们，像公司一样运营一个人。</p>
+
+    <div class="agents">
+      <div class="agent-card">
+        <div class="emoji">🧠</div>
+        <div class="name">贾维斯 Jarvis</div>
+        <div class="title">执行总裁 COO</div>
+        <div class="salary">月薪 500 Token</div>
+        <div class="kpi">KPI 98</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">⚙️</div>
+        <div class="name">赫敏 Hermione</div>
+        <div class="title">技术总监 CTO</div>
+        <div class="salary">月薪 450 Token</div>
+        <div class="kpi">KPI 96</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">📐</div>
+        <div class="name">麦格 McGonagall</div>
+        <div class="title">产品总监 CPO</div>
+        <div class="salary">月薪 400 Token</div>
+        <div class="kpi">KPI 92</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">🚀</div>
+        <div class="name">卢娜 Luna</div>
+        <div class="title">增长官 CMO</div>
+        <div class="salary">月薪 600 Token</div>
+        <div class="kpi">KPI 94</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">💼</div>
+        <div class="name">弗雷德 Fred</div>
+        <div class="title">销售经理 CSO</div>
+        <div class="salary">月薪 500 Token</div>
+        <div class="kpi">KPI 87</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">💰</div>
+        <div class="name">珀西 Percy</div>
+        <div class="title">财务总监 CFO</div>
+        <div class="salary">月薪 350 Token</div>
+        <div class="kpi">KPI 95</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">🔍</div>
+        <div class="name">斯内普 Snape</div>
+        <div class="title">审计长 CAO</div>
+        <div class="salary">月薪 250 Token</div>
+        <div class="kpi">KPI 99 · 月冠</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">💬</div>
+        <div class="name">多比 Dobby</div>
+        <div class="title">客户成功 CRO</div>
+        <div class="salary">月薪 400 Token</div>
+        <div class="kpi">NPS 4.7/5</div>
+      </div>
+      <div class="agent-card">
+        <div class="emoji">🧑‍💼</div>
+        <div class="name">纳威 Neville</div>
+        <div class="title">人力资源 CHRO</div>
+        <div class="salary">月薪 400 Token</div>
+        <div class="kpi">新人观察期</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="background:var(--surface2)">
+  <div class="container">
+    <h2>它是怎么 <span class="hl">工作</span> 的</h2>
+    <p class="section-sub">一套 DAG 工作流引擎，把你想做的事拆成可执行的 Agent 任务。</p>
+
+    <div class="how">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>📝 你说想法</h3>
+        <p>自然语言告诉 Jarvis：「给我做 10 条一人公司抖音脚本」。</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>🎯 COO 分派</h3>
+        <p>贾维斯拆成 5 个子任务，派给对应的 AI 员工，并预算 Token 成本。</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>⚡ 并行执行</h3>
+        <p>Luna 写脚本、Hermione 生成海报、Fred 预备话术、Snape 审计合规。</p>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <h3>✅ 你按发布</h3>
+        <p>所有产出排好队给你审核。你改几个字，按「发布」。结束。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proof">
+  <div class="container">
+    <h2>不是吹牛·<span class="hl">真实运营数据</span></h2>
+    <p class="section-sub">每周三公开运营数据。所有代码开源 50%（剩下 50% 就是产品本体）。</p>
+
+    <div class="proof-grid">
+      <div class="proof">
+        <div class="qt">"Snape 审计长凌晨 3 点阻断了一次 API Key 泄漏。省了我至少 ¥4000，和一段关系。"</div>
+        <div class="by">— 李原野 / 野子哥（创始人）</div>
+      </div>
+      <div class="proof">
+        <div class="qt">"AI 写的销售文案成交了第一单 ¥999。我只按了「发布」。我开始相信这不是段子。"</div>
+        <div class="by">— 2026-04 创始人日志</div>
+      </div>
+      <div class="proof">
+        <div class="qt">"月流水 ¥20k，成本 ¥2,890，毛利超 90%。一个三人团队要花 ¥40,000 才能做到。"</div>
+        <div class="by">— Percy 财务月报</div>
+      </div>
+      <div class="proof">
+        <div class="qt">"CEO 日均只用 1.5 小时。剩下时间都在打羽毛球和遛狗。"</div>
+        <div class="by">— 纳威 HR 工时统计</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-bar">
+  <div class="container">
+    <h2>从今天开始 · <span class="hl" style="background:linear-gradient(135deg,#F7C325,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent">让 9 个 AI 员工帮你上班</span></h2>
+    <p>¥999 启航版 · 永久使用 · 7 天无理由退款 · 终身升级（标准版/企业版）</p>
+    <a class="btn btn-primary" href="pricing.html">查看所有版本 →</a>
+    <p style="margin-top:20px;font-size:.9em;opacity:.7">或直接加创始人微信 <strong style="color:var(--accent)">go19237140413</strong>（野子哥）</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="links">
+      <a href="pricing.html">定价</a>
+      <a href="thank-you.html">购买流程</a>
+      <a href="https://space.bilibili.com/3706974745135246">B 站</a>
+      <a href="#">抖音</a>
+      <a href="#">小红书</a>
+    </div>
+    <div>© 2026 Jarvis One Company OS · 由李原野一个人 + 9 个 AI 员工维护</div>
+    <div style="margin-top:6px;opacity:.7">本网站部分文案由 Luna（CMO Agent）撰写 · 部分代码由 Hermione（CTO Agent）生成</div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -180,12 +180,67 @@ Grade 阈值：S ≥ 90 / A ≥ 75 / B ≥ 60 / C ≥ 40 / D < 40。
 
 > 注：如遇 better-sqlite3 NODE_MODULE_VERSION 不匹配导致 `db:export` 报 `ERR_DLOPEN_FAILED`，与本次改动无关，运行 `npm rebuild better-sqlite3 --build-from-source` 即可恢复。
 
-### Day 2 Step C（下一轮）
+### Day 2 Step C 已交付（2026-04-23）：周比 + What-If + 周报脚本 + 定时刷新
 
-- Dashboard 追加"本周增速"指标：本周花费 vs 上周
-- Profitability 页增加"What-If 模拟器"：如果把 A 业务线客单价提 20% 会怎样
-- 导出盈利边界周报到 `docs/profitability-weekly-YYYY-MM-DD.md`
-- 评分刷新定时任务：每周一 09:00 跑一次 v2 增量，写入历史曲线（`desktop/electron/schedulerService.ts` 接入）
+#### 交付内容
+
+- `src/services/profitabilityService.ts`
+  - 抽出纯函数 `buildProfitabilityBoundary()`，统一给页面、脚本、测试复用
+  - 新增 `computeWeeklyBurnComparison()`：按周比较本周 vs 上周烧钱
+  - 新增 `simulateBoundaryWhatIf()`：支持业务线价格/成本百分比变动后的盈亏平衡重算
+  - 新增 `buildProfitabilityWeeklyReport()`：输出 Markdown 周报正文
+- `src/pages/DashboardPage.tsx`
+  - 烧钱速率卡片改为展示“本周 vs 上周”与环比
+- `src/pages/ProfitabilityPage.tsx`
+  - 新增 What-If 模拟器：选择业务线，输入价格/成本变动，即时重算平均客单价、单单利润、盈亏平衡线、毛利率
+  - 新增本周烧钱速率卡片：展示本周、上周与环比
+- `scripts/lib/exportSnapshot.ts`
+  - 新增 `buildAppSnapshot()`，让脚本端可以直接拿到与前端一致的 snapshot 数据
+- `scripts/export-profitability-weekly.ts`（新增）
+  - 生成 `docs/profitability-weekly-YYYY-MM-DD.md`
+- `desktop/electron/schedulerService.ts`
+  - 新增内建任务 `__performance_refresh_v2__`
+  - 调用 `/api/agents/performance/refresh`，每周定时跑 v2 刷新
+- `config/app-config.json`
+  - 增加“绩效评分刷新”周一 09:00 定时任务
+- `package.json`
+  - 增加 `npm run report:profitability-weekly`
+
+#### 验证
+
+- `npx tsx scripts/test-profitability-step-c.ts`：覆盖 What-If、周比、周报导出正文
+- `npx tsc --noEmit -p tsconfig.app.json`
+- `npx tsc --noEmit -p tsconfig.node.json`
+- `npx eslint src/pages/DashboardPage.tsx src/pages/ProfitabilityPage.tsx src/services/profitabilityService.ts scripts/export-profitability-weekly.ts scripts/test-profitability-step-c.ts desktop/electron/schedulerService.ts`
+
+### 北极星 Step B 已交付（2026-04-23）：5 维商业就绪评分前端版
+
+#### 交付内容
+
+- `docs/NORTH-STAR.md`
+  - 固化 5 维评分：`autonomy / revenue_contribution / intelligence / execution / productization`
+  - 追加前端即时评分代理口径，明确页面展示与后端持久化评分的关系
+- `jarvis-one-company-os/src/services/performanceV2Service.ts`（新增）
+  - 纯前端即时计算商业就绪分
+  - 团队均分、降档规则、最低维度识别统一收口到这里
+- `jarvis-one-company-os/src/components/CommercialReadinessRadar.tsx`（新增）
+  - 使用 `recharts` Radar 画 5 维商业就绪雷达图
+- `jarvis-one-company-os/src/pages/AgentsPage.tsx`
+  - 选中 Agent 后并列展示：
+    - v2 商业就绪评分 + 5 维拆分 + 雷达图
+    - v1 持久化绩效评分 + 历史曲线
+- `jarvis-one-company-os/src/pages/DashboardPage.tsx`
+  - 「Agent 团队」卡改为「商业就绪」卡，展示 v2 团队均分与 grade 分布
+- `jarvis-one-company-os/README.md`
+  - 增补北极星 v2 商业就绪能力说明与周报脚本入口
+- `jarvis-one-company-os/scripts/test-performance-v2-service.ts`（新增）
+  - 覆盖 5 维评分、团队摘要、收入差异和低分降档
+
+#### 验证
+
+- `npx tsx scripts/test-performance-v2-service.ts`
+- `npx tsc --noEmit -p tsconfig.app.json`
+- `npx eslint src/pages/AgentsPage.tsx src/pages/DashboardPage.tsx src/components/CommercialReadinessRadar.tsx src/services/performanceV2Service.ts scripts/test-performance-v2-service.ts`
 
 ---
 
