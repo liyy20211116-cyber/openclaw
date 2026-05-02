@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$Choice
 )
 
@@ -8,14 +8,18 @@ $dashboardUrl = "http://127.0.0.1:$port/"
 $gatewayCmdPath = Join-Path $env:USERPROFILE ".openclaw\gateway.cmd"
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+$npmBin = Join-Path $env:APPDATA "npm"
+if (Test-Path $npmBin) {
+  $env:Path = "$npmBin;$env:Path"
+}
 $env:GEMINI_API_KEY = [System.Environment]::GetEnvironmentVariable("GEMINI_API_KEY","User")
-$env:OPENAI_API_KEY = "sk-fandai-9e151a7a060afe8d068d4513eacfed0f2de67b0dea2d2e91"
+$env:OPENAI_API_KEY = [System.Environment]::GetEnvironmentVariable("OPENAI_API_KEY","User")
 $env:SILICONFLOW_API_KEY = [System.Environment]::GetEnvironmentVariable("SILICONFLOW_API_KEY","User")
 
 function Confirm-OpenClaw {
   if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) {
-    Write-Host "Error: openclaw command not found." -ForegroundColor Red
-    Write-Host "Install with: npm install -g openclaw@latest" -ForegroundColor Yellow
+    Write-Host "错误: 找不到 openclaw 命令（从资源管理器启动时可能未加载 npm 全局路径）。" -ForegroundColor Red
+    Write-Host "已尝试将 $($env:APPDATA)\npm 加入 PATH。若仍失败，请执行: npm install -g openclaw@latest" -ForegroundColor Yellow
     exit 1
   }
 }
@@ -83,7 +87,20 @@ function Get-GatewayToken {
   return $null
 }
 
-$jarvisRoot = Join-Path $PSScriptRoot "jarvis-one-company-os"
+$jarvisRoot = $null
+$walkDir = $PSScriptRoot
+for ($i = 0; $i -lt 12; $i++) {
+  if (-not $walkDir) { break }
+  $candidate = Join-Path $walkDir "jarvis-one-company-os"
+  if (Test-Path $candidate) {
+    $jarvisRoot = $candidate
+    break
+  }
+  $walkDir = Split-Path $walkDir -Parent
+}
+if (-not $jarvisRoot) {
+  $jarvisRoot = Join-Path $PSScriptRoot "jarvis-one-company-os"
+}
 $jarvisApiPort = 18782
 $jarvisUiPort = 5173
 $jarvisUrl = "http://127.0.0.1:${jarvisUiPort}/"
@@ -116,10 +133,10 @@ function Stop-PortProcess {
   $lines = netstat -ano 2>$null | Select-String ":$Port\s.*LISTENING"
   foreach ($line in $lines) {
     if ($line -match '\s(\d+)\s*$') {
-      $pid = [int]$matches[1]
+      $killPid = [int]$matches[1]
       try {
-        Stop-Process -Id $pid -Force -ErrorAction Stop
-        Write-Host "  Killed stale process PID $pid on port $Port" -ForegroundColor DarkGray
+        Stop-Process -Id $killPid -Force -ErrorAction Stop
+        Write-Host "  Killed stale process PID $killPid on port $Port" -ForegroundColor DarkGray
       } catch {}
     }
   }
@@ -438,29 +455,37 @@ function Invoke-MenuAction {
   }
 }
 
-Confirm-OpenClaw
-$isInteractiveMenu = -not $PSBoundParameters.ContainsKey('Choice')
+try {
+  Confirm-OpenClaw
+  $isInteractiveMenu = -not $PSBoundParameters.ContainsKey('Choice')
 
-if (-not $isInteractiveMenu) {
-  Show-Header
-  $shouldExit = Invoke-MenuAction -SelectedChoice $Choice
-  exit 0
-}
-
-while ($true) {
-  Show-Header
-  $Choice = Read-Host "Choose an action"
-
-  try {
-    $shouldExit = Invoke-MenuAction -SelectedChoice $Choice
-  } catch {
-    Write-Host "Action failed: $($_.Exception.Message)" -ForegroundColor Red
-    $shouldExit = $false
+  if (-not $isInteractiveMenu) {
+    Show-Header
+    $null = Invoke-MenuAction -SelectedChoice $Choice
+    exit 0
   }
 
-  if ($shouldExit) {
-    break
-  }
+  while ($true) {
+    Show-Header
+    $Choice = Read-Host "Choose an action"
 
-  Wait-ForContinue
+    try {
+      $shouldExit = Invoke-MenuAction -SelectedChoice $Choice
+    } catch {
+      Write-Host "Action failed: $($_.Exception.Message)" -ForegroundColor Red
+      $shouldExit = $false
+    }
+
+    if ($shouldExit) {
+      break
+    }
+
+    Wait-ForContinue
+  }
+} catch {
+  Write-Host ""
+  Write-Host "OpenClaw 控制台异常退出: $($_.Exception.Message)" -ForegroundColor Red
+  Write-Host ""
+  Read-Host "按 Enter 关闭窗口"
+  exit 1
 }

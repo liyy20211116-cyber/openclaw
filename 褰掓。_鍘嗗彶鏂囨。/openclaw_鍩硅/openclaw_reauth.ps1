@@ -1,4 +1,4 @@
-param(
+﻿param(
   [switch]$OpenAI,
   [switch]$Qwen,
   [switch]$All
@@ -6,6 +6,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+$npmBin = Join-Path $env:APPDATA "npm"
+if (Test-Path $npmBin) {
+  $env:Path = "$npmBin;$env:Path"
+}
 
 function Write-Info($msg)    { Write-Host "[INFO] $msg" -ForegroundColor Cyan }
 function Write-Ok($msg)      { Write-Host "[ OK ] $msg" -ForegroundColor Green }
